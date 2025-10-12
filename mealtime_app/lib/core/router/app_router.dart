@@ -9,9 +9,9 @@ import 'package:mealtime_app/features/cats/presentation/pages/cats_list_page.dar
 import 'package:mealtime_app/features/cats/presentation/pages/create_cat_page.dart';
 import 'package:mealtime_app/features/cats/presentation/pages/edit_cat_page.dart';
 import 'package:mealtime_app/features/cats/presentation/pages/cat_detail_page.dart';
-import 'package:mealtime_app/features/meals/presentation/pages/meals_list_page.dart';
-import 'package:mealtime_app/features/meals/presentation/pages/create_meal_page.dart';
-import 'package:mealtime_app/features/meals/presentation/pages/meal_detail_page.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/pages/feeding_logs_list_page.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/pages/create_feeding_log_page.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/pages/feeding_log_detail_page.dart';
 import 'package:mealtime_app/features/homes/presentation/pages/homes_list_page.dart';
 import 'package:mealtime_app/features/homes/presentation/pages/create_home_page.dart';
 
@@ -46,34 +46,34 @@ class AppRouter {
             CatDetailPage(catId: state.pathParameters['catId']!),
       ),
       GoRoute(
-        path: '/meals',
+        path: '/feeding-logs',
         builder: (context, state) {
           final catId = state.uri.queryParameters['catId'];
           final showTodayOnly = state.uri.queryParameters['today'] == 'true';
-          return MealsListPage(catId: catId, showTodayOnly: showTodayOnly);
+          return FeedingLogsListPage(catId: catId, showTodayOnly: showTodayOnly);
         },
       ),
       GoRoute(
-        path: '/create-meal',
+        path: '/create-feeding-log',
         builder: (context, state) {
           final catId = state.uri.queryParameters['catId'];
-          final homeId = state.uri.queryParameters['homeId'];
-          return CreateMealPage(catId: catId, homeId: homeId);
+          final householdId = state.uri.queryParameters['householdId'];
+          return CreateFeedingLogPage(catId: catId, householdId: householdId);
         },
       ),
       GoRoute(
-        path: '/edit-meal/:mealId',
+        path: '/edit-feeding-log/:feedingLogId',
         builder: (context, state) {
-          // TODO: Implementar carregamento da refeição
+          // TODO: Implementar carregamento da alimentação
           return const Scaffold(
-            body: Center(child: Text('EditMealPage - Em desenvolvimento')),
+            body: Center(child: Text('EditFeedingLogPage - Em desenvolvimento')),
           );
         },
       ),
       GoRoute(
-        path: '/meal-detail/:mealId',
+        path: '/feeding-log-detail/:feedingLogId',
         builder: (context, state) =>
-            MealDetailPage(mealId: state.pathParameters['mealId']!),
+            FeedingLogDetailPage(feedingLogId: state.pathParameters['feedingLogId']!),
       ),
       GoRoute(
         path: '/homes',
