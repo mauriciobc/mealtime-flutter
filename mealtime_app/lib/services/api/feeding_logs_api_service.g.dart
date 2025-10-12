@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'meals_api_service.dart';
+part of 'feeding_logs_api_service.dart';
 
 // **************************************************************************
 // RetrofitGenerator
@@ -8,8 +8,8 @@ part of 'meals_api_service.dart';
 
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element
 
-class _MealsApiService implements MealsApiService {
-  _MealsApiService(
+class _FeedingLogsApiService implements FeedingLogsApiService {
+  _FeedingLogsApiService(
     this._dio, {
     this.baseUrl,
     this.errorLogger,
@@ -22,32 +22,30 @@ class _MealsApiService implements MealsApiService {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<ApiResponse<List<MealModel>>> getMeals({
+  Future<ApiResponse<List<FeedingLogModel>>> getFeedingLogs({
     String? catId,
-    String? homeId,
-    String? status,
-    String? dateFrom,
-    String? dateTo,
+    String? householdId,
+    String? startDate,
+    String? endDate,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      r'cat_id': catId,
-      r'home_id': homeId,
-      r'status': status,
-      r'date_from': dateFrom,
-      r'date_to': dateTo,
+      r'catId': catId,
+      r'householdId': householdId,
+      r'startDate': startDate,
+      r'endDate': endDate,
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<ApiResponse<List<MealModel>>>(Options(
+    final _options = _setStreamType<ApiResponse<List<FeedingLogModel>>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/meals',
+          '/feeding-logs',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -57,14 +55,14 @@ class _MealsApiService implements MealsApiService {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late ApiResponse<List<MealModel>> _value;
+    late ApiResponse<List<FeedingLogModel>> _value;
     try {
-      _value = ApiResponse<List<MealModel>>.fromJson(
+      _value = ApiResponse<List<FeedingLogModel>>.fromJson(
         _result.data!,
         (json) => json is List<dynamic>
             ? json
-                .map<MealModel>(
-                    (i) => MealModel.fromJson(i as Map<String, dynamic>))
+                .map<FeedingLogModel>(
+                    (i) => FeedingLogModel.fromJson(i as Map<String, dynamic>))
                 .toList()
             : List.empty(),
       );
@@ -76,19 +74,19 @@ class _MealsApiService implements MealsApiService {
   }
 
   @override
-  Future<ApiResponse<MealModel>> getMealById(String id) async {
+  Future<ApiResponse<FeedingLogModel>> getFeedingLogById(String id) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<ApiResponse<MealModel>>(Options(
+    final _options = _setStreamType<ApiResponse<FeedingLogModel>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/meals/${id}',
+          '/feeding-logs/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -98,11 +96,11 @@ class _MealsApiService implements MealsApiService {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late ApiResponse<MealModel> _value;
+    late ApiResponse<FeedingLogModel> _value;
     try {
-      _value = ApiResponse<MealModel>.fromJson(
+      _value = ApiResponse<FeedingLogModel>.fromJson(
         _result.data!,
-        (json) => MealModel.fromJson(json as Map<String, dynamic>),
+        (json) => FeedingLogModel.fromJson(json as Map<String, dynamic>),
       );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
@@ -112,20 +110,21 @@ class _MealsApiService implements MealsApiService {
   }
 
   @override
-  Future<ApiResponse<MealModel>> createMeal(CreateMealRequest request) async {
+  Future<ApiResponse<FeedingLogModel>> createFeedingLog(
+      CreateFeedingLogRequest request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(request.toJson());
-    final _options = _setStreamType<ApiResponse<MealModel>>(Options(
+    final _options = _setStreamType<ApiResponse<FeedingLogModel>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/meals',
+          '/feeding-logs',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -135,11 +134,11 @@ class _MealsApiService implements MealsApiService {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late ApiResponse<MealModel> _value;
+    late ApiResponse<FeedingLogModel> _value;
     try {
-      _value = ApiResponse<MealModel>.fromJson(
+      _value = ApiResponse<FeedingLogModel>.fromJson(
         _result.data!,
-        (json) => MealModel.fromJson(json as Map<String, dynamic>),
+        (json) => FeedingLogModel.fromJson(json as Map<String, dynamic>),
       );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
@@ -149,23 +148,23 @@ class _MealsApiService implements MealsApiService {
   }
 
   @override
-  Future<ApiResponse<MealModel>> updateMeal(
+  Future<ApiResponse<FeedingLogModel>> updateFeedingLog(
     String id,
-    UpdateMealRequest request,
+    UpdateFeedingLogRequest request,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(request.toJson());
-    final _options = _setStreamType<ApiResponse<MealModel>>(Options(
+    final _options = _setStreamType<ApiResponse<FeedingLogModel>>(Options(
       method: 'PUT',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/meals/${id}',
+          '/feeding-logs/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -175,11 +174,11 @@ class _MealsApiService implements MealsApiService {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late ApiResponse<MealModel> _value;
+    late ApiResponse<FeedingLogModel> _value;
     try {
-      _value = ApiResponse<MealModel>.fromJson(
+      _value = ApiResponse<FeedingLogModel>.fromJson(
         _result.data!,
-        (json) => MealModel.fromJson(json as Map<String, dynamic>),
+        (json) => FeedingLogModel.fromJson(json as Map<String, dynamic>),
       );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
@@ -189,7 +188,7 @@ class _MealsApiService implements MealsApiService {
   }
 
   @override
-  Future<ApiResponse<EmptyResponse>> deleteMeal(String id) async {
+  Future<ApiResponse<EmptyResponse>> deleteFeedingLog(String id) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -201,7 +200,7 @@ class _MealsApiService implements MealsApiService {
     )
         .compose(
           _dio.options,
-          '/meals/${id}',
+          '/feeding-logs/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -225,23 +224,19 @@ class _MealsApiService implements MealsApiService {
   }
 
   @override
-  Future<ApiResponse<MealModel>> completeMeal(
-    String id,
-    CompleteMealRequest request,
-  ) async {
+  Future<ApiResponse<FeedingLogModel?>> getLastFeeding(String catId) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(request.toJson());
-    final _options = _setStreamType<ApiResponse<MealModel>>(Options(
-      method: 'POST',
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<ApiResponse<FeedingLogModel>>(Options(
+      method: 'GET',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/meals/${id}/complete',
+          '/feedings/last/${catId}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -251,51 +246,13 @@ class _MealsApiService implements MealsApiService {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late ApiResponse<MealModel> _value;
+    late ApiResponse<FeedingLogModel?> _value;
     try {
-      _value = ApiResponse<MealModel>.fromJson(
+      _value = ApiResponse<FeedingLogModel?>.fromJson(
         _result.data!,
-        (json) => MealModel.fromJson(json as Map<String, dynamic>),
-      );
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<ApiResponse<MealModel>> skipMeal(
-    String id,
-    SkipMealRequest request,
-  ) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(request.toJson());
-    final _options = _setStreamType<ApiResponse<MealModel>>(Options(
-      method: 'POST',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/meals/${id}/skip',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late ApiResponse<MealModel> _value;
-    try {
-      _value = ApiResponse<MealModel>.fromJson(
-        _result.data!,
-        (json) => MealModel.fromJson(json as Map<String, dynamic>),
+        (json) => json == null
+            ? null
+            : FeedingLogModel.fromJson(json as Map<String, dynamic>),
       );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);

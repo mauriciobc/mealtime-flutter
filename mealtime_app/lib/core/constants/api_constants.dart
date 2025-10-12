@@ -16,11 +16,11 @@ class ApiConstants {
   static String catMeals(String catId) => '/cats/$catId/meals';
   static String catWeightHistory(String catId) => '/cats/$catId/weight';
 
-  // Meals endpoints
-  static const String meals = '/meals';
-  static String mealById(String id) => '/meals/$id';
-  static String completeMeal(String id) => '/meals/$id/complete';
-  static String skipMeal(String id) => '/meals/$id/skip';
+  // ✅ Feeding Logs endpoints (renomeado de meals)
+  static const String feedingLogs = '/feeding-logs';
+  static String feedingLogById(String id) => '/feeding-logs/$id';
+  static String lastFeeding(String catId) => '/feedings/last/$catId';
+  static const String feedingStats = '/feedings/stats';
 
   // Households endpoints (migrado de /homes para /households)
   static const String households = '/households';
@@ -33,31 +33,31 @@ class ApiConstants {
   static String notificationById(String id) => '/notifications/$id';
   static const String notificationSettings = '/notifications/settings';
 
-  // User endpoints
-  static const String profile = '/user/profile';
-  static const String updateProfile = '/user/profile';
-  static const String changePassword = '/user/change-password';
+  // ✅ User endpoints (corrigido)
+  static const String profile = '/profile';
+  static const String updateProfile = '/profile';
+  static const String changePassword = '/profile/change-password';
 
-  // Statistics endpoints
-  static const String statistics = '/statistics';
-  static String catStatistics(String catId) => '/statistics/cats/$catId';
-  static String homeStatistics(String homeId) => '/statistics/homes/$homeId';
+  // ⚠️ Statistics endpoints - TEMPORARIAMENTE DESABILITADO (erro 500 na API)
+  // static const String statistics = '/statistics';
+  // static String catStatistics(String catId) => '/statistics/cats/$catId';
+  // static String homeStatistics(String homeId) => '/statistics/homes/$homeId';
 
   // Weight tracking endpoints
   static const String weightLogs = '/weight/logs';
   static const String weightGoals = '/weight/goals';
 
-  // Feeding logs endpoints (baseado na documentação original)
-  static const String feedingLogs = '/feeding-logs';
-  static String catFeedingLogs(String catId) => '/feeding-logs?cat_id=$catId';
-  static String lastFeeding(String catId) => '/feedings/last/$catId';
-  static const String feedingStats = '/feedings/stats';
+  // ⚠️ Feeding logs antigos - removidos (duplicados, já definidos acima)
+  // static const String feedingLogs = '/feeding-logs';
+  // static String catFeedingLogs(String catId) => '/feeding-logs?cat_id=$catId';
+  // static String lastFeeding(String catId) => '/feedings/last/$catId';
+  // static const String feedingStats = '/feedings/stats';
 
-  // Household management endpoints
+  // ✅ Household management endpoints
   static String householdMembers(String homeId) =>
       '/households/$homeId/members';
   static String householdInvite(String homeId) => '/households/$homeId/invite';
-  static String householdJoin = '/households/join';
+  static const String householdJoin = '/households/join';
   static String householdInviteCode(String homeId) =>
       '/households/$homeId/invite-code';
 

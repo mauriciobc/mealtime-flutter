@@ -291,7 +291,7 @@ class _AuthApiService implements AuthApiService {
     )
         .compose(
           _dio.options,
-          '/user/profile',
+          '/profile',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -329,7 +329,7 @@ class _AuthApiService implements AuthApiService {
     )
         .compose(
           _dio.options,
-          '/user/profile',
+          '/profile',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -367,7 +367,7 @@ class _AuthApiService implements AuthApiService {
     )
         .compose(
           _dio.options,
-          '/user/change-password',
+          '/profile/change-password',
           queryParameters: queryParameters,
           data: _data,
         )

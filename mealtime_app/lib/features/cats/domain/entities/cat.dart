@@ -12,6 +12,11 @@ class Cat extends Equatable {
   final double? currentWeight;
   final double? targetWeight;
   final String homeId;
+  final String? ownerId;  // ✅ NOVO: ID do dono principal
+  final double? portionSize;  // ✅ NOVO: Tamanho da porção
+  final String? portionUnit;  // ✅ NOVO: Unidade da porção (g, kg, xícaras)
+  final int? feedingInterval;  // ✅ NOVO: Intervalo entre alimentações (horas)
+  final String? restrictions;  // ✅ NOVO: Restrições alimentares
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isActive;
@@ -28,6 +33,11 @@ class Cat extends Equatable {
     this.currentWeight,
     this.targetWeight,
     required this.homeId,
+    this.ownerId,
+    this.portionSize,
+    this.portionUnit,
+    this.feedingInterval,
+    this.restrictions,
     required this.createdAt,
     required this.updatedAt,
     this.isActive = true,
@@ -46,6 +56,11 @@ class Cat extends Equatable {
     currentWeight,
     targetWeight,
     homeId,
+    ownerId,
+    portionSize,
+    portionUnit,
+    feedingInterval,
+    restrictions,
     createdAt,
     updatedAt,
     isActive,
@@ -63,6 +78,11 @@ class Cat extends Equatable {
     double? currentWeight,
     double? targetWeight,
     String? homeId,
+    String? ownerId,
+    double? portionSize,
+    String? portionUnit,
+    int? feedingInterval,
+    String? restrictions,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isActive,
@@ -79,6 +99,11 @@ class Cat extends Equatable {
       currentWeight: currentWeight ?? this.currentWeight,
       targetWeight: targetWeight ?? this.targetWeight,
       homeId: homeId ?? this.homeId,
+      ownerId: ownerId ?? this.ownerId,
+      portionSize: portionSize ?? this.portionSize,
+      portionUnit: portionUnit ?? this.portionUnit,
+      feedingInterval: feedingInterval ?? this.feedingInterval,
+      restrictions: restrictions ?? this.restrictions,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isActive: isActive ?? this.isActive,
