@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_bloc.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_event.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_state.dart';
-import 'package:mealtime_app/features/meals/presentation/widgets/meal_form.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_event.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/widgets/meal_form.dart';
 
-class EditMealPage extends StatefulWidget {
-  final Meal meal;
+class EditFeedingLogPage extends StatefulWidget {
+  final FeedingLog meal;
 
-  const EditMealPage({super.key, required this.meal});
+  const EditFeedingLogPage({super.key, required this.meal});
 
   @override
-  State<EditMealPage> createState() => _EditMealPageState();
+  State<EditFeedingLogPage> createState() => _EditFeedingLogPageState();
 }
 
-class _EditMealPageState extends State<EditMealPage> {
+class _EditFeedingLogPageState extends State<EditFeedingLogPage> {
   final _formKey = GlobalKey<FormState>();
 
   // Form controllers
@@ -72,17 +72,17 @@ class _EditMealPageState extends State<EditMealPage> {
       appBar: AppBar(
         title: const Text('Editar Refeição'),
         actions: [
-          TextButton(onPressed: _saveMeal, child: const Text('Salvar')),
+          TextButton(onPressed: _saveFeedingLog, child: const Text('Salvar')),
         ],
       ),
-      body: BlocListener<MealsBloc, MealsState>(
+      body: BlocListener<FeedingLogsBloc, FeedingLogsState>(
         listener: (context, state) {
-          if (state is MealOperationSuccess) {
+          if (state is FeedingLogOperationSuccess) {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));
             Navigator.of(context).pop();
-          } else if (state is MealsError) {
+          } else if (state is FeedingLogsError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.failure.message),
@@ -138,7 +138,7 @@ class _EditMealPageState extends State<EditMealPage> {
                 ),
                 const SizedBox(height: 24),
 
-                MealForm(
+                FeedingLogForm(
                   catIdController: _catIdController,
                   homeIdController: _homeIdController,
                   notesController: _notesController,
@@ -162,7 +162,7 @@ class _EditMealPageState extends State<EditMealPage> {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: _deleteMeal,
+                        onPressed: _deleteFeedingLog,
                         icon: const Icon(Icons.delete),
                         label: const Text('Excluir'),
                         style: OutlinedButton.styleFrom(
@@ -173,7 +173,7 @@ class _EditMealPageState extends State<EditMealPage> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: _saveMeal,
+                        onPressed: _saveFeedingLog,
                         icon: const Icon(Icons.save),
                         label: const Text('Salvar'),
                       ),
@@ -188,7 +188,7 @@ class _EditMealPageState extends State<EditMealPage> {
     );
   }
 
-  void _saveMeal() {
+  void _saveFeedingLog() {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -211,7 +211,7 @@ class _EditMealPageState extends State<EditMealPage> {
       _selectedTime.minute,
     );
 
-    final updatedMeal = widget.meal.copyWith(
+    final updatedFeedingLog = widget.meal.copyWith(
       catId: _selectedCatId!,
       homeId: _selectedHomeId!,
       type: _selectedType,
@@ -228,10 +228,10 @@ class _EditMealPageState extends State<EditMealPage> {
       updatedAt: DateTime.now(),
     );
 
-    context.read<MealsBloc>().add(UpdateMeal(updatedMeal));
+    context.read<FeedingLogsBloc>().add(UpdateFeedingLog(updatedFeedingLog));
   }
 
-  void _deleteMeal() {
+  void _deleteFeedingLog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -246,7 +246,7 @@ class _EditMealPageState extends State<EditMealPage> {
           ),
           ElevatedButton(
             onPressed: () {
-              context.read<MealsBloc>().add(DeleteMeal(widget.meal.id));
+              context.read<FeedingLogsBloc>().add(DeleteFeedingLog(widget.meal.id));
               Navigator.of(context).pop();
             },
             style: ElevatedButton.styleFrom(
@@ -262,26 +262,26 @@ class _EditMealPageState extends State<EditMealPage> {
 
   Color _getStatusColor() {
     switch (widget.meal.status) {
-      case MealStatus.scheduled:
+      case FeedingLogStatus.scheduled:
         return widget.meal.isOverdue ? Colors.red : Colors.blue;
-      case MealStatus.completed:
+      case FeedingLogStatus.completed:
         return Colors.green;
-      case MealStatus.skipped:
+      case FeedingLogStatus.skipped:
         return Colors.orange;
-      case MealStatus.cancelled:
+      case FeedingLogStatus.cancelled:
         return Colors.grey;
     }
   }
 
   IconData _getStatusIcon() {
     switch (widget.meal.status) {
-      case MealStatus.scheduled:
+      case FeedingLogStatus.scheduled:
         return widget.meal.isOverdue ? Icons.warning : Icons.schedule;
-      case MealStatus.completed:
+      case FeedingLogStatus.completed:
         return Icons.check_circle;
-      case MealStatus.skipped:
+      case FeedingLogStatus.skipped:
         return Icons.skip_next;
-      case MealStatus.cancelled:
+      case FeedingLogStatus.cancelled:
         return Icons.cancel;
     }
   }

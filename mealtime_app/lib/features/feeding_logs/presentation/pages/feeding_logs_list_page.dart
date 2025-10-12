@@ -1,37 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_bloc.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_event.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_state.dart';
-import 'package:mealtime_app/features/meals/presentation/widgets/meal_card.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_event.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/widgets/meal_card.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
-class MealsListPage extends StatefulWidget {
+class FeedingLogsListPage extends StatefulWidget {
   final String? catId;
   final bool showTodayOnly;
 
-  const MealsListPage({super.key, this.catId, this.showTodayOnly = false});
+  const FeedingLogsListPage({super.key, this.catId, this.showTodayOnly = false});
 
   @override
-  State<MealsListPage> createState() => _MealsListPageState();
+  State<FeedingLogsListPage> createState() => _FeedingLogsListPageState();
 }
 
-class _MealsListPageState extends State<MealsListPage> {
+class _FeedingLogsListPageState extends State<FeedingLogsListPage> {
   @override
   void initState() {
     super.initState();
-    _loadMeals();
+    _loadFeedingLogs();
   }
 
-  void _loadMeals() {
+  void _loadFeedingLogs() {
     if (widget.showTodayOnly) {
-      context.read<MealsBloc>().add(const LoadTodayMeals());
+      context.read<FeedingLogsBloc>().add(const LoadTodayFeedingLogs());
     } else if (widget.catId != null) {
-      context.read<MealsBloc>().add(LoadMealsByCat(widget.catId!));
+      context.read<FeedingLogsBloc>().add(LoadFeedingLogsByCat(widget.catId!));
     } else {
-      context.read<MealsBloc>().add(const LoadMeals());
+      context.read<FeedingLogsBloc>().add(const LoadFeedingLogs());
     }
   }
 
@@ -47,43 +47,43 @@ class _MealsListPageState extends State<MealsListPage> {
               : 'Todas as Refeições',
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadMeals),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadFeedingLogs),
         ],
       ),
-      body: BlocBuilder<MealsBloc, MealsState>(
+      body: BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
         builder: (context, state) {
-          if (state is MealsLoading) {
+          if (state is FeedingLogsLoading) {
             return const LoadingWidget();
           }
 
-          if (state is MealsError) {
+          if (state is FeedingLogsError) {
             return CustomErrorWidget(
               message: state.failure.message,
-              onRetry: _loadMeals,
+              onRetry: _loadFeedingLogs,
             );
           }
 
-          if (state is MealsLoaded) {
-            if (state.meals.isEmpty) {
+          if (state is FeedingLogsLoaded) {
+            if (state.feeding_logs.isEmpty) {
               return _buildEmptyState();
             }
 
             return RefreshIndicator(
               onRefresh: () async {
-                _loadMeals();
+                _loadFeedingLogs();
               },
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: state.meals.length,
+                itemCount: state.feeding_logs.length,
                 itemBuilder: (context, index) {
-                  final meal = state.meals[index];
+                  final meal = state.feeding_logs[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: MealCard(
+                    child: FeedingLogCard(
                       meal: meal,
-                      onTap: () => _navigateToMealDetail(meal),
-                      onComplete: () => _completeMeal(meal),
-                      onSkip: () => _skipMeal(meal),
+                      onTap: () => _navigateToFeedingLogDetail(meal),
+                      onComplete: () => _completeFeedingLog(meal),
+                      onSkip: () => _skipFeedingLog(meal),
                     ),
                   );
                 },
@@ -91,26 +91,26 @@ class _MealsListPageState extends State<MealsListPage> {
             );
           }
 
-          if (state is MealOperationInProgress) {
+          if (state is FeedingLogOperationInProgress) {
             return Stack(
               children: [
-                if (state.meals.isNotEmpty)
+                if (state.feeding_logs.isNotEmpty)
                   RefreshIndicator(
                     onRefresh: () async {
-                      _loadMeals();
+                      _loadFeedingLogs();
                     },
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16),
-                      itemCount: state.meals.length,
+                      itemCount: state.feeding_logs.length,
                       itemBuilder: (context, index) {
-                        final meal = state.meals[index];
+                        final meal = state.feeding_logs[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: MealCard(
+                          child: FeedingLogCard(
                             meal: meal,
-                            onTap: () => _navigateToMealDetail(meal),
-                            onComplete: () => _completeMeal(meal),
-                            onSkip: () => _skipMeal(meal),
+                            onTap: () => _navigateToFeedingLogDetail(meal),
+                            onComplete: () => _completeFeedingLog(meal),
+                            onSkip: () => _skipFeedingLog(meal),
                           ),
                         );
                       },
@@ -141,7 +141,7 @@ class _MealsListPageState extends State<MealsListPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToCreateMeal,
+        onPressed: _navigateToCreateFeedingLog,
         child: const Icon(Icons.add),
       ),
     );
@@ -177,7 +177,7 @@ class _MealsListPageState extends State<MealsListPage> {
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: _navigateToCreateMeal,
+            onPressed: _navigateToCreateFeedingLog,
             icon: const Icon(Icons.add),
             label: const Text('Criar Refeição'),
           ),
@@ -186,42 +186,42 @@ class _MealsListPageState extends State<MealsListPage> {
     );
   }
 
-  void _navigateToMealDetail(Meal meal) {
+  void _navigateToFeedingLogDetail(FeedingLog meal) {
     // TODO: Implementar navegação para detalhes da refeição
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Detalhes da refeição: ${meal.id}')));
   }
 
-  void _navigateToCreateMeal() {
+  void _navigateToCreateFeedingLog() {
     // TODO: Implementar navegação para criar refeição
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Criar nova refeição')));
   }
 
-  void _completeMeal(Meal meal) {
+  void _completeFeedingLog(FeedingLog meal) {
     showDialog(
       context: context,
-      builder: (context) => _CompleteMealDialog(
+      builder: (context) => _CompleteFeedingLogDialog(
         meal: meal,
         onComplete: (notes, amount) {
-          context.read<MealsBloc>().add(
-            CompleteMeal(mealId: meal.id, notes: notes, amount: amount),
+          context.read<FeedingLogsBloc>().add(
+            CompleteFeedingLog(mealId: meal.id, notes: notes, amount: amount),
           );
         },
       ),
     );
   }
 
-  void _skipMeal(Meal meal) {
+  void _skipFeedingLog(FeedingLog meal) {
     showDialog(
       context: context,
-      builder: (context) => _SkipMealDialog(
+      builder: (context) => _SkipFeedingLogDialog(
         meal: meal,
         onSkip: (reason) {
-          context.read<MealsBloc>().add(
-            SkipMeal(mealId: meal.id, reason: reason),
+          context.read<FeedingLogsBloc>().add(
+            SkipFeedingLog(mealId: meal.id, reason: reason),
           );
         },
       ),
@@ -229,17 +229,17 @@ class _MealsListPageState extends State<MealsListPage> {
   }
 }
 
-class _CompleteMealDialog extends StatefulWidget {
-  final Meal meal;
+class _CompleteFeedingLogDialog extends StatefulWidget {
+  final FeedingLog meal;
   final Function(String? notes, double? amount) onComplete;
 
-  const _CompleteMealDialog({required this.meal, required this.onComplete});
+  const _CompleteFeedingLogDialog({required this.meal, required this.onComplete});
 
   @override
-  State<_CompleteMealDialog> createState() => _CompleteMealDialogState();
+  State<_CompleteFeedingLogDialog> createState() => _CompleteFeedingLogDialogState();
 }
 
-class _CompleteMealDialogState extends State<_CompleteMealDialog> {
+class _CompleteFeedingLogDialogState extends State<_CompleteFeedingLogDialog> {
   final _notesController = TextEditingController();
   final _amountController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -316,17 +316,17 @@ class _CompleteMealDialogState extends State<_CompleteMealDialog> {
   }
 }
 
-class _SkipMealDialog extends StatefulWidget {
-  final Meal meal;
+class _SkipFeedingLogDialog extends StatefulWidget {
+  final FeedingLog meal;
   final Function(String? reason) onSkip;
 
-  const _SkipMealDialog({required this.meal, required this.onSkip});
+  const _SkipFeedingLogDialog({required this.meal, required this.onSkip});
 
   @override
-  State<_SkipMealDialog> createState() => _SkipMealDialogState();
+  State<_SkipFeedingLogDialog> createState() => _SkipFeedingLogDialogState();
 }
 
-class _SkipMealDialogState extends State<_SkipMealDialog> {
+class _SkipFeedingLogDialogState extends State<_SkipFeedingLogDialog> {
   final _reasonController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 

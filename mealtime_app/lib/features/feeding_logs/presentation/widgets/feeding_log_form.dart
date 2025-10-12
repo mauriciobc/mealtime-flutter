@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
 
-class MealForm extends StatelessWidget {
+class FeedingLogForm extends StatelessWidget {
   final TextEditingController catIdController;
   final TextEditingController homeIdController;
   final TextEditingController notesController;
@@ -16,7 +16,7 @@ class MealForm extends StatelessWidget {
   final ValueChanged<String?> onCatSelected;
   final ValueChanged<String?> onHomeSelected;
 
-  const MealForm({
+  const FeedingLogForm({
     super.key,
     required this.catIdController,
     required this.homeIdController,

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_bloc.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_event.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_state.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_event.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
 
-class MealDetailPage extends StatelessWidget {
+class FeedingLogDetailPage extends StatelessWidget {
   final String mealId;
 
-  const MealDetailPage({super.key, required this.mealId});
+  const FeedingLogDetailPage({super.key, required this.mealId});
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +22,13 @@ class MealDetailPage extends StatelessWidget {
           ),
         ],
       ),
-      body: BlocBuilder<MealsBloc, MealsState>(
+      body: BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
         builder: (context, state) {
-          if (state is MealsLoading) {
+          if (state is FeedingLogsLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (state is MealsError) {
+          if (state is FeedingLogsError) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -47,7 +47,7 @@ class MealDetailPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      context.read<MealsBloc>().add(LoadMealById(mealId));
+                      context.read<FeedingLogsBloc>().add(LoadFeedingLogById(mealId));
                     },
                     child: const Text('Tentar Novamente'),
                   ),
@@ -56,13 +56,13 @@ class MealDetailPage extends StatelessWidget {
             );
           }
 
-          if (state is MealLoaded) {
-            return _buildMealDetails(context, state.meal);
+          if (state is FeedingLogLoaded) {
+            return _buildFeedingLogDetails(context, state.meal);
           }
 
           // Carregar refeição se ainda não foi carregada
-          if (state is! MealOperationInProgress) {
-            context.read<MealsBloc>().add(LoadMealById(mealId));
+          if (state is! FeedingLogOperationInProgress) {
+            context.read<FeedingLogsBloc>().add(LoadFeedingLogById(mealId));
           }
 
           return const Center(child: CircularProgressIndicator());
@@ -71,7 +71,7 @@ class MealDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMealDetails(BuildContext context, Meal meal) {
+  Widget _buildFeedingLogDetails(BuildContext context, FeedingLog meal) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -217,12 +217,12 @@ class MealDetailPage extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Botões de ação
-          if (meal.status == MealStatus.scheduled) ...[
+          if (meal.status == FeedingLogStatus.scheduled) ...[
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _skipMeal(context, meal),
+                    onPressed: () => _skipFeedingLog(context, meal),
                     icon: const Icon(Icons.skip_next),
                     label: const Text('Pular'),
                     style: OutlinedButton.styleFrom(
@@ -233,7 +233,7 @@ class MealDetailPage extends StatelessWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _completeMeal(context, meal),
+                    onPressed: () => _completeFeedingLog(context, meal),
                     icon: const Icon(Icons.check),
                     label: const Text('Concluir'),
                   ),
@@ -279,13 +279,13 @@ class MealDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusChip(BuildContext context, Meal meal) {
+  Widget _buildStatusChip(BuildContext context, FeedingLog meal) {
     Color backgroundColor;
     Color textColor;
     String text;
 
     switch (meal.status) {
-      case MealStatus.scheduled:
+      case FeedingLogStatus.scheduled:
         if (meal.isOverdue) {
           backgroundColor = Colors.red.withOpacity(0.1);
           textColor = Colors.red;
@@ -296,17 +296,17 @@ class MealDetailPage extends StatelessWidget {
           text = 'Agendada';
         }
         break;
-      case MealStatus.completed:
+      case FeedingLogStatus.completed:
         backgroundColor = Colors.green.withOpacity(0.1);
         textColor = Colors.green;
         text = 'Concluída';
         break;
-      case MealStatus.skipped:
+      case FeedingLogStatus.skipped:
         backgroundColor = Colors.orange.withOpacity(0.1);
         textColor = Colors.orange;
         text = 'Pulada';
         break;
-      case MealStatus.cancelled:
+      case FeedingLogStatus.cancelled:
         backgroundColor = Colors.grey.withOpacity(0.1);
         textColor = Colors.grey;
         text = 'Cancelada';
@@ -358,9 +358,9 @@ class MealDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusInfo(BuildContext context, Meal meal) {
+  Widget _buildStatusInfo(BuildContext context, FeedingLog meal) {
     switch (meal.status) {
-      case MealStatus.scheduled:
+      case FeedingLogStatus.scheduled:
         return Column(
           children: [
             _buildInfoRow(
@@ -396,7 +396,7 @@ class MealDetailPage extends StatelessWidget {
             ],
           ],
         );
-      case MealStatus.completed:
+      case FeedingLogStatus.completed:
         return Column(
           children: [
             _buildInfoRow(context, Icons.check_circle, 'Status', 'Concluída'),
@@ -411,7 +411,7 @@ class MealDetailPage extends StatelessWidget {
             ],
           ],
         );
-      case MealStatus.skipped:
+      case FeedingLogStatus.skipped:
         return Column(
           children: [
             _buildInfoRow(context, Icons.skip_next, 'Status', 'Pulada'),
@@ -426,7 +426,7 @@ class MealDetailPage extends StatelessWidget {
             ],
           ],
         );
-      case MealStatus.cancelled:
+      case FeedingLogStatus.cancelled:
         return _buildInfoRow(context, Icons.cancel, 'Status', 'Cancelada');
     }
   }
@@ -463,28 +463,28 @@ class MealDetailPage extends StatelessWidget {
     ).showSnackBar(const SnackBar(content: Text('Editar refeição')));
   }
 
-  void _completeMeal(BuildContext context, Meal meal) {
+  void _completeFeedingLog(BuildContext context, FeedingLog meal) {
     showDialog(
       context: context,
-      builder: (context) => _CompleteMealDialog(
+      builder: (context) => _CompleteFeedingLogDialog(
         meal: meal,
         onComplete: (notes, amount) {
-          context.read<MealsBloc>().add(
-            CompleteMeal(mealId: meal.id, notes: notes, amount: amount),
+          context.read<FeedingLogsBloc>().add(
+            CompleteFeedingLog(mealId: meal.id, notes: notes, amount: amount),
           );
         },
       ),
     );
   }
 
-  void _skipMeal(BuildContext context, Meal meal) {
+  void _skipFeedingLog(BuildContext context, FeedingLog meal) {
     showDialog(
       context: context,
-      builder: (context) => _SkipMealDialog(
+      builder: (context) => _SkipFeedingLogDialog(
         meal: meal,
         onSkip: (reason) {
-          context.read<MealsBloc>().add(
-            SkipMeal(mealId: meal.id, reason: reason),
+          context.read<FeedingLogsBloc>().add(
+            SkipFeedingLog(mealId: meal.id, reason: reason),
           );
         },
       ),
@@ -492,17 +492,17 @@ class MealDetailPage extends StatelessWidget {
   }
 }
 
-class _CompleteMealDialog extends StatefulWidget {
-  final Meal meal;
+class _CompleteFeedingLogDialog extends StatefulWidget {
+  final FeedingLog meal;
   final Function(String? notes, double? amount) onComplete;
 
-  const _CompleteMealDialog({required this.meal, required this.onComplete});
+  const _CompleteFeedingLogDialog({required this.meal, required this.onComplete});
 
   @override
-  State<_CompleteMealDialog> createState() => _CompleteMealDialogState();
+  State<_CompleteFeedingLogDialog> createState() => _CompleteFeedingLogDialogState();
 }
 
-class _CompleteMealDialogState extends State<_CompleteMealDialog> {
+class _CompleteFeedingLogDialogState extends State<_CompleteFeedingLogDialog> {
   final _notesController = TextEditingController();
   final _amountController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -579,17 +579,17 @@ class _CompleteMealDialogState extends State<_CompleteMealDialog> {
   }
 }
 
-class _SkipMealDialog extends StatefulWidget {
-  final Meal meal;
+class _SkipFeedingLogDialog extends StatefulWidget {
+  final FeedingLog meal;
   final Function(String? reason) onSkip;
 
-  const _SkipMealDialog({required this.meal, required this.onSkip});
+  const _SkipFeedingLogDialog({required this.meal, required this.onSkip});
 
   @override
-  State<_SkipMealDialog> createState() => _SkipMealDialogState();
+  State<_SkipFeedingLogDialog> createState() => _SkipFeedingLogDialogState();
 }
 
-class _SkipMealDialogState extends State<_SkipMealDialog> {
+class _SkipFeedingLogDialogState extends State<_SkipFeedingLogDialog> {
   final _reasonController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 

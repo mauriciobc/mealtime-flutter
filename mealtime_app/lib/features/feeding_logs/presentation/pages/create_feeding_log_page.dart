@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_bloc.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_event.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_state.dart';
-import 'package:mealtime_app/features/meals/presentation/widgets/meal_form.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_event.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/widgets/meal_form.dart';
 import 'package:uuid/uuid.dart';
 
-class CreateMealPage extends StatefulWidget {
+class CreateFeedingLogPage extends StatefulWidget {
   final String? catId;
   final String? homeId;
 
-  const CreateMealPage({super.key, this.catId, this.homeId});
+  const CreateFeedingLogPage({super.key, this.catId, this.homeId});
 
   @override
-  State<CreateMealPage> createState() => _CreateMealPageState();
+  State<CreateFeedingLogPage> createState() => _CreateFeedingLogPageState();
 }
 
-class _CreateMealPageState extends State<CreateMealPage> {
+class _CreateFeedingLogPageState extends State<CreateFeedingLogPage> {
   final _formKey = GlobalKey<FormState>();
   final _uuid = const Uuid();
 
@@ -64,17 +64,17 @@ class _CreateMealPageState extends State<CreateMealPage> {
       appBar: AppBar(
         title: const Text('Nova Refeição'),
         actions: [
-          TextButton(onPressed: _saveMeal, child: const Text('Salvar')),
+          TextButton(onPressed: _saveFeedingLog, child: const Text('Salvar')),
         ],
       ),
-      body: BlocListener<MealsBloc, MealsState>(
+      body: BlocListener<FeedingLogsBloc, FeedingLogsState>(
         listener: (context, state) {
-          if (state is MealOperationSuccess) {
+          if (state is FeedingLogOperationSuccess) {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));
             Navigator.of(context).pop();
-          } else if (state is MealsError) {
+          } else if (state is FeedingLogsError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.failure.message),
@@ -90,7 +90,7 @@ class _CreateMealPageState extends State<CreateMealPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                MealForm(
+                FeedingLogForm(
                   catIdController: _catIdController,
                   homeIdController: _homeIdController,
                   notesController: _notesController,
@@ -111,7 +111,7 @@ class _CreateMealPageState extends State<CreateMealPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: _saveMeal,
+                    onPressed: _saveFeedingLog,
                     icon: const Icon(Icons.save),
                     label: const Text('Criar Refeição'),
                   ),
@@ -124,7 +124,7 @@ class _CreateMealPageState extends State<CreateMealPage> {
     );
   }
 
-  void _saveMeal() {
+  void _saveFeedingLog() {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -147,13 +147,13 @@ class _CreateMealPageState extends State<CreateMealPage> {
       _selectedTime.minute,
     );
 
-    final meal = Meal(
+    final meal = FeedingLog(
       id: _uuid.v4(),
       catId: _selectedCatId!,
       homeId: _selectedHomeId!,
       type: _selectedType,
       scheduledAt: scheduledAt,
-      status: MealStatus.scheduled,
+      status: FeedingLogStatus.scheduled,
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
@@ -167,6 +167,6 @@ class _CreateMealPageState extends State<CreateMealPage> {
       updatedAt: DateTime.now(),
     );
 
-    context.read<MealsBloc>().add(CreateMeal(meal));
+    context.read<FeedingLogsBloc>().add(CreateFeedingLog(meal));
   }
 }

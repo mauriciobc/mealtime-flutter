@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
 
-class MealCard extends StatelessWidget {
-  final Meal meal;
+class FeedingLogCard extends StatelessWidget {
+  final FeedingLog meal;
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
   final VoidCallback? onSkip;
 
-  const MealCard({
+  const FeedingLogCard({
     super.key,
     required this.meal,
     this.onTap,
@@ -99,7 +99,7 @@ class MealCard extends StatelessWidget {
                   ],
                 ),
               ],
-              if (meal.status == MealStatus.scheduled) ...[
+              if (meal.status == FeedingLogStatus.scheduled) ...[
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -170,7 +170,7 @@ class MealCard extends StatelessWidget {
     String text;
 
     switch (meal.status) {
-      case MealStatus.scheduled:
+      case FeedingLogStatus.scheduled:
         if (meal.isOverdue) {
           backgroundColor = Colors.red.withOpacity(0.1);
           textColor = Colors.red;
@@ -181,17 +181,17 @@ class MealCard extends StatelessWidget {
           text = 'Agendada';
         }
         break;
-      case MealStatus.completed:
+      case FeedingLogStatus.completed:
         backgroundColor = Colors.green.withOpacity(0.1);
         textColor = Colors.green;
         text = 'Concluída';
         break;
-      case MealStatus.skipped:
+      case FeedingLogStatus.skipped:
         backgroundColor = Colors.orange.withOpacity(0.1);
         textColor = Colors.orange;
         text = 'Pulada';
         break;
-      case MealStatus.cancelled:
+      case FeedingLogStatus.cancelled:
         backgroundColor = Colors.grey.withOpacity(0.1);
         textColor = Colors.grey;
         text = 'Cancelada';

@@ -1,114 +1,114 @@
 import 'package:dio/dio.dart';
 import 'package:mealtime_app/core/constants/api_constants.dart';
-import 'package:mealtime_app/features/meals/data/models/meal_model.dart';
+import 'package:mealtime_app/features/feeding_logs/data/models/meal_model.dart';
 
-class MealsApiService {
+class FeedingLogsApiService {
   final Dio _dio;
 
-  MealsApiService(this._dio);
+  FeedingLogsApiService(this._dio);
 
-  Future<List<MealModel>> getMeals() async {
+  Future<List<FeedingLogModel>> getFeedingLogs() async {
     try {
-      final response = await _dio.get('${ApiConstants.baseUrl}/meals');
+      final response = await _dio.get('${ApiConstants.baseUrl}/feeding_logs');
       final List<dynamic> data = response.data['data'] ?? response.data;
-      return data.map((json) => MealModel.fromJson(json)).toList();
+      return data.map((json) => FeedingLogModel.fromJson(json)).toList();
     } on DioException catch (e) {
       throw _handleDioException(e);
     }
   }
 
-  Future<List<MealModel>> getMealsByCat(String catId) async {
+  Future<List<FeedingLogModel>> getFeedingLogsByCat(String catId) async {
     try {
       final response = await _dio.get(
-        '${ApiConstants.baseUrl}/meals?cat_id=$catId',
+        '${ApiConstants.baseUrl}/feeding_logs?cat_id=$catId',
       );
       final List<dynamic> data = response.data['data'] ?? response.data;
-      return data.map((json) => MealModel.fromJson(json)).toList();
+      return data.map((json) => FeedingLogModel.fromJson(json)).toList();
     } on DioException catch (e) {
       throw _handleDioException(e);
     }
   }
 
-  Future<MealModel> getMealById(String mealId) async {
+  Future<FeedingLogModel> getFeedingLogById(String mealId) async {
     try {
-      final response = await _dio.get('${ApiConstants.baseUrl}/meals/$mealId');
-      return MealModel.fromJson(response.data['data'] ?? response.data);
+      final response = await _dio.get('${ApiConstants.baseUrl}/feeding_logs/$mealId');
+      return FeedingLogModel.fromJson(response.data['data'] ?? response.data);
     } on DioException catch (e) {
       throw _handleDioException(e);
     }
   }
 
-  Future<List<MealModel>> getTodayMeals() async {
+  Future<List<FeedingLogModel>> getTodayFeedingLogs() async {
     try {
       final today = DateTime.now().toIso8601String().split('T')[0];
       final response = await _dio.get(
-        '${ApiConstants.baseUrl}/meals?date=$today',
+        '${ApiConstants.baseUrl}/feeding_logs?date=$today',
       );
       final List<dynamic> data = response.data['data'] ?? response.data;
-      return data.map((json) => MealModel.fromJson(json)).toList();
+      return data.map((json) => FeedingLogModel.fromJson(json)).toList();
     } on DioException catch (e) {
       throw _handleDioException(e);
     }
   }
 
-  Future<MealModel> createMeal(MealModel meal) async {
+  Future<FeedingLogModel> createFeedingLog(FeedingLogModel meal) async {
     try {
       final response = await _dio.post(
-        '${ApiConstants.baseUrl}/meals',
+        '${ApiConstants.baseUrl}/feeding_logs',
         data: meal.toJson(),
       );
-      return MealModel.fromJson(response.data['data'] ?? response.data);
+      return FeedingLogModel.fromJson(response.data['data'] ?? response.data);
     } on DioException catch (e) {
       throw _handleDioException(e);
     }
   }
 
-  Future<MealModel> updateMeal(MealModel meal) async {
+  Future<FeedingLogModel> updateFeedingLog(FeedingLogModel meal) async {
     try {
       final response = await _dio.put(
-        '${ApiConstants.baseUrl}/meals/${meal.id}',
+        '${ApiConstants.baseUrl}/feeding_logs/${meal.id}',
         data: meal.toJson(),
       );
-      return MealModel.fromJson(response.data['data'] ?? response.data);
+      return FeedingLogModel.fromJson(response.data['data'] ?? response.data);
     } on DioException catch (e) {
       throw _handleDioException(e);
     }
   }
 
-  Future<void> deleteMeal(String mealId) async {
+  Future<void> deleteFeedingLog(String mealId) async {
     try {
-      await _dio.delete('${ApiConstants.baseUrl}/meals/$mealId');
+      await _dio.delete('${ApiConstants.baseUrl}/feeding_logs/$mealId');
     } on DioException catch (e) {
       throw _handleDioException(e);
     }
   }
 
-  Future<MealModel> completeMeal(
+  Future<FeedingLogModel> completeFeedingLog(
     String mealId,
     String? notes,
     double? amount,
   ) async {
     try {
       final response = await _dio.patch(
-        '${ApiConstants.baseUrl}/meals/$mealId/complete',
+        '${ApiConstants.baseUrl}/feeding_logs/$mealId/complete',
         data: {
           if (notes != null) 'notes': notes,
           if (amount != null) 'amount': amount,
         },
       );
-      return MealModel.fromJson(response.data['data'] ?? response.data);
+      return FeedingLogModel.fromJson(response.data['data'] ?? response.data);
     } on DioException catch (e) {
       throw _handleDioException(e);
     }
   }
 
-  Future<MealModel> skipMeal(String mealId, String? reason) async {
+  Future<FeedingLogModel> skipFeedingLog(String mealId, String? reason) async {
     try {
       final response = await _dio.patch(
-        '${ApiConstants.baseUrl}/meals/$mealId/skip',
+        '${ApiConstants.baseUrl}/feeding_logs/$mealId/skip',
         data: {if (reason != null) 'reason': reason},
       );
-      return MealModel.fromJson(response.data['data'] ?? response.data);
+      return FeedingLogModel.fromJson(response.data['data'] ?? response.data);
     } on DioException catch (e) {
       throw _handleDioException(e);
     }

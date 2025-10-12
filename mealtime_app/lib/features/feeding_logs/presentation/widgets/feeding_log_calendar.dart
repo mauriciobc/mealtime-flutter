@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
 
-class MealCalendar extends StatefulWidget {
-  final List<Meal> meals;
+class FeedingLogCalendar extends StatefulWidget {
+  final List<FeedingLog> feeding_logs;
   final ValueChanged<DateTime>? onDateSelected;
-  final ValueChanged<Meal>? onMealSelected;
+  final ValueChanged<FeedingLog>? onFeedingLogSelected;
 
-  const MealCalendar({
+  const FeedingLogCalendar({
     super.key,
-    required this.meals,
+    required this.feeding_logs,
     this.onDateSelected,
-    this.onMealSelected,
+    this.onFeedingLogSelected,
   });
 
   @override
-  State<MealCalendar> createState() => _MealCalendarState();
+  State<FeedingLogCalendar> createState() => _FeedingLogCalendarState();
 }
 
-class _MealCalendarState extends State<MealCalendar> {
+class _FeedingLogCalendarState extends State<FeedingLogCalendar> {
   DateTime _selectedDate = DateTime.now();
   late PageController _pageController;
   late DateTime _currentMonth;
@@ -71,7 +71,7 @@ class _MealCalendarState extends State<MealCalendar> {
         const SizedBox(height: 16),
 
         // Lista de refeições do dia selecionado
-        _buildMealsForSelectedDate(),
+        _buildFeedingLogsForSelectedDate(),
       ],
     );
   }
@@ -156,7 +156,7 @@ class _MealCalendarState extends State<MealCalendar> {
                 final date = DateTime(month.year, month.month, day);
                 final isSelected = _isSameDay(date, _selectedDate);
                 final isToday = _isSameDay(date, DateTime.now());
-                final hasMeals = _hasMealsOnDate(date);
+                final hasFeedingLogs = _hasFeedingLogsOnDate(date);
 
                 return GestureDetector(
                   onTap: () {
@@ -170,7 +170,7 @@ class _MealCalendarState extends State<MealCalendar> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? Theme.of(context).colorScheme.primary
-                          : hasMeals
+                          : hasFeedingLogs
                           ? Theme.of(context).colorScheme.primaryContainer
                           : null,
                       borderRadius: BorderRadius.circular(8),
@@ -195,7 +195,7 @@ class _MealCalendarState extends State<MealCalendar> {
                             fontWeight: isToday ? FontWeight.bold : null,
                           ),
                         ),
-                        if (hasMeals) ...[
+                        if (hasFeedingLogs) ...[
                           const SizedBox(height: 2),
                           Container(
                             width: 4,
@@ -220,10 +220,10 @@ class _MealCalendarState extends State<MealCalendar> {
     );
   }
 
-  Widget _buildMealsForSelectedDate() {
-    final mealsForDate = _getMealsForDate(_selectedDate);
+  Widget _buildFeedingLogsForSelectedDate() {
+    final feeding_logsForDate = _getFeedingLogsForDate(_selectedDate);
 
-    if (mealsForDate.isEmpty) {
+    if (feeding_logsForDate.isEmpty) {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -260,10 +260,10 @@ class _MealCalendarState extends State<MealCalendar> {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            ...mealsForDate.map(
+            ...feeding_logsForDate.map(
               (meal) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: _buildMealItem(meal),
+                child: _buildFeedingLogItem(meal),
               ),
             ),
           ],
@@ -272,9 +272,9 @@ class _MealCalendarState extends State<MealCalendar> {
     );
   }
 
-  Widget _buildMealItem(Meal meal) {
+  Widget _buildFeedingLogItem(FeedingLog meal) {
     return InkWell(
-      onTap: () => widget.onMealSelected?.call(meal),
+      onTap: () => widget.onFeedingLogSelected?.call(meal),
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -347,24 +347,24 @@ class _MealCalendarState extends State<MealCalendar> {
     );
   }
 
-  Widget _buildStatusChip(MealStatus status) {
+  Widget _buildStatusChip(FeedingLogStatus status) {
     Color color;
     String text;
 
     switch (status) {
-      case MealStatus.scheduled:
+      case FeedingLogStatus.scheduled:
         color = Colors.blue;
         text = 'Agendada';
         break;
-      case MealStatus.completed:
+      case FeedingLogStatus.completed:
         color = Colors.green;
         text = 'Concluída';
         break;
-      case MealStatus.skipped:
+      case FeedingLogStatus.skipped:
         color = Colors.orange;
         text = 'Pulada';
         break;
-      case MealStatus.cancelled:
+      case FeedingLogStatus.cancelled:
         color = Colors.grey;
         text = 'Cancelada';
         break;
@@ -393,12 +393,12 @@ class _MealCalendarState extends State<MealCalendar> {
         date1.day == date2.day;
   }
 
-  bool _hasMealsOnDate(DateTime date) {
-    return widget.meals.any((meal) => _isSameDay(meal.scheduledAt, date));
+  bool _hasFeedingLogsOnDate(DateTime date) {
+    return widget.feeding_logs.any((meal) => _isSameDay(meal.scheduledAt, date));
   }
 
-  List<Meal> _getMealsForDate(DateTime date) {
-    return widget.meals
+  List<FeedingLog> _getFeedingLogsForDate(DateTime date) {
+    return widget.feeding_logs
         .where((meal) => _isSameDay(meal.scheduledAt, date))
         .toList()
       ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
-import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_bloc.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_event.dart';
-import 'package:mealtime_app/features/meals/presentation/widgets/cat_selection_item.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_event.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/widgets/cat_selection_item.dart';
 import 'package:uuid/uuid.dart';
 
 class FeedingFormData {
@@ -264,14 +264,14 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
       for (final catId in _selectedCatIds) {
         final data = _feedingData[catId]!;
 
-        final meal = Meal(
+        final meal = FeedingLog(
           id: uuid.v4(),
           catId: catId,
           homeId: widget.householdId,
           type: MealType.snack,
           scheduledAt: now,
           completedAt: now,
-          status: MealStatus.completed,
+          status: FeedingLogStatus.completed,
           amount: data.portion,
           foodType: data.foodType,
           notes: data.notes?.isEmpty ?? true ? null : data.notes,
@@ -280,7 +280,7 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
         );
 
         if (mounted) {
-          context.read<MealsBloc>().add(CreateMeal(meal));
+          context.read<FeedingLogsBloc>().add(CreateFeedingLog(meal));
         }
       }
 
@@ -289,7 +289,7 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
       if (mounted) {
         Navigator.of(context).pop();
 
-        context.read<MealsBloc>().add(LoadMeals());
+        context.read<FeedingLogsBloc>().add(LoadFeedingLogs());
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
