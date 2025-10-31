@@ -675,3 +675,4 @@ O sistema está:
 *Data: 12 de Outubro de 2025*  
 *Versão: 1.0.0*
 
+

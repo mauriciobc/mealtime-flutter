@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/widgets/feeding_bottom_sheet.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/widgets/feeding_form_fields.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 class CatSelectionItem extends StatelessWidget {
   final Cat cat;
@@ -9,6 +12,7 @@ class CatSelectionItem extends StatelessWidget {
   final FeedingFormData? formData;
   final ValueChanged<bool> onSelectionChanged;
   final ValueChanged<FeedingFormData> onFormDataChanged;
+  final List<FeedingLog>? feedingLogs;
 
   const CatSelectionItem({
     super.key,
@@ -17,6 +21,7 @@ class CatSelectionItem extends StatelessWidget {
     required this.formData,
     required this.onSelectionChanged,
     required this.onFormDataChanged,
+    this.feedingLogs,
   });
 
   @override
@@ -50,16 +55,7 @@ class CatSelectionItem extends StatelessWidget {
                     onChanged: (value) => onSelectionChanged(value ?? false),
                   ),
                   const SizedBox(width: 12),
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
-                    child: Icon(
-                      Icons.pets,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      size: 20,
-                    ),
-                  ),
+                  _buildCatAvatar(context),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -105,10 +101,89 @@ class CatSelectionItem extends StatelessWidget {
     );
   }
 
+  Widget _buildCatAvatar(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    // Validar se a URL existe e é válida (começa com http)
+    final imageUrl = cat.imageUrl;
+    final hasValidImageUrl = imageUrl != null && 
+        imageUrl.isNotEmpty && 
+        imageUrl.trim().isNotEmpty &&
+        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
+    
+    if (hasValidImageUrl) {
+      return SizedBox(
+        width: 40,
+        height: 40,
+        child: ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: imageUrl.trim(),
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
+              width: 40,
+              height: 40,
+              color: theme.colorScheme.surfaceContainerHighest,
+              child: Center(
+                child: Material3LoadingIndicator(size: 20.0),
+              ),
+            ),
+            errorWidget: (context, url, error) {
+              return Container(
+                width: 40,
+                height: 40,
+                color: theme.colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  Icons.pets,
+                  size: 20,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+    
+    return CircleAvatar(
+      radius: 20,
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      child: Icon(
+        Icons.pets,
+        size: 20,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+
   String _getLastFeedingText() {
-    // TODO: Implementar lógica real de última refeição
-    // Por enquanto, retorna texto placeholder
-    return 'há 12 dias';
+    if (feedingLogs == null || feedingLogs!.isEmpty) {
+      return 'Nunca alimentado';
+    }
+
+    // Filtra os feeding logs deste gato
+    final catFeedings = feedingLogs!.where((log) => log.catId == cat.id).toList();
+    
+    if (catFeedings.isEmpty) {
+      return 'Nunca alimentado';
+    }
+
+    // Ordena por data (mais recente primeiro)
+    catFeedings.sort((a, b) => b.fedAt.compareTo(a.fedAt));
+    
+    final lastFeeding = catFeedings.first;
+    final now = DateTime.now();
+    final difference = now.difference(lastFeeding.fedAt);
+
+    if (difference.inMinutes < 60) {
+      return 'há ${difference.inMinutes} min';
+    } else if (difference.inHours < 24) {
+      return 'há ${difference.inHours} ${difference.inHours == 1 ? 'hora' : 'horas'}';
+    } else if (difference.inDays < 30) {
+      return 'há ${difference.inDays} ${difference.inDays == 1 ? 'dia' : 'dias'}';
+    } else {
+      final months = (difference.inDays / 30).floor();
+      return 'há $months ${months == 1 ? 'mês' : 'meses'}';
+    }
   }
 }
 

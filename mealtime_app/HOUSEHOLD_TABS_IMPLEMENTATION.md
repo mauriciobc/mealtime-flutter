@@ -359,3 +359,9 @@ As seguintes funcionalidades têm placeholders implementados e exibem mensagens 
 **Implementação Completa ✨**  
 *Todos os TODOs marcados como concluídos*
 
+
+
+
+
+
+

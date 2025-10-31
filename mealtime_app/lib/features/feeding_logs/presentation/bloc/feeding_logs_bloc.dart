@@ -1,20 +1,18 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mealtime_app/core/usecases/usecase.dart';
-import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
-import 'package:mealtime_app/features/feeding_logs/domain/usecases/complete_meal.dart'
-    as complete_meal;
-import 'package:mealtime_app/features/feeding_logs/domain/usecases/create_meal.dart'
-    as create_meal;
-import 'package:mealtime_app/features/feeding_logs/domain/usecases/delete_meal.dart'
-    as delete_meal;
-import 'package:mealtime_app/features/feeding_logs/domain/usecases/get_meal_by_id.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/usecases/create_feeding_log.dart'
+    as create_feeding_log;
+import 'package:mealtime_app/features/feeding_logs/domain/usecases/create_feeding_logs_batch.dart'
+    as create_feeding_logs_batch;
+import 'package:mealtime_app/features/feeding_logs/domain/usecases/delete_feeding_log.dart'
+    as delete_feeding_log;
+import 'package:mealtime_app/features/feeding_logs/domain/usecases/get_feeding_log_by_id.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/usecases/get_feeding_logs.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/usecases/get_feeding_logs_by_cat.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/usecases/get_today_feeding_logs.dart';
-import 'package:mealtime_app/features/feeding_logs/domain/usecases/skip_meal.dart'
-    as skip_meal;
-import 'package:mealtime_app/features/feeding_logs/domain/usecases/update_meal.dart'
-    as update_meal;
+import 'package:mealtime_app/features/feeding_logs/domain/usecases/update_feeding_log.dart'
+    as update_feeding_log;
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_event.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
 
@@ -23,11 +21,10 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
   final GetFeedingLogsByCat getFeedingLogsByCat;
   final GetFeedingLogById getFeedingLogById;
   final GetTodayFeedingLogs getTodayFeedingLogs;
-  final create_meal.CreateFeedingLog createFeedingLog;
-  final update_meal.UpdateFeedingLog updateFeedingLog;
-  final delete_meal.DeleteFeedingLog deleteFeedingLog;
-  final complete_meal.CompleteFeedingLog completeFeedingLog;
-  final skip_meal.SkipFeedingLog skipFeedingLog;
+  final create_feeding_log.CreateFeedingLog createFeedingLog;
+  final create_feeding_logs_batch.CreateFeedingLogsBatch createFeedingLogsBatch;
+  final update_feeding_log.UpdateFeedingLog updateFeedingLog;
+  final delete_feeding_log.DeleteFeedingLog deleteFeedingLog;
 
   FeedingLogsBloc({
     required this.getFeedingLogs,
@@ -35,20 +32,18 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
     required this.getFeedingLogById,
     required this.getTodayFeedingLogs,
     required this.createFeedingLog,
+    required this.createFeedingLogsBatch,
     required this.updateFeedingLog,
     required this.deleteFeedingLog,
-    required this.completeFeedingLog,
-    required this.skipFeedingLog,
   }) : super(const FeedingLogsInitial()) {
     on<LoadFeedingLogs>(_onLoadFeedingLogs);
     on<LoadFeedingLogsByCat>(_onLoadFeedingLogsByCat);
     on<LoadFeedingLogById>(_onLoadFeedingLogById);
     on<LoadTodayFeedingLogs>(_onLoadTodayFeedingLogs);
     on<CreateFeedingLog>(_onCreateFeedingLog);
+    on<CreateFeedingLogsBatch>(_onCreateFeedingLogsBatch);
     on<UpdateFeedingLog>(_onUpdateFeedingLog);
     on<DeleteFeedingLog>(_onDeleteFeedingLog);
-    on<CompleteFeedingLog>(_onCompleteFeedingLog);
-    on<SkipFeedingLog>(_onSkipFeedingLog);
     on<RefreshFeedingLogs>(_onRefreshFeedingLogs);
     on<ClearFeedingLogsError>(_onClearFeedingLogsError);
   }
@@ -98,7 +93,7 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
   ) async {
     emit(const FeedingLogsLoading());
 
-    final result = await getTodayFeedingLogs(NoParams());
+    final result = await getTodayFeedingLogs(householdId: event.householdId);
 
     result.fold(
       (failure) => emit(FeedingLogsError(failure)),
@@ -135,6 +130,45 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
             message: 'Refeição criada com sucesso!',
             feeding_logs: [newFeedingLog],
             updatedFeedingLog: newFeedingLog,
+          ),
+        );
+      }
+    });
+  }
+
+  Future<void> _onCreateFeedingLogsBatch(
+    CreateFeedingLogsBatch event,
+    Emitter<FeedingLogsState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is FeedingLogsLoaded) {
+      emit(
+        FeedingLogOperationInProgress(
+          operation: 'Criando ${event.meals.length} refeição(ões)...',
+          feeding_logs: currentState.feeding_logs,
+        ),
+      );
+    }
+
+    final result = await createFeedingLogsBatch(event.meals);
+
+    result.fold((failure) => emit(FeedingLogsError(failure)), (newFeedingLogs) {
+      if (currentState is FeedingLogsLoaded) {
+        final updatedFeedingLogs = <FeedingLog>[
+          ...currentState.feeding_logs,
+          ...newFeedingLogs,
+        ];
+        emit(
+          FeedingLogOperationSuccess(
+            message: '${newFeedingLogs.length} refeição(ões) criada(s) com sucesso!',
+            feeding_logs: updatedFeedingLogs,
+          ),
+        );
+      } else {
+        emit(
+          FeedingLogOperationSuccess(
+            message: '${newFeedingLogs.length} refeição(ões) criada(s) com sucesso!',
+            feeding_logs: newFeedingLogs,
           ),
         );
       }
@@ -213,90 +247,8 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
     });
   }
 
-  Future<void> _onCompleteFeedingLog(
-    CompleteFeedingLog event,
-    Emitter<FeedingLogsState> emit,
-  ) async {
-    final currentState = state;
-    if (currentState is FeedingLogsLoaded) {
-      emit(
-        FeedingLogOperationInProgress(
-          operation: 'Concluindo refeição...',
-          feeding_logs: currentState.feeding_logs,
-        ),
-      );
-    }
-
-    final result = await completeFeedingLog(
-      complete_meal.CompleteFeedingLogParams(
-        mealId: event.mealId,
-        notes: event.notes,
-        amount: event.amount,
-      ),
-    );
-
-    result.fold((failure) => emit(FeedingLogsError(failure)), (completedFeedingLog) {
-      if (currentState is FeedingLogsLoaded) {
-        final updatedFeedingLogs = currentState.feeding_logs.map<FeedingLog>((meal) {
-          return meal.id == completedFeedingLog.id ? completedFeedingLog : meal;
-        }).toList();
-        emit(
-          FeedingLogOperationSuccess(
-            message: 'Refeição concluída com sucesso!',
-            feeding_logs: updatedFeedingLogs,
-            updatedFeedingLog: completedFeedingLog,
-          ),
-        );
-      } else {
-        emit(
-          FeedingLogOperationSuccess(
-            message: 'Refeição concluída com sucesso!',
-            feeding_logs: [completedFeedingLog],
-            updatedFeedingLog: completedFeedingLog,
-          ),
-        );
-      }
-    });
-  }
-
-  Future<void> _onSkipFeedingLog(SkipFeedingLog event, Emitter<FeedingLogsState> emit) async {
-    final currentState = state;
-    if (currentState is FeedingLogsLoaded) {
-      emit(
-        FeedingLogOperationInProgress(
-          operation: 'Pulando refeição...',
-          feeding_logs: currentState.feeding_logs,
-        ),
-      );
-    }
-
-    final result = await skipFeedingLog(
-      skip_meal.SkipFeedingLogParams(mealId: event.mealId, reason: event.reason),
-    );
-
-    result.fold((failure) => emit(FeedingLogsError(failure)), (skippedFeedingLog) {
-      if (currentState is FeedingLogsLoaded) {
-        final updatedFeedingLogs = currentState.feeding_logs.map<FeedingLog>((meal) {
-          return meal.id == skippedFeedingLog.id ? skippedFeedingLog : meal;
-        }).toList();
-        emit(
-          FeedingLogOperationSuccess(
-            message: 'Refeição pulada com sucesso!',
-            feeding_logs: updatedFeedingLogs,
-            updatedFeedingLog: skippedFeedingLog,
-          ),
-        );
-      } else {
-        emit(
-          FeedingLogOperationSuccess(
-            message: 'Refeição pulada com sucesso!',
-            feeding_logs: [skippedFeedingLog],
-            updatedFeedingLog: skippedFeedingLog,
-          ),
-        );
-      }
-    });
-  }
+  // Métodos complete e skip não são necessários para feeding_logs
+  // pois são registros de alimentação já realizados, não agendamentos
 
   Future<void> _onRefreshFeedingLogs(
     RefreshFeedingLogs event,

@@ -1,17 +1,32 @@
 import 'package:equatable/equatable.dart';
 
-/// Tipos de agendamento
-enum ScheduleType { feeding, weightCheck }
+/// Tipos de agendamento conforme o backend
+enum ScheduleType { interval, fixedTime }
 
-/// Entidade Schedule representa um agendamento de tarefa
-/// Baseado na tabela schedules do Supabase
+/// Modelo básico de gato (usado em schedules)
+class CatBasic extends Equatable {
+  final String id;
+  final String name;
+
+  const CatBasic({
+    required this.id,
+    required this.name,
+  });
+
+  @override
+  List<Object?> get props => [id, name];
+}
+
+/// Entidade Schedule representa um agendamento de alimentação
+/// Baseado na tabela schedules do backend
 class Schedule extends Equatable {
   final String id;
   final String catId;
   final ScheduleType type;
-  final int? interval;  // Intervalo em horas
-  final List<String>? times;  // Horários específicos ["08:00", "12:00", "18:00"]
+  final int? interval; // minutos entre alimentações (para type=interval)
+  final List<String> times; // horários fixos HH:MM (para type=fixedTime)
   final bool enabled;
+  final CatBasic? cat; // {id, name} - dados básicos do gato
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -20,8 +35,9 @@ class Schedule extends Equatable {
     required this.catId,
     required this.type,
     this.interval,
-    this.times,
+    required this.times,
     required this.enabled,
+    this.cat,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -34,6 +50,7 @@ class Schedule extends Equatable {
         interval,
         times,
         enabled,
+        cat,
         createdAt,
         updatedAt,
       ];
@@ -45,6 +62,7 @@ class Schedule extends Equatable {
     int? interval,
     List<String>? times,
     bool? enabled,
+    CatBasic? cat,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -55,6 +73,7 @@ class Schedule extends Equatable {
       interval: interval ?? this.interval,
       times: times ?? this.times,
       enabled: enabled ?? this.enabled,
+      cat: cat ?? this.cat,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -63,26 +82,13 @@ class Schedule extends Equatable {
   /// Nome de exibição do tipo de agendamento
   String get typeDisplayName {
     switch (type) {
-      case ScheduleType.feeding:
-        return 'Alimentação';
-      case ScheduleType.weightCheck:
-        return 'Pesagem';
+      case ScheduleType.interval:
+        return 'Intervalo de ${interval ?? 0} minutos';
+      case ScheduleType.fixedTime:
+        return 'Horários fixos: ${times.join(", ")}';
     }
   }
 
-  /// Descrição do intervalo
-  String get intervalDescription {
-    if (interval != null) {
-      if (interval == 1) {
-        return 'A cada hora';
-      } else if (interval! < 24) {
-        return 'A cada $interval horas';
-      } else {
-        final days = interval! ~/ 24;
-        return 'A cada $days ${days == 1 ? 'dia' : 'dias'}';
-      }
-    }
-    return 'Horários específicos';
-  }
+  /// Verifica se o agendamento está ativo
+  bool get isActive => enabled;
 }
-

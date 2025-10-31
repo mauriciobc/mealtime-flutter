@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -33,7 +34,10 @@ class _LoginFormState extends State<LoginForm> {
         } else if (state is AuthFailure) {
           // Mostrar erro
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
           );
         }
       },
@@ -102,14 +106,12 @@ class _LoginFormState extends State<LoginForm> {
                   child: ElevatedButton(
                     onPressed: state is AuthLoading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     child: state is AuthLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
+                        ? const Material3LoadingIndicator(size: 20.0)
                         : const Text('Entrar', style: TextStyle(fontSize: 16)),
                   ),
                 );

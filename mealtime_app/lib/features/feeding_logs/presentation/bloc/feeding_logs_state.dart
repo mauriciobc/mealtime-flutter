@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:mealtime_app/core/errors/failures.dart';
-import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 
 abstract class FeedingLogsState extends Equatable {
   const FeedingLogsState();
@@ -19,11 +19,18 @@ class FeedingLogsLoading extends FeedingLogsState {
 
 class FeedingLogsLoaded extends FeedingLogsState {
   final List<FeedingLog> feeding_logs;
+  final FeedingLog? _lastFeeding;
 
-  const FeedingLogsLoaded({required this.feeding_logs});
+  FeedingLogsLoaded({required this.feeding_logs}) 
+      : _lastFeeding = feeding_logs.isNotEmpty 
+          ? (List<FeedingLog>.from(feeding_logs)..sort((a, b) => b.fedAt.compareTo(a.fedAt))).first
+          : null;
+
+  // Get the most recent feeding (sorted by fedAt descending)
+  FeedingLog? get lastFeeding => _lastFeeding;
 
   @override
-  List<Object> get props => [feeding_logs];
+  List<Object?> get props => [feeding_logs];
 }
 
 class FeedingLogLoaded extends FeedingLogsState {

@@ -1,71 +1,60 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mealtime_app/features/homes/data/models/home_model.dart';
-import 'package:mealtime_app/features/homes/domain/entities/home.dart';
+import 'package:mealtime_app/core/database/app_database.dart';
+import 'package:mealtime_app/core/database/daos/households_dao.dart';
+import 'package:mealtime_app/core/database/mappers/home_mapper.dart';
+import 'package:mealtime_app/features/homes/domain/entities/home.dart' as domain;
 
 abstract class HomesLocalDataSource {
-  Future<List<Home>> getCachedHomes();
-  Future<void> cacheHomes(List<Home> homes);
-  Future<void> cacheHome(Home home);
+  Future<List<domain.Home>> getCachedHomes();
+  Future<void> cacheHomes(List<domain.Home> homes);
+  Future<void> cacheHome(domain.Home home);
   Future<void> removeCachedHome(String id);
   Future<void> setActiveHome(String id);
-  Future<Home?> getActiveHome();
+  Future<domain.Home?> getActiveHome();
+  Future<void> markAsSynced(String id);
+  Stream<List<domain.Home>> watchHomes();
 }
 
 class HomesLocalDataSourceImpl implements HomesLocalDataSource {
+  final AppDatabase database;
   final SharedPreferences sharedPreferences;
-  static const String _homesKey = 'cached_homes';
+  late final HouseholdsDao _householdsDao;
   static const String _activeHomeKey = 'active_home_id';
 
-  HomesLocalDataSourceImpl({required this.sharedPreferences});
-
-  @override
-  Future<List<Home>> getCachedHomes() async {
-    final homesJson = sharedPreferences.getStringList(_homesKey) ?? [];
-    return homesJson
-        .map(
-          (json) => HomeModel.fromJson(
-            Map<String, dynamic>.from(
-              json.split(',').fold({}, (map, item) {
-                final parts = item.split(':');
-                if (parts.length == 2) {
-                  map[parts[0]] = parts[1];
-                }
-                return map;
-              }),
-            ),
-          ),
-        )
-        .map((model) => model.toEntity())
-        .toList();
+  HomesLocalDataSourceImpl({
+    required this.database,
+    required this.sharedPreferences,
+  }) {
+    _householdsDao = HouseholdsDao(database);
   }
 
   @override
-  Future<void> cacheHomes(List<Home> homes) async {
-    final homesJson = homes
-        .map((home) => HomeModel.fromEntity(home).toJson().toString())
-        .toList();
-    await sharedPreferences.setStringList(_homesKey, homesJson);
+  Future<List<domain.Home>> getCachedHomes() async {
+    final driftHomes = await _householdsDao.getAllHouseholds();
+    return HomeMapper.fromDriftHouseholds(driftHomes);
   }
 
   @override
-  Future<void> cacheHome(Home home) async {
-    final cachedHomes = await getCachedHomes();
-    final existingIndex = cachedHomes.indexWhere((h) => h.id == home.id);
-
-    if (existingIndex != -1) {
-      cachedHomes[existingIndex] = home;
-    } else {
-      cachedHomes.add(home);
+  Future<void> cacheHomes(List<domain.Home> homes) async {
+    for (final home in homes) {
+      await cacheHome(home);
     }
+  }
 
-    await cacheHomes(cachedHomes);
+  @override
+  Future<void> cacheHome(domain.Home home) async {
+    final companion = HomeMapper.toDriftCompanion(
+      home,
+      syncedAt: DateTime.now(),
+      version: 1,
+      isDeleted: false,
+    );
+    await database.into(database.households).insertOnConflictUpdate(companion);
   }
 
   @override
   Future<void> removeCachedHome(String id) async {
-    final cachedHomes = await getCachedHomes();
-    cachedHomes.removeWhere((home) => home.id == id);
-    await cacheHomes(cachedHomes);
+    await _householdsDao.deleteHousehold(id);
   }
 
   @override
@@ -74,15 +63,24 @@ class HomesLocalDataSourceImpl implements HomesLocalDataSource {
   }
 
   @override
-  Future<Home?> getActiveHome() async {
+  Future<domain.Home?> getActiveHome() async {
     final activeHomeId = sharedPreferences.getString(_activeHomeKey);
     if (activeHomeId == null) return null;
 
-    final cachedHomes = await getCachedHomes();
-    try {
-      return cachedHomes.firstWhere((home) => home.id == activeHomeId);
-    } catch (e) {
-      return null;
-    }
+    final driftHome = await _householdsDao.getHouseholdById(activeHomeId);
+    if (driftHome == null) return null;
+    return HomeMapper.fromDriftHousehold(driftHome);
+  }
+
+  @override
+  Future<void> markAsSynced(String id) async {
+    await _householdsDao.markAsSynced(id);
+  }
+
+  @override
+  Stream<List<domain.Home>> watchHomes() {
+    return _householdsDao.watchAllHouseholds().map((driftHomes) {
+      return HomeMapper.fromDriftHouseholds(driftHomes);
+    });
   }
 }

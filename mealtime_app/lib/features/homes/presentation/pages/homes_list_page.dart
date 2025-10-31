@@ -6,8 +6,20 @@ import 'package:mealtime_app/features/homes/presentation/widgets/home_card.dart'
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
-class HomesListPage extends StatelessWidget {
+class HomesListPage extends StatefulWidget {
   const HomesListPage({super.key});
+
+  @override
+  State<HomesListPage> createState() => _HomesListPageState();
+}
+
+class _HomesListPageState extends State<HomesListPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Carregar households automaticamente quando a página é exibida
+    context.read<HomesBloc>().add(LoadHomes());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +49,8 @@ class HomesListPage extends StatelessWidget {
             }
             return _buildHomesList(context, state.homes);
           }
-          return const SizedBox.shrink();
+          // Estado inicial - mostrar loading enquanto carrega
+          return const LoadingWidget();
         },
       ),
       floatingActionButton: FloatingActionButton(

@@ -1,12 +1,11 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mealtime_app/core/errors/failures.dart';
 import 'package:mealtime_app/core/errors/exceptions.dart';
 import 'package:mealtime_app/features/auth/domain/entities/user.dart';
 import 'package:mealtime_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:mealtime_app/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:mealtime_app/features/auth/data/datasources/auth_local_datasource.dart';
-import 'package:mealtime_app/core/supabase/supabase_config.dart';
-import 'package:mealtime_app/features/auth/data/models/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
@@ -37,45 +36,18 @@ class AuthRepositoryImpl implements AuthRepository {
         authResponse.refreshToken ?? '',
       );
 
-      // Tentar buscar dados completos da tabela profiles
-      try {
-        final userId = authResponse.user!.id;
-        final profileData = await SupabaseConfig.client
-            .from('profiles')
-            .select()
-            .eq('id', userId)
-            .maybeSingle();
-
-        if (profileData != null) {
-          // Combinar dados do Auth com dados do Profile
-          final completeUser = UserModel(
-            id: userId,
-            authId: userId,
-            fullName: profileData['full_name'] as String? ?? 
-                     authResponse.user!.email.split('@').first,
-            email: authResponse.user!.email,
-            householdId: profileData['household_id'] as String?,
-            createdAt: authResponse.user!.createdAt,
-            updatedAt: authResponse.user!.updatedAt,
-            isEmailVerified: authResponse.user!.isEmailVerified,
-          );
-          
-          await localDataSource.saveUser(completeUser);
-          return Right(completeUser.toEntity());
-        }
-      } catch (e) {
-        // Se falhar ao buscar profile, continuar com dados básicos do Auth
-        print('Aviso: Não foi possível buscar dados do profile: $e');
-      }
-
-      // Fallback: salvar usuário do Supabase Auth
+      // Salvar usuário (dados já vêm completos do backend)
       await localDataSource.saveUser(authResponse.user!);
       return Right(authResponse.user!.toEntity());
     } on ServerException catch (e) {
+      debugPrint('[AuthRepository] Login ServerException: ${e.message}');
       return Left(ServerFailure(e.message));
     } on NetworkException catch (e) {
+      debugPrint('[AuthRepository] Login NetworkException: ${e.message}');
       return Left(NetworkFailure(e.message));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('[AuthRepository] Login unexpected error: $e');
+      debugPrint('[AuthRepository] Stack trace: $stackTrace');
       return Left(ServerFailure('Erro inesperado: ${e.toString()}'));
     }
   }

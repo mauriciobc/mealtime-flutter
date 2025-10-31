@@ -14,7 +14,7 @@ class _ApiClient implements ApiClient {
     this.baseUrl,
     this.errorLogger,
   }) {
-    baseUrl ??= 'https://mealtime.app.br/api';
+    baseUrl ??= 'https://mealtime.app.br/api/v2';
   }
 
   final Dio _dio;

@@ -16,22 +16,29 @@ class RegisterPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Logo e título
-              const Icon(Icons.pets, size: 80, color: Colors.orange),
+              Icon(
+                Icons.pets,
+                size: 80,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Criar Conta',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Comece a gerenciar a alimentação dos seus gatos',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 48),
 

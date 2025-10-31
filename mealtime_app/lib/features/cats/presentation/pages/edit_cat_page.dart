@@ -36,11 +36,7 @@ class _EditCatPageState extends State<EditCatPage> {
           if (_isLoading)
             const Padding(
               padding: EdgeInsets.all(16.0),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
+              child: Material3LoadingIndicator(size: 20.0),
             ),
         ],
       ),

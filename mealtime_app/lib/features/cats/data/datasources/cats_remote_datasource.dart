@@ -3,12 +3,19 @@ import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/services/api/cats_api_service.dart';
 
 abstract class CatsRemoteDataSource {
-  Future<List<Cat>> getCats();
-  Future<Cat> getCatById(String id);
+  /// Obtém todos os gatos (com filtro opcional por household)
+  Future<List<Cat>> getCats({String? householdId});
+  
+  /// Cria um novo gato
   Future<Cat> createCat(Cat cat);
+
+  /// Atualiza um gato existente
   Future<Cat> updateCat(Cat cat);
-  Future<void> deleteCat(String id);
-  Future<List<Cat>> getCatsByHome(String homeId);
+
+  /// Deleta um gato
+  Future<void> deleteCat(String catId);
+
+  /// Atualiza o peso de um gato
   Future<Cat> updateCatWeight(String catId, double weight);
 }
 
@@ -18,9 +25,9 @@ class CatsRemoteDataSourceImpl implements CatsRemoteDataSource {
   CatsRemoteDataSourceImpl({required this.apiService});
 
   @override
-  Future<List<Cat>> getCats() async {
+  Future<List<Cat>> getCats({String? householdId}) async {
     try {
-      final apiResponse = await apiService.getCats();
+      final apiResponse = await apiService.getCats(householdId: householdId);
 
       if (!apiResponse.success) {
         throw ServerException(
@@ -35,36 +42,15 @@ class CatsRemoteDataSourceImpl implements CatsRemoteDataSource {
   }
 
   @override
-  Future<Cat> getCatById(String id) async {
-    try {
-      final apiResponse = await apiService.getCatById(id);
-
-      if (!apiResponse.success) {
-        throw ServerException(
-          apiResponse.error ?? 'Erro desconhecido ao buscar gato',
-        );
-      }
-
-      return apiResponse.data!.toEntity();
-    } catch (e) {
-      throw ServerException('Erro ao buscar gato: ${e.toString()}');
-    }
-  }
-
-  @override
   Future<Cat> createCat(Cat cat) async {
     try {
-      final request = CreateCatRequest(
+      final request = CreateCatRequestV2(
         name: cat.name,
-        breed: cat.breed,
-        birthDate: cat.birthDate,
-        gender: cat.gender,
-        color: cat.color,
-        description: cat.description,
-        imageUrl: cat.imageUrl,
-        currentWeight: cat.currentWeight,
-        targetWeight: cat.targetWeight,
-        homeId: cat.homeId,
+        householdId: cat.homeId,  // mudou de homeId
+        photoUrl: cat.imageUrl,    // mudou de imageUrl
+        birthdate: cat.birthDate,  // mudou de birthDate
+        weight: cat.currentWeight,
+        feedingInterval: cat.feedingInterval,
       );
       final apiResponse = await apiService.createCat(request);
 
@@ -83,17 +69,13 @@ class CatsRemoteDataSourceImpl implements CatsRemoteDataSource {
   @override
   Future<Cat> updateCat(Cat cat) async {
     try {
-      final request = UpdateCatRequest(
+      final request = UpdateCatRequestV2(
         name: cat.name,
-        breed: cat.breed,
-        birthDate: cat.birthDate,
-        gender: cat.gender,
-        color: cat.color,
-        description: cat.description,
-        imageUrl: cat.imageUrl,
-        currentWeight: cat.currentWeight,
-        targetWeight: cat.targetWeight,
-        homeId: cat.homeId,
+        householdId: cat.homeId,
+        photoUrl: cat.imageUrl,
+        birthdate: cat.birthDate,
+        weight: cat.currentWeight,
+        feedingInterval: cat.feedingInterval,
       );
       final apiResponse = await apiService.updateCat(cat.id, request);
 
@@ -110,55 +92,35 @@ class CatsRemoteDataSourceImpl implements CatsRemoteDataSource {
   }
 
   @override
-  Future<void> deleteCat(String id) async {
+  Future<void> deleteCat(String catId) async {
     try {
-      final apiResponse = await apiService.deleteCat(id);
+      final apiResponse = await apiService.deleteCat(catId);
 
       if (!apiResponse.success) {
         throw ServerException(
-          apiResponse.error ?? 'Erro desconhecido ao excluir gato',
+          apiResponse.error ?? 'Erro desconhecido ao deletar gato',
         );
       }
     } catch (e) {
-      throw ServerException('Erro ao excluir gato: ${e.toString()}');
-    }
-  }
-
-  @override
-  Future<List<Cat>> getCatsByHome(String homeId) async {
-    try {
-      final apiResponse = await apiService.getCatsByHome(homeId);
-
-      if (!apiResponse.success) {
-        throw ServerException(
-          apiResponse.error ??
-              'Erro desconhecido ao buscar gatos da residência',
-        );
-      }
-
-      return apiResponse.data!.map((catModel) => catModel.toEntity()).toList();
-    } catch (e) {
-      throw ServerException(
-        'Erro ao buscar gatos da residência: ${e.toString()}',
-      );
+      throw ServerException('Erro ao deletar gato: ${e.toString()}');
     }
   }
 
   @override
   Future<Cat> updateCatWeight(String catId, double weight) async {
     try {
-      final request = UpdateCatWeightRequest(weight: weight);
+      final request = UpdateWeightRequest(weight: weight);
       final apiResponse = await apiService.updateCatWeight(catId, request);
 
       if (!apiResponse.success) {
         throw ServerException(
-          apiResponse.error ?? 'Erro desconhecido ao atualizar peso do gato',
+          apiResponse.error ?? 'Erro desconhecido ao atualizar peso',
         );
       }
 
       return apiResponse.data!.toEntity();
     } catch (e) {
-      throw ServerException('Erro ao atualizar peso do gato: ${e.toString()}');
+      throw ServerException('Erro ao atualizar peso: ${e.toString()}');
     }
   }
 }

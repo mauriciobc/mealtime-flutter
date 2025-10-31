@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 
 abstract class FeedingLogsEvent extends Equatable {
   const FeedingLogsEvent();
@@ -31,7 +31,12 @@ class LoadFeedingLogById extends FeedingLogsEvent {
 }
 
 class LoadTodayFeedingLogs extends FeedingLogsEvent {
-  const LoadTodayFeedingLogs();
+  final String? householdId;
+
+  const LoadTodayFeedingLogs({this.householdId});
+
+  @override
+  List<Object?> get props => [householdId];
 }
 
 class CreateFeedingLog extends FeedingLogsEvent {
@@ -41,6 +46,15 @@ class CreateFeedingLog extends FeedingLogsEvent {
 
   @override
   List<Object> get props => [meal];
+}
+
+class CreateFeedingLogsBatch extends FeedingLogsEvent {
+  final List<FeedingLog> meals;
+
+  const CreateFeedingLogsBatch(this.meals);
+
+  @override
+  List<Object> get props => [meals];
 }
 
 class UpdateFeedingLog extends FeedingLogsEvent {
@@ -59,27 +73,6 @@ class DeleteFeedingLog extends FeedingLogsEvent {
 
   @override
   List<Object> get props => [mealId];
-}
-
-class CompleteFeedingLog extends FeedingLogsEvent {
-  final String mealId;
-  final String? notes;
-  final double? amount;
-
-  const CompleteFeedingLog({required this.mealId, this.notes, this.amount});
-
-  @override
-  List<Object?> get props => [mealId, notes, amount];
-}
-
-class SkipFeedingLog extends FeedingLogsEvent {
-  final String mealId;
-  final String? reason;
-
-  const SkipFeedingLog({required this.mealId, this.reason});
-
-  @override
-  List<Object?> get props => [mealId, reason];
 }
 
 class RefreshFeedingLogs extends FeedingLogsEvent {

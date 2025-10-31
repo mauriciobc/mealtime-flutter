@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
@@ -51,13 +52,19 @@ class _CatDetailPageState extends State<CatDetailPage> {
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'delete',
                 child: Row(
                   children: [
-                    Icon(Icons.delete, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Excluir', style: TextStyle(color: Colors.red)),
+                    Icon(
+                      Icons.delete,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Excluir',
+                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    ),
                   ],
                 ),
               ),
@@ -124,27 +131,65 @@ class _CatDetailPageState extends State<CatDetailPage> {
   }
 
   Widget _buildCatHeader(BuildContext context, dynamic cat) {
+    final theme = Theme.of(context);
+    
+    // Validar se a URL existe e é válida (começa com http)
+    final imageUrl = cat.imageUrl;
+    final hasValidImageUrl = imageUrl != null && 
+        imageUrl.isNotEmpty && 
+        imageUrl.trim().isNotEmpty &&
+        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
+    
+    Widget avatarWidget;
+    if (hasValidImageUrl) {
+      avatarWidget = SizedBox(
+        width: 80,
+        height: 80,
+        child: ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: imageUrl.trim(),
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
+              width: 80,
+              height: 80,
+              color: theme.colorScheme.surfaceContainerHighest,
+              child: Center(
+                child: Material3LoadingIndicator(size: 32.0),
+              ),
+            ),
+            errorWidget: (context, url, error) {
+              return Container(
+                width: 80,
+                height: 80,
+                color: theme.colorScheme.primary.withOpacity(0.1),
+                child: Icon(
+                  Icons.pets,
+                  size: 40,
+                  color: theme.colorScheme.primary,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    } else {
+      avatarWidget = CircleAvatar(
+        radius: 40,
+        backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+        child: Icon(
+          Icons.pets,
+          size: 40,
+          color: theme.colorScheme.primary,
+        ),
+      );
+    }
+    
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: Theme.of(
-                context,
-              ).colorScheme.primary.withOpacity(0.1),
-              backgroundImage: cat.imageUrl != null
-                  ? NetworkImage(cat.imageUrl!)
-                  : null,
-              child: cat.imageUrl == null
-                  ? Icon(
-                      Icons.pets,
-                      size: 40,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
-                  : null,
-            ),
+            avatarWidget,
             const SizedBox(width: 20),
             Expanded(
               child: Column(
@@ -191,7 +236,9 @@ class _CatDetailPageState extends State<CatDetailPage> {
                         Icon(
                           cat.gender == 'M' ? Icons.male : Icons.female,
                           size: 16,
-                          color: cat.gender == 'M' ? Colors.blue : Colors.pink,
+                          color: cat.gender == 'M'
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.tertiary,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -326,10 +373,10 @@ class _CatDetailPageState extends State<CatDetailPage> {
           ).colorScheme.surfaceContainerHighest,
           valueColor: AlwaysStoppedAnimation<Color>(
             isOverweight
-                ? Colors.orange
+                ? Theme.of(context).colorScheme.tertiary
                 : isUnderweight
-                ? Colors.blue
-                : Colors.green,
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.secondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -337,10 +384,10 @@ class _CatDetailPageState extends State<CatDetailPage> {
           _getWeightStatus(cat.currentWeight!, cat.targetWeight!),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: isOverweight
-                ? Colors.orange
+                ? Theme.of(context).colorScheme.tertiary
                 : isUnderweight
-                ? Colors.blue
-                : Colors.green,
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.secondary,
             fontWeight: FontWeight.w500,
           ),
         ),

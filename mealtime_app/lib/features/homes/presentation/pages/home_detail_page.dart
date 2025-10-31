@@ -61,8 +61,8 @@ class _HomeDetailPageState extends State<HomeDetailPage>
         (h) => h.id == widget.home.id,
       );
 
-      // Buscar gatos do household
-      final catsResponse = await catsApi.getCatsByHome(widget.home.id);
+      // Buscar gatos do household usando API V2
+      final catsResponse = await catsApi.getCats(householdId: widget.home.id);
       final cats = catsResponse.data?.map((catModel) => catModel.toEntity()).toList();
 
       setState(() {
@@ -166,13 +166,19 @@ class _HomeDetailPageState extends State<HomeDetailPage>
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'delete',
               child: Row(
                 children: [
-                  Icon(Icons.delete, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Excluir', style: TextStyle(color: Colors.red)),
+                  Icon(
+                    Icons.delete,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Excluir',
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
                 ],
               ),
             ),

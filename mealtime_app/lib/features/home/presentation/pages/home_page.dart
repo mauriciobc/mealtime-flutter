@@ -1,18 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:material_charts/material_charts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_bloc.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_event.dart';
-import 'package:mealtime_app/features/meals/presentation/bloc/meals_state.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
-import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
-import 'package:mealtime_app/features/meals/presentation/widgets/feeding_bottom_sheet.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_event.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/widgets/feeding_bottom_sheet.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+
+/// Resultado do processamento de dados do gráfico
+class ChartDataResult {
+  final List<StackedBarData>? stackedData;
+  final List<BarChartData>? barData;
+
+  ChartDataResult._({this.stackedData, this.barData});
+
+  factory ChartDataResult.stacked(List<StackedBarData> data) {
+    return ChartDataResult._(stackedData: data);
+  }
+
+  factory ChartDataResult.bar(List<BarChartData> data) {
+    return ChartDataResult._(barData: data);
+  }
+
+  bool get isEmpty {
+    if (stackedData != null) return stackedData!.isEmpty;
+    if (barData != null) return barData!.isEmpty;
+    return true;
+  }
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,13 +48,56 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String? _currentHouseholdId;
+
   @override
   void initState() {
     super.initState();
     // Carregar dados iniciais
     context.read<CatsBloc>().add(LoadCats());
-    context.read<MealsBloc>().add(LoadMeals());
-    context.read<HomesBloc>().add(LoadHomes());
+    // Homes loading is optional - don't block UI if it fails
+    try {
+      context.read<HomesBloc>().add(LoadHomes());
+    } catch (e) {
+      debugPrint('[HomePage] Failed to load homes (non-critical): $e');
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Removed _loadFeedingLogs call from here to prevent duplicate calls
+    // Loading is now handled by BlocListener<CatsBloc> only
+  }
+
+  void _loadFeedingLogs() {
+    final catsState = context.read<CatsBloc>().state;
+    final feedingLogsState = context.read<FeedingLogsBloc>().state;
+    
+    // Prevent duplicate calls - don't load if already loading
+    if (feedingLogsState is FeedingLogsLoading) {
+      debugPrint('[HomePage] Skipping _loadFeedingLogs: already loading');
+      return;
+    }
+    
+    if (catsState is CatsLoaded && catsState.cats.isNotEmpty) {
+      final householdId = catsState.cats.first.homeId;
+      
+      if (_currentHouseholdId != householdId) {
+        _currentHouseholdId = householdId;
+        debugPrint('[HomePage] Loading feeding logs for household: $householdId');
+        context.read<FeedingLogsBloc>().add(LoadTodayFeedingLogs(householdId: householdId));
+      } else {
+        debugPrint('[HomePage] Household ID unchanged, checking if reload needed');
+        // If household unchanged but no data, reload anyway
+        if (feedingLogsState is! FeedingLogsLoaded || feedingLogsState.feeding_logs.isEmpty) {
+          debugPrint('[HomePage] Reloading feeding logs (no data or not loaded)');
+          context.read<FeedingLogsBloc>().add(LoadTodayFeedingLogs(householdId: householdId));
+        }
+      }
+    } else {
+      debugPrint('[HomePage] Cannot load feeding logs: cats not loaded or empty');
+    }
   }
 
   @override
@@ -39,33 +108,66 @@ class _HomePageState extends State<HomePage> {
           context.go('/login');
         }
       },
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
+      child: BlocListener<CatsBloc, CatsState>(
+        listener: (context, catsState) {
+          // Load feeding logs when cats are loaded
+          if (catsState is CatsLoaded && catsState.cats.isNotEmpty) {
+            // Use WidgetsBinding to ensure context is ready
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _loadFeedingLogs();
+            });
+          }
+        },
+        child: BlocBuilder<CatsBloc, CatsState>(
+          builder: (context, catsState) {
+            // Mostrar loader apenas quando está carregando pela primeira vez
+            final bool isLoading = catsState is CatsLoading || 
+                                 (catsState is CatsInitial);
+
+            return Stack(
               children: [
-                _buildHeader(context),
-                const SizedBox(height: 24),
-                _buildSummaryCards(context),
-                const SizedBox(height: 24),
-                _buildLastFeedingSection(context),
-                const SizedBox(height: 24),
-                _buildFeedingsChartSection(context),
-                const SizedBox(height: 24),
-                _buildRecentRecordsSection(context),
-                const SizedBox(height: 24),
-                _buildMyCatsSection(context),
-                const SizedBox(height: 80), // Espaço para a navegação inferior
+                Scaffold(
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                  body: SafeArea(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildHeader(context),
+                          const SizedBox(height: 24),
+                          _buildSummaryCards(context),
+                          const SizedBox(height: 24),
+                          _buildLastFeedingSection(context),
+                          const SizedBox(height: 24),
+                          _buildFeedingsChartSection(context),
+                          const SizedBox(height: 24),
+                          _buildRecentRecordsSection(context),
+                          const SizedBox(height: 24),
+                          _buildMyCatsSection(context),
+                          const SizedBox(height: 80), // Espaço para a navegação inferior
+                        ],
+                      ),
+                    ),
+                  ),
+                  floatingActionButton: FloatingActionButton(
+                    onPressed: _showFeedingBottomSheet,
+                    tooltip: 'Registrar Alimentação',
+                    child: const Icon(Icons.add),
+                  ),
+                  floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+                ),
+                // Overlay de loader Material 3 que não bloqueia listeners
+                if (isLoading)
+                  Material(
+                    color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                    child: const Center(
+                      child: Material3LoadingIndicator(),
+                    ),
+                  ),
               ],
-            ),
-          ),
+            );
+          },
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _showFeedingBottomSheet,
-          child: const Icon(Icons.add),
-        ),
-        bottomNavigationBar: _buildBottomNavigationBar(context),
       ),
     );
   }
@@ -105,13 +207,55 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildSummaryCards(BuildContext context) {
     return BlocBuilder<CatsBloc, CatsState>(
+      buildWhen: (previous, current) {
+        if (previous.runtimeType != current.runtimeType) return true;
+        if (previous is CatsLoaded && current is CatsLoaded) {
+          return previous.cats.length != current.cats.length;
+        }
+        return false;
+      },
       builder: (context, catsState) {
-        return BlocBuilder<MealsBloc, MealsState>(
-          builder: (context, mealsState) {
+        return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
+          buildWhen: (previous, current) {
+            // Always rebuild on state type change (Initial -> Loading -> Loaded)
+            if (previous.runtimeType != current.runtimeType) return true;
+            if (previous is FeedingLogsLoaded && current is FeedingLogsLoaded) {
+              return previous.feeding_logs.length != current.feeding_logs.length;
+            }
+            return false;
+          },
+          builder: (context, feedingLogsState) {
             final catsCount = catsState is CatsLoaded ? catsState.cats.length : 0;
-            final todayMeals = mealsState is MealsLoaded 
-                ? mealsState.meals.where((meal) => meal.isToday).length 
+            // Count only today's feedings for the summary card
+            final now = DateTime.now();
+            final todayCount = feedingLogsState is FeedingLogsLoaded 
+                ? feedingLogsState.feeding_logs.where((feeding) {
+                    final feedingDate = feeding.fedAt;
+                    return feedingDate.year == now.year &&
+                           feedingDate.month == now.month &&
+                           feedingDate.day == now.day;
+                  }).length
                 : 0;
+            
+            // Calculate average portion from all feeding logs
+            double averagePortion = 0.0;
+            String averagePortionText = '0g';
+            if (feedingLogsState is FeedingLogsLoaded && feedingLogsState.feeding_logs.isNotEmpty) {
+              final amounts = feedingLogsState.feeding_logs
+                  .where((f) => f.amount != null && f.amount! > 0)
+                  .map((f) => f.amount!)
+                  .toList();
+              if (amounts.isNotEmpty) {
+                averagePortion = amounts.reduce((a, b) => a + b) / amounts.length;
+                averagePortionText = '${averagePortion.toStringAsFixed(1)}g';
+              }
+            }
+            
+            // Get last feeding time
+            String lastFeedingTime = '--:--';
+            if (feedingLogsState is FeedingLogsLoaded && feedingLogsState.lastFeeding != null) {
+              lastFeedingTime = _formatTime(feedingLogsState.lastFeeding!.fedAt);
+            }
             
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -121,15 +265,15 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Expanded(child: _buildSummaryCard('Total de Gatos', catsCount.toString())),
                       const SizedBox(width: 12),
-                      Expanded(child: _buildSummaryCard('Alimentações Hoje', todayMeals.toString())),
+                      Expanded(child: _buildSummaryCard('Hoje', todayCount.toString())),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _buildSummaryCard('Porção Média', '9.2g')),
+                      Expanded(child: _buildSummaryCard('Porção Média', averagePortionText)),
                       const SizedBox(width: 12),
-                      Expanded(child: _buildSummaryCard('Última Vez', '19:28')),
+                      Expanded(child: _buildSummaryCard('Última Vez', lastFeedingTime)),
                     ],
                   ),
                 ],
@@ -172,22 +316,89 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildLastFeedingSection(BuildContext context) {
-    return BlocBuilder<MealsBloc, MealsState>(
-      builder: (context, state) {
-        Meal? lastMeal;
-        if (state is MealsLoaded && state.meals.isNotEmpty) {
-          final completedMeals = state.meals
-              .where((meal) => meal.status == MealStatus.completed)
-              .toList();
-          if (completedMeals.isNotEmpty) {
-            completedMeals.sort((a, b) => b.completedAt!.compareTo(a.completedAt!));
-            lastMeal = completedMeals.first;
-          }
+    // First get cats state, then feeding logs - allows feeding logs to use cats data
+    return BlocBuilder<CatsBloc, CatsState>(
+      buildWhen: (previous, current) {
+        // Always rebuild on state type change
+        if (previous.runtimeType != current.runtimeType) return true;
+        // Rebuild if both are loaded and cats changed
+        if (previous is CatsLoaded && current is CatsLoaded) {
+          if (previous.cats.length != current.cats.length) return true;
+          // Compare by IDs for better performance
+          final prevIds = previous.cats.map((e) => e.id).toSet();
+          final currIds = current.cats.map((e) => e.id).toSet();
+          return prevIds != currIds;
         }
+        return false;
+      },
+          builder: (context, catsState) {
+        // Inner BlocBuilder for FeedingLogs - has access to catsState from outer builder
+        return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
+          buildWhen: (previous, current) {
+            // Always rebuild on state type change (Initial -> Loading -> Loaded)
+            if (previous.runtimeType != current.runtimeType) return true;
+            // Rebuild if both are loaded and data changed
+            if (previous is FeedingLogsLoaded && current is FeedingLogsLoaded) {
+              // Compare by length first (fastest check)
+              if (previous.feeding_logs.length != current.feeding_logs.length) return true;
+              // If same length, compare by IDs
+              if (previous.feeding_logs.isEmpty && current.feeding_logs.isEmpty) return false;
+              final prevIds = previous.feeding_logs.map((e) => e.id).toSet();
+              final currIds = current.feeding_logs.map((e) => e.id).toSet();
+              return prevIds != currIds;
+            }
+            return false;
+          },
+          builder: (context, feedingLogsState) {
+            FeedingLog? lastFeeding;
+            Cat? cat;
+            
+            // Check if we have feeding logs data
+            if (feedingLogsState is FeedingLogsLoaded) {
+              debugPrint('[HomePage] _buildLastFeedingSection - FeedingLogsLoaded: ${feedingLogsState.feeding_logs.length} logs');
+              lastFeeding = feedingLogsState.lastFeeding;
+              debugPrint('[HomePage] _buildLastFeedingSection - Last feeding: ${lastFeeding?.id ?? 'null'}');
+              
+              if (lastFeeding != null) {
+                debugPrint('[HomePage] _buildLastFeedingSection - Last feeding details - catId: ${lastFeeding.catId}, amount: ${lastFeeding.amount}, fedAt: ${lastFeeding.fedAt}');
+                
+                // Get cat object using optimized O(1) lookup
+                if (catsState is CatsLoaded) {
+                  cat = catsState.getCatById(lastFeeding.catId);
+                  if (cat == null) {
+                    debugPrint('[HomePage] _buildLastFeedingSection - WARNING: Cat not found in map, trying fallback');
+                    // Fallback if cat not in map yet
+                    try {
+                      cat = catsState.cats.firstWhere(
+                        (c) => c.id == lastFeeding!.catId,
+                      );
+                    } catch (e) {
+                      // If no exact match, just use first cat as fallback
+                      if (catsState.cats.isNotEmpty) {
+                        cat = catsState.cats.first;
+                      }
+                    }
+                  }
+                  debugPrint('[HomePage] _buildLastFeedingSection - Cat for ${lastFeeding.catId}: ${cat?.name ?? 'null'}, imageUrl: ${cat?.imageUrl ?? 'null'}');
+                } else {
+                  debugPrint('[HomePage] _buildLastFeedingSection - WARNING: Cats not loaded yet (state: ${catsState.runtimeType})');
+                }
+                debugPrint('[HomePage] _buildLastFeedingSection - WILL DISPLAY lastFeeding: ${lastFeeding.id}, catName: ${cat?.name ?? 'null'}');
+              } else {
+                debugPrint('[HomePage] _buildLastFeedingSection - lastFeeding is NULL - will show empty state');
+              }
+            } else if (feedingLogsState is FeedingLogsLoading) {
+              debugPrint('[HomePage] _buildLastFeedingSection - FeedingLogsLoading...');
+            } else if (feedingLogsState is FeedingLogsError) {
+              debugPrint('[HomePage] _buildLastFeedingSection - FeedingLogsError: ${feedingLogsState.failure}');
+            } else {
+              debugPrint('[HomePage] _buildLastFeedingSection - FeedingLogsState: ${feedingLogsState.runtimeType}');
+            }
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -198,153 +409,390 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              if (lastMeal != null)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              Builder(
+                builder: (context) {
+                  debugPrint('[HomePage] Building widget - lastFeeding: ${lastFeeding?.id ?? 'null'}, cat: ${cat?.name ?? 'null'}');
+                  if (lastFeeding != null && cat != null) {
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainer,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
+                      child: Row(
+                        children: [
+                          _buildCatAvatar(context, cat),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  cat.name,
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  lastFeeding.amount != null 
+                                      ? '${lastFeeding.amount!.toStringAsFixed(0)}g de ração'
+                                      : 'Ração não especificada',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${_formatTime(lastFeeding.fedAt)} · ${_formatDate(lastFeeding.fedAt)}',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              'Negresco', // TODO: Buscar nome do gato
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
+                            Icon(
+                              Icons.pets_outlined,
+                              size: 48,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 8),
                             Text(
-                              '${lastMeal.amount?.toStringAsFixed(0) ?? '10'}g ${lastMeal.foodType ?? 'ração seca'}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              'Nenhuma alimentação registrada',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Por Maurício Castro · ${_formatTime(lastMeal.completedAt!)} · ${_formatDate(lastMeal.completedAt!)}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                fontSize: 14,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                )
-              else
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Nenhuma alimentação registrada hoje',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => context.push(AppRouter.meals),
-                  child: Text(
-                    'Ver todas',
-                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
-                  ),
-                ),
+                    );
+                  }
+                },
               ),
             ],
           ),
+        );
+          },
         );
       },
     );
   }
 
   Widget _buildFeedingsChartSection(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-              Text(
-                'Alimentações',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+    return BlocBuilder<CatsBloc, CatsState>(
+      buildWhen: (previous, current) {
+        if (previous.runtimeType != current.runtimeType) return true;
+        if (previous is CatsLoaded && current is CatsLoaded) {
+          return previous.cats.length != current.cats.length ||
+                 previous.cats.map((e) => e.id).toSet() != 
+                 current.cats.map((e) => e.id).toSet();
+        }
+        return false;
+      },
+      builder: (context, catsState) {
+        return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
+          buildWhen: (previous, current) {
+            if (previous.runtimeType != current.runtimeType) return true;
+            if (previous is FeedingLogsLoaded && current is FeedingLogsLoaded) {
+              return previous.feeding_logs.length != current.feeding_logs.length;
+            }
+            return false;
+          },
+          builder: (context, feedingLogsState) {
+            final List<Cat> cats = catsState is CatsLoaded ? catsState.cats : <Cat>[];
+            final List<FeedingLog> feedingLogs = feedingLogsState is FeedingLogsLoaded 
+                ? feedingLogsState.feeding_logs 
+                : <FeedingLog>[];
+
+            // Processar dados dos últimos 7 dias
+            final chartData = _prepareChartData(
+              context,
+              feedingLogs,
+              cats,
+            );
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Alimentações',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Últimos 7 dias',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    height: 200,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Theme.of(context).colorScheme.outline),
+                    ),
+                    child: !chartData.isEmpty
+                        ? _buildChart(context, chartData)
+                        : _buildEmptyChart(context),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildDayLabels(context),
+                ],
               ),
-          const SizedBox(height: 4),
-          Text(
-            'Últimos 7 dias',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Cores únicas para cada gato (até 5 gatos) - usar cores do tema
+  static List<Color> _getCatColors(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return [
+      colorScheme.primary,
+      colorScheme.tertiary,
+      colorScheme.secondary,
+      colorScheme.error,
+      colorScheme.inversePrimary,
+    ];
+  }
+
+  /// Prepara os dados do gráfico agrupando alimentações dos últimos 7 dias
+  /// Retorna dados para stacked chart (<= 5 gatos) ou bar chart simples (> 5 gatos)
+  ChartDataResult _prepareChartData(BuildContext context, List<FeedingLog> feedingLogs, List<Cat> cats) {
+    final now = DateTime.now();
+    final int catsCount = cats.length;
+    final bool useStackedChart = catsCount <= 5;
+    
+    if (useStackedChart && catsCount > 0) {
+      // Preparar dados para stacked bar chart
+      final List<StackedBarData> stackedData = [];
+      
+      // Processar os últimos 7 dias
+      for (int i = 6; i >= 0; i--) {
+        final date = now.subtract(Duration(days: i));
+        final dateKey = DateFormat('yyyy-MM-dd').format(date);
+        final dayLabel = DateFormat('E', 'pt_BR').format(date).substring(0, 3);
+        
+        // Para cada gato, contar alimentações neste dia
+        final List<StackedBarSegment> segments = [];
+        
+        for (int catIndex = 0; catIndex < catsCount; catIndex++) {
+          final cat = cats[catIndex];
+          final catFeedings = feedingLogs.where((log) {
+            final logDateKey = DateFormat('yyyy-MM-dd').format(log.fedAt);
+            return logDateKey == dateKey && log.catId == cat.id;
+          }).length;
+          
+          final colors = _getCatColors(context);
+          segments.add(
+            StackedBarSegment(
+              value: catFeedings.toDouble(),
+              color: colors[catIndex % colors.length],
+              label: cat.name,
             ),
+          );
+        }
+        
+        stackedData.add(
+          StackedBarData(
+            label: dayLabel,
+            segments: segments,
           ),
-          const SizedBox(height: 12),
-          Container(
-            height: 200,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Theme.of(context).colorScheme.outline),
-            ),
-              child: Center(
-                child: Text(
-                  'Gráfico de alimentações\n(Em desenvolvimento)',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                ),
-              ),
+        );
+      }
+      
+      return ChartDataResult.stacked(stackedData);
+    } else {
+      // Preparar dados para bar chart simples (mais de 5 gatos ou sem gatos)
+      final List<BarChartData> barData = [];
+      
+      for (int i = 6; i >= 0; i--) {
+        final date = now.subtract(Duration(days: i));
+        final dateKey = DateFormat('yyyy-MM-dd').format(date);
+        final dayLabel = DateFormat('E', 'pt_BR').format(date).substring(0, 3);
+        
+        // Contar total de alimentações neste dia
+        final dayFeedings = feedingLogs.where((log) {
+          final logDateKey = DateFormat('yyyy-MM-dd').format(log.fedAt);
+          return logDateKey == dateKey;
+        }).length;
+        
+        barData.add(
+          BarChartData(
+            value: dayFeedings.toDouble(),
+            label: dayLabel,
+          ),
+        );
+      }
+      
+      return ChartDataResult.bar(barData);
+    }
+  }
+
+
+  /// Constrói o gráfico usando material_charts
+  Widget _buildChart(BuildContext context, ChartDataResult chartDataResult) {
+    // Obter largura disponível (container tem padding de 16 de cada lado)
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Garantir que chartWidth seja válido e não negativo/NaN
+    final chartWidth = (screenWidth - 64).clamp(200.0, double.infinity);
+    final chartHeight = 160.0;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (chartDataResult.stackedData != null) {
+      // Gráfico empilhado (até 5 gatos)
+      return MaterialStackedBarChart(
+        data: chartDataResult.stackedData!,
+        width: chartWidth,
+        height: chartHeight,
+        showGrid: true,
+        showValues: true,
+        style: StackedBarChartStyle(
+          backgroundColor: colorScheme.surface,
+          gridColor: colorScheme.outline.withValues(alpha: 0.2),
+          labelStyle: TextStyle(
+            color: colorScheme.onSurfaceVariant,
+            fontSize: 10,
+          ),
+          valueStyle: TextStyle(
+            color: colorScheme.onSurface,
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+          // Colunas finas - barSpacing menor = barras mais largas, maior = barras mais finas
+          barSpacing: 0.8, // Espaço maior entre barras (colunas mais finas)
+          cornerRadius: 2, // Cantos arredondados pequenos
+        ),
+      );
+    } else {
+      // Gráfico simples (mais de 5 gatos)
+      return MaterialBarChart(
+        data: chartDataResult.barData!,
+        width: chartWidth,
+        height: chartHeight,
+        showGrid: true,
+        showValues: true,
+        style: BarChartStyle(
+          barColor: colorScheme.primary,
+          backgroundColor: colorScheme.surface,
+          barSpacing: 0.8, // Colunas finas - valor maior = barras mais finas
+          labelStyle: TextStyle(
+            color: colorScheme.onSurfaceVariant,
+            fontSize: 10,
+          ),
+          valueStyle: TextStyle(
+            color: colorScheme.onSurface,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Widget para quando não há dados
+  Widget _buildEmptyChart(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.bar_chart_outlined,
+            size: 48,
+            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
           ),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Text('Dom', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              Text('Seg', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              Text('Ter', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              Text('Qua', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              Text('Qui', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              Text('Sex', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              Text('Sáb', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-            ],
+          Text(
+            'Nenhuma alimentação registrada',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 14,
+            ),
           ),
         ],
       ),
     );
   }
 
+  /// Constrói os labels dos dias da semana
+  Widget _buildDayLabels(BuildContext context) {
+    final now = DateTime.now();
+    final dayLabels = <String>[];
+    
+    // Gerar labels dos últimos 7 dias
+    for (int i = 6; i >= 0; i--) {
+      final date = now.subtract(Duration(days: i));
+      final weekday = DateFormat('E', 'pt_BR').format(date).substring(0, 3);
+      dayLabels.add(weekday);
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: dayLabels.map((label) => Text(
+        label,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      )).toList(),
+    );
+  }
+
   Widget _buildRecentRecordsSection(BuildContext context) {
-    return BlocBuilder<MealsBloc, MealsState>(
+    return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
+      buildWhen: (previous, current) {
+        if (previous.runtimeType != current.runtimeType) return true;
+        if (previous is FeedingLogsLoaded && current is FeedingLogsLoaded) {
+          if (previous.feeding_logs.length != current.feeding_logs.length) return true;
+          // Compare first 3 by IDs
+          final prevFirst3 = previous.feeding_logs.take(3).map((e) => e.id).toList();
+          final currFirst3 = current.feeding_logs.take(3).map((e) => e.id).toList();
+          return prevFirst3.length != currFirst3.length || 
+                 prevFirst3.toString() != currFirst3.toString();
+        }
+        return false;
+      },
       builder: (context, state) {
-        List<Meal> recentMeals = [];
-        if (state is MealsLoaded) {
-          recentMeals = state.meals
-              .where((meal) => meal.status == MealStatus.completed)
-              .take(3)
-              .toList();
+        List<FeedingLog> recentFeedings = [];
+        if (state is FeedingLogsLoaded) {
+          recentFeedings = state.feeding_logs.take(3).toList();
         }
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -355,8 +803,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              if (recentMeals.isNotEmpty)
-                ...recentMeals.map((meal) => _buildRecentRecordItem(meal))
+              if (recentFeedings.isNotEmpty)
+                ...recentFeedings.map((feeding) => _buildRecentRecordItem(feeding, key: ValueKey(feeding.id)))
               else
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -378,55 +826,93 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildRecentRecordItem(Meal meal) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+  Widget _buildRecentRecordItem(FeedingLog feeding, {Key? key}) {
+    return BlocBuilder<CatsBloc, CatsState>(
+      buildWhen: (previous, current) {
+        if (previous.runtimeType != current.runtimeType) return true;
+        if (previous is CatsLoaded && current is CatsLoaded) {
+          // Only rebuild if the specific cat for this feeding changed
+          final prevCat = previous.getCatById(feeding.catId);
+          final currCat = current.getCatById(feeding.catId);
+          if (prevCat == null || currCat == null) return true;
+          return prevCat.name != currCat.name;
+        }
+        return false;
+      },
+        builder: (context, catsState) {
+        Cat? cat;
+        if (catsState is CatsLoaded) {
+          // Use optimized O(1) lookup instead of firstWhere O(n)
+          cat = catsState.getCatById(feeding.catId);
+        }
+        
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(12),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Negresco', // TODO: Buscar nome do gato
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+          child: Row(
+            children: [
+              cat != null 
+                  ? _buildSmallCatAvatar(context, cat)
+                  : CircleAvatar(
+                      radius: 20,
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+                    ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      cat?.name ?? 'Nome não encontrado',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      feeding.amount != null 
+                          ? '${feeding.amount!.toStringAsFixed(0)}g de ração'
+                          : 'Ração não especificada',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  '${meal.amount?.toStringAsFixed(0) ?? '10'}g ${meal.foodType ?? 'ração seca'}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              ),
+              Text(
+                _formatTime(feeding.fedAt),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Text(
-            _formatTime(meal.completedAt ?? meal.scheduledAt),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildMyCatsSection(BuildContext context) {
     return BlocBuilder<CatsBloc, CatsState>(
+      buildWhen: (previous, current) {
+        if (previous.runtimeType != current.runtimeType) return true;
+        if (previous is CatsLoaded && current is CatsLoaded) {
+          // Only rebuild if the first 3 cats changed (compare by IDs)
+          final prevIds = previous.cats.take(3).map((e) => e.id).toList();
+          final currIds = current.cats.take(3).map((e) => e.id).toList();
+          if (prevIds.length != currIds.length) return true;
+          for (int i = 0; i < prevIds.length; i++) {
+            if (prevIds[i] != currIds[i]) return true;
+          }
+        }
+        return false;
+      },
       builder: (context, state) {
         List<Cat> cats = [];
         if (state is CatsLoaded) {
@@ -436,6 +922,7 @@ class _HomePageState extends State<HomePage> {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -447,7 +934,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 12),
               if (cats.isNotEmpty)
-                ...cats.map((cat) => _buildMyCatsItem(cat))
+                ...cats.map((cat) => _buildMyCatsItem(cat, key: ValueKey(cat.id)))
               else
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -480,21 +967,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildMyCatsItem(Cat cat) {
+  Widget _buildMyCatsItem(Cat cat, {Key? key}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
-          ),
+          _buildSmallCatAvatar(context, cat),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -521,66 +1004,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildBottomNavigationBar(BuildContext context) {
-    return NavigationBar(
-      selectedIndex: 0, // Home está ativo
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'Início',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.pets_outlined),
-          selectedIcon: Icon(Icons.pets),
-          label: 'Gatos',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.home_work_outlined),
-          selectedIcon: Icon(Icons.home_work),
-          label: 'Domicílios',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.calendar_today_outlined),
-          selectedIcon: Icon(Icons.calendar_today),
-          label: 'Agenda',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.monitor_weight_outlined),
-          selectedIcon: Icon(Icons.monitor_weight),
-          label: 'Peso',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.bar_chart_outlined),
-          selectedIcon: Icon(Icons.bar_chart),
-          label: 'Estatísticas',
-        ),
-      ],
-      onDestinationSelected: (index) {
-        switch (index) {
-          case 0:
-            // Já estamos na home
-            break;
-          case 1:
-            context.push(AppRouter.cats);
-            break;
-          case 2:
-            context.push(AppRouter.homes);
-            break;
-          case 3:
-            context.push(AppRouter.meals);
-            break;
-          case 4:
-          case 5:
-            // TODO: Implementar páginas de peso e estatísticas
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Em breve!')),
-            );
-            break;
-        }
-      },
-    );
-  }
 
   String _formatTime(DateTime dateTime) {
     return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
@@ -609,13 +1032,125 @@ class _HomePageState extends State<HomePage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0),
       builder: (context) => SizedBox(
         height: MediaQuery.of(context).size.height * 0.9,
         child: FeedingBottomSheet(
           availableCats: catsState.cats,
           householdId: householdId,
         ),
+      ),
+    );
+  }
+
+  Widget _buildCatAvatar(BuildContext context, Cat cat) {
+    final theme = Theme.of(context);
+    
+    // Validar se a URL existe e é válida (começa com http)
+    final imageUrl = cat.imageUrl;
+    final hasValidImageUrl = imageUrl != null && 
+        imageUrl.isNotEmpty && 
+        imageUrl.trim().isNotEmpty &&
+        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
+    
+    if (hasValidImageUrl) {
+      final trimmedUrl = imageUrl.trim();
+      
+      return SizedBox(
+        width: 60,
+        height: 60,
+        child: ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: trimmedUrl,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
+              width: 60,
+              height: 60,
+              color: theme.colorScheme.surfaceContainerHighest,
+              child: Center(
+                child: Material3LoadingIndicator(size: 24.0),
+              ),
+            ),
+            errorWidget: (context, url, error) {
+              return Container(
+                width: 60,
+                height: 60,
+                color: theme.colorScheme.primary.withOpacity(0.1),
+                child: Icon(
+                  Icons.pets,
+                  size: 30,
+                  color: theme.colorScheme.primary,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+    
+    return CircleAvatar(
+      radius: 30,
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      child: Icon(
+        Icons.pets,
+        size: 30,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+
+  Widget _buildSmallCatAvatar(BuildContext context, Cat cat) {
+    final theme = Theme.of(context);
+    
+    // Validar se a URL existe e é válida (começa com http)
+    final imageUrl = cat.imageUrl;
+    final hasValidImageUrl = imageUrl != null && 
+        imageUrl.isNotEmpty && 
+        imageUrl.trim().isNotEmpty &&
+        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
+    
+    if (hasValidImageUrl) {
+      final trimmedUrl = imageUrl.trim();
+      
+      return SizedBox(
+        width: 40,
+        height: 40,
+        child: ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: trimmedUrl,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
+              width: 40,
+              height: 40,
+              color: theme.colorScheme.surfaceContainerHighest,
+              child: Center(
+                child: Material3LoadingIndicator(size: 20.0),
+              ),
+            ),
+            errorWidget: (context, url, error) {
+              return Container(
+                width: 40,
+                height: 40,
+                color: theme.colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  Icons.pets,
+                  size: 20,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+    
+    return CircleAvatar(
+      radius: 20,
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      child: Icon(
+        Icons.pets,
+        size: 20,
+        color: theme.colorScheme.onSurfaceVariant,
       ),
     );
   }

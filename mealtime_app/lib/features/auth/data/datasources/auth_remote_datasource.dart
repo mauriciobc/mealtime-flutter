@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:mealtime_app/core/errors/exceptions.dart';
 import 'package:mealtime_app/features/auth/data/models/user_model.dart';
 import 'package:mealtime_app/services/api/auth_api_service.dart';
@@ -24,6 +25,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         LoginRequest(email: email, password: password),
       );
 
+      debugPrint('[AuthRemoteDataSource] apiResponse: $apiResponse');
+      debugPrint('[AuthRemoteDataSource] apiResponse.data: ${apiResponse.data}');
+      debugPrint('[AuthRemoteDataSource] apiResponse.data type: ${apiResponse.data?.runtimeType}');
+
       // Verificar se a resposta contém dados
       if (apiResponse.data == null) {
         throw ServerException('Resposta da API está vazia');
@@ -45,10 +50,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       return authResponse;
     } on FormatException catch (e) {
+      debugPrint('[AuthRemoteDataSource] FormatException: ${e.message}');
+      debugPrint('[AuthRemoteDataSource] FormatException source: ${e.source}');
+      debugPrint('[AuthRemoteDataSource] FormatException offset: ${e.offset}');
       throw ServerException(
         'Erro ao processar resposta do servidor: ${e.message}',
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('[AuthRemoteDataSource] Login error: $e');
+      debugPrint('[AuthRemoteDataSource] Stack trace: $stackTrace');
       throw ServerException('Erro ao fazer login: ${e.toString()}');
     }
   }

@@ -3,6 +3,16 @@
 part of 'feeding_logs_api_service.dart';
 
 // **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+EmptyResponse _$EmptyResponseFromJson(Map<String, dynamic> json) =>
+    EmptyResponse();
+
+Map<String, dynamic> _$EmptyResponseToJson(EmptyResponse instance) =>
+    <String, dynamic>{};
+
+// **************************************************************************
 // RetrofitGenerator
 // **************************************************************************
 
@@ -23,17 +33,13 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
 
   @override
   Future<ApiResponse<List<FeedingLogModel>>> getFeedingLogs({
-    String? catId,
     String? householdId,
-    String? startDate,
-    String? endDate,
+    String? catId,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      r'catId': catId,
       r'householdId': householdId,
-      r'startDate': startDate,
-      r'endDate': endDate,
+      r'catId': catId,
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
@@ -45,7 +51,7 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
     )
         .compose(
           _dio.options,
-          '/feeding-logs',
+          '/v2/feedings',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -86,7 +92,7 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
     )
         .compose(
           _dio.options,
-          '/feeding-logs/${id}',
+          '/v2/feedings/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -124,7 +130,7 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
     )
         .compose(
           _dio.options,
-          '/feeding-logs',
+          '/v2/feedings',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -148,9 +154,52 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
   }
 
   @override
+  Future<ApiResponse<List<FeedingLogModel>>> createFeedingLogsBatch(
+      CreateFeedingLogsBatchRequest request) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
+    final _options = _setStreamType<ApiResponse<List<FeedingLogModel>>>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/v2/feedings/batch',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ApiResponse<List<FeedingLogModel>> _value;
+    try {
+      _value = ApiResponse<List<FeedingLogModel>>.fromJson(
+        _result.data!,
+        (json) => json is List<dynamic>
+            ? json
+                .map<FeedingLogModel>(
+                    (i) => FeedingLogModel.fromJson(i as Map<String, dynamic>))
+                .toList()
+            : List.empty(),
+      );
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<ApiResponse<FeedingLogModel>> updateFeedingLog(
     String id,
-    UpdateFeedingLogRequest request,
+    CreateFeedingLogRequest request,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -164,7 +213,7 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
     )
         .compose(
           _dio.options,
-          '/feeding-logs/${id}',
+          '/v2/feedings/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -200,7 +249,7 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
     )
         .compose(
           _dio.options,
-          '/feeding-logs/${id}',
+          '/v2/feedings/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -224,19 +273,21 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
   }
 
   @override
-  Future<ApiResponse<FeedingLogModel?>> getLastFeeding(String catId) async {
+  Future<ApiResponse<FeedingStatsModel>> getFeedingStats(
+      {String? householdId}) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'householdId': householdId};
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<ApiResponse<FeedingLogModel>>(Options(
+    final _options = _setStreamType<ApiResponse<FeedingStatsModel>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/feedings/last/${catId}',
+          '/v2/feedings/stats',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -246,13 +297,11 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late ApiResponse<FeedingLogModel?> _value;
+    late ApiResponse<FeedingStatsModel> _value;
     try {
-      _value = ApiResponse<FeedingLogModel?>.fromJson(
+      _value = ApiResponse<FeedingStatsModel>.fromJson(
         _result.data!,
-        (json) => json == null
-            ? null
-            : FeedingLogModel.fromJson(json as Map<String, dynamic>),
+        (json) => FeedingStatsModel.fromJson(json as Map<String, dynamic>),
       );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);

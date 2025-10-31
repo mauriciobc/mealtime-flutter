@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 /// Widget de card de gato para exibir no grid de gatos do household
 class HouseholdCatCard extends StatelessWidget {
@@ -106,21 +107,36 @@ class HouseholdCatCard extends StatelessWidget {
   Widget _buildCatImage(BuildContext context) {
     final theme = Theme.of(context);
     
+    // Validar se a URL existe e é válida (começa com http)
+    final imageUrl = cat.imageUrl;
+    final trimmedUrl = imageUrl?.trim();
+    
+    if (trimmedUrl != null && 
+        trimmedUrl.isNotEmpty &&
+        (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://'))) {
+      return AspectRatio(
+        aspectRatio: 1,
+        child: CachedNetworkImage(
+          imageUrl: trimmedUrl,
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Container(
+            color: theme.colorScheme.surfaceContainerHighest,
+            child: const Center(
+              child: Material3LoadingIndicator(size: 24.0),
+            ),
+          ),
+          errorWidget: (context, url, error) {
+            // Log para debug (pode remover depois)
+            debugPrint('Erro ao carregar imagem do gato: $url - Erro: $error');
+            return _buildPlaceholder(context);
+          },
+        ),
+      );
+    }
+    
     return AspectRatio(
       aspectRatio: 1,
-      child: cat.imageUrl != null && cat.imageUrl!.isNotEmpty
-          ? CachedNetworkImage(
-              imageUrl: cat.imageUrl!,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                color: theme.colorScheme.surfaceContainerHighest,
-                child: const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-              errorWidget: (context, url, error) => _buildPlaceholder(context),
-            )
-          : _buildPlaceholder(context),
+      child: _buildPlaceholder(context),
     );
   }
 

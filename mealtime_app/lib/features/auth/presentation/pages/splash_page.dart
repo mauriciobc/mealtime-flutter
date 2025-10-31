@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -38,40 +40,46 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return BlocListener<SimpleAuthBloc, SimpleAuthState>(
       listener: (context, state) {
-        print('[SplashPage] State changed: ${state.runtimeType}');
         if (state is SimpleAuthSuccess) {
           // Usuário autenticado, ir para home
-          print('[SplashPage] Going to /home');
           context.go('/home');
         } else if (state is SimpleAuthInitial || state is SimpleAuthFailure) {
           // Usuário não autenticado ou erro na autenticação, ir para login
-          print('[SplashPage] Going to /login');
           context.go('/login');
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.orange,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.pets, size: 120, color: Colors.white),
+              Icon(
+                Icons.pets,
+                size: 120,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'MealTime',
                 style: TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Gerencie a alimentação dos seus gatos',
-                style: TextStyle(fontSize: 18, color: Colors.white70),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                ),
               ),
               const SizedBox(height: 48),
-              const CircularProgressIndicator(color: Colors.white),
+              Material3LoadingIndicator(
+                variant: LoadingIndicatorM3EVariant.contained,
+              ),
             ],
           ),
         ),

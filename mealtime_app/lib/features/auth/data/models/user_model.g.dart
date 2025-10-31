@@ -25,17 +25,25 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       currentHomeId: json['current_home_id'] as String?,
     );
 
-Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
-      'id': instance.id,
-      'auth_id': instance.authId,
-      'full_name': instance.fullName,
-      'email': instance.email,
-      'household_id': instance.householdId,
-      'household': instance.household,
-      if (instance.createdAt?.toIso8601String() case final value?)
-        'created_at': value,
-      if (instance.updatedAt?.toIso8601String() case final value?)
-        'updated_at': value,
-      'is_email_verified': instance.isEmailVerified,
-      'current_home_id': instance.currentHomeId,
-    };
+Map<String, dynamic> _$UserModelToJson(UserModel instance) {
+  final val = <String, dynamic>{
+    'id': instance.id,
+    'auth_id': instance.authId,
+    'full_name': instance.fullName,
+    'email': instance.email,
+    'household_id': instance.householdId,
+    'household': instance.household,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('created_at', instance.createdAt?.toIso8601String());
+  writeNotNull('updated_at', instance.updatedAt?.toIso8601String());
+  val['is_email_verified'] = instance.isEmailVerified;
+  val['current_home_id'] = instance.currentHomeId;
+  return val;
+}

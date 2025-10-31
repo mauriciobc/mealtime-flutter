@@ -556,3 +556,4 @@ Adicionar validação robusta:
 **Documentação gerada via Cursor AI**  
 *Última atualização: 12/10/2025*
 
+

@@ -11,6 +11,15 @@ class GetCatById implements UseCase<Cat, String> {
 
   @override
   Future<Either<Failure, Cat>> call(String catId) async {
-    return await repository.getCatById(catId);
+    final result = await repository.getCatById(catId);
+    return result.fold(
+      (failure) => Left(failure),
+      (cat) {
+        if (cat == null) {
+          return Left(ServerFailure('Gato não encontrado'));
+        }
+        return Right(cat);
+      },
+    );
   }
 }

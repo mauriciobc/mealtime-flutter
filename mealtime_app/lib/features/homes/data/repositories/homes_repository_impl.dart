@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:mealtime_app/features/homes/data/datasources/homes_remote_datasource.dart';
 import 'package:mealtime_app/features/homes/data/datasources/homes_local_datasource.dart';
 import 'package:mealtime_app/features/homes/domain/entities/home.dart';
@@ -15,13 +16,33 @@ class HomesRepositoryImpl implements HomesRepository {
   @override
   Future<List<Home>> getHomes() async {
     try {
+      debugPrint('[HomesRepository] Buscando households do servidor...');
       final homeModels = await remoteDataSource.getHomes();
+      debugPrint('[HomesRepository] Recebidos ${homeModels.length} households do servidor');
+      
       final homes = homeModels.map((model) => model.toEntity()).toList();
       await localDataSource.cacheHomes(homes);
+      debugPrint('[HomesRepository] Households armazenados em cache local');
+      
       return homes;
-    } catch (e) {
-      // Fallback para dados locais em caso de erro
-      return await localDataSource.getCachedHomes();
+    } catch (e, stackTrace) {
+      debugPrint('[HomesRepository] Erro ao buscar households do servidor: $e');
+      debugPrint('[HomesRepository] Stack trace: $stackTrace');
+      
+      // Tentar buscar dados do cache local
+      try {
+        final cachedHomes = await localDataSource.getCachedHomes();
+        if (cachedHomes.isNotEmpty) {
+          debugPrint('[HomesRepository] Retornando ${cachedHomes.length} households do cache local');
+          return cachedHomes;
+        }
+      } catch (cacheError) {
+        debugPrint('[HomesRepository] Erro ao buscar cache local: $cacheError');
+      }
+      
+      // Se não há dados no cache, relançar a exceção para que o erro seja mostrado ao usuário
+      debugPrint('[HomesRepository] Nenhum dado encontrado, relançando exceção...');
+      rethrow;
     }
   }
 

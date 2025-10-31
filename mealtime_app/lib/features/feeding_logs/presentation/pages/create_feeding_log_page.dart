@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_event.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
-import 'package:mealtime_app/features/feeding_logs/presentation/widgets/meal_form.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/widgets/feeding_log_form.dart';
 import 'package:uuid/uuid.dart';
 
 class CreateFeedingLogPage extends StatefulWidget {
   final String? catId;
   final String? homeId;
+  final String? householdId;
 
-  const CreateFeedingLogPage({super.key, this.catId, this.homeId});
+  const CreateFeedingLogPage({
+    super.key,
+    this.catId,
+    this.homeId,
+    this.householdId,
+  });
 
   @override
   State<CreateFeedingLogPage> createState() => _CreateFeedingLogPageState();
@@ -131,9 +137,9 @@ class _CreateFeedingLogPageState extends State<CreateFeedingLogPage> {
 
     if (_selectedCatId == null || _selectedHomeId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Selecione um gato e uma residência'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('Selecione um gato e uma residência'),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       return;
@@ -150,19 +156,17 @@ class _CreateFeedingLogPageState extends State<CreateFeedingLogPage> {
     final meal = FeedingLog(
       id: _uuid.v4(),
       catId: _selectedCatId!,
-      homeId: _selectedHomeId!,
-      type: _selectedType,
-      scheduledAt: scheduledAt,
-      status: FeedingLogStatus.scheduled,
+      householdId: _selectedHomeId!,
+      mealType: _selectedType,
+      fedAt: scheduledAt,
+      fedBy: 'current-user-id', // TODO: Pegar do auth
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
       amount: _amountController.text.trim().isEmpty
           ? null
           : double.tryParse(_amountController.text.trim()),
-      foodType: _foodTypeController.text.trim().isEmpty
-          ? null
-          : _foodTypeController.text.trim(),
+      unit: 'g',
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );

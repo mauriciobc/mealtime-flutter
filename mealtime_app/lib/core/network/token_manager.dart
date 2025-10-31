@@ -12,17 +12,22 @@ class TokenManager {
   static const String _refreshTokenKey = 'refresh_token';
   static const String _tokenExpiryKey = 'token_expiry';
 
-  /// Obtém o token de acesso atual (prioriza Supabase, depois SharedPreferences)
+  /// Obtém o token de acesso atual (prioriza SharedPreferences/backend, depois Supabase)
   static Future<String?> getAccessToken() async {
-    // Primeiro tenta obter do Supabase
+    // Prioriza SharedPreferences (backend API)
+    final prefs = await SharedPreferences.getInstance();
+    final backendToken = prefs.getString(_accessTokenKey);
+    if (backendToken != null) {
+      return backendToken;
+    }
+    
+    // Fallback: Supabase (para compatibilidade)
     final supabaseToken = SimpleAuthManager.currentAccessToken;
     if (supabaseToken != null) {
       return supabaseToken;
     }
     
-    // Fallback: SharedPreferences (para compatibilidade com API externa)
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_accessTokenKey);
+    return null;
   }
 
   /// Obtém o token de refresh atual
@@ -125,17 +130,18 @@ class TokenManager {
     return await refreshAccessToken();
   }
 
-  /// Extrai o userId (prioriza Supabase, depois decodifica JWT)
+  /// Extrai o userId (decodifica JWT do token, com fallback para Supabase)
   static Future<String?> getUserId() async {
-    // Primeiro tenta obter do Supabase
-    final supabaseUser = SimpleAuthManager.currentUser;
-    if (supabaseUser != null) {
-      return supabaseUser.id;
-    }
-    
-    // Fallback: Decodificar JWT
+    // Decodificar JWT do token (backend ou Supabase)
     final token = await getAccessToken();
-    if (token == null) return null;
+    if (token == null) {
+      // Fallback: Supabase
+      final supabaseUser = SimpleAuthManager.currentUser;
+      if (supabaseUser != null) {
+        return supabaseUser.id;
+      }
+      return null;
+    }
 
     try {
       // Decodificar JWT
@@ -164,7 +170,40 @@ class TokenManager {
       return payloadMap['sub'] as String?;
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao extrair userId do token: $e');
+        debugPrint('Erro ao extrair userId do token: $e');
+      }
+      return null;
+    }
+  }
+
+  /// Obtém o household_id do perfil do usuário salvo localmente
+  static Future<String?> getHouseholdId() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userString = prefs.getString('user');
+      
+      if (userString == null) {
+        if (kDebugMode) {
+          debugPrint('[TokenManager] Nenhum usuário salvo localmente');
+        }
+        return null;
+      }
+
+      final userJson = json.decode(userString) as Map<String, dynamic>;
+      
+      // Extrair household_id do user salvos
+      final householdId = userJson['household_id'] as String?;
+      
+      if (kDebugMode && householdId != null) {
+        debugPrint('[TokenManager] Household ID encontrado: $householdId');
+      } else if (kDebugMode) {
+        debugPrint('[TokenManager] Nenhum household_id encontrado no perfil do usuário');
+      }
+      
+      return householdId;
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Erro ao obter household_id: $e');
       }
       return null;
     }

@@ -3,6 +3,40 @@ import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.d
 
 part 'feeding_log_model.g.dart';
 
+/// Conversor customizado para lidar com conversão de String para double
+/// Aceita String, int, double ou null e converte adequadamente
+class DoubleConverter implements JsonConverter<double?, dynamic> {
+  const DoubleConverter();
+
+  @override
+  double? fromJson(dynamic json) {
+    if (json == null) return null;
+    if (json is double) return json;
+    if (json is int) return json.toDouble();
+    if (json is String) {
+      return double.tryParse(json);
+    }
+    return null;
+  }
+
+  @override
+  dynamic toJson(double? object) => object;
+}
+
+/// Função helper para converter dynamic para double?
+double? _doubleFromJson(dynamic json) {
+  if (json == null) return null;
+  if (json is double) return json;
+  if (json is int) return json.toDouble();
+  if (json is String) {
+    return double.tryParse(json);
+  }
+  return null;
+}
+
+/// Função helper para converter double? para dynamic
+dynamic _doubleToJson(double? object) => object;
+
 /// Model de FeedingLog mapeado da tabela feeding_logs do Supabase
 /// Usa snake_case para compatibilidade com o banco de dados
 @JsonSerializable(fieldRename: FieldRename.snake)
@@ -11,6 +45,7 @@ class FeedingLogModel {
   final String catId;
   final String householdId;
   final String mealType;  // 'breakfast', 'lunch', 'dinner', 'snack'
+  @JsonKey(fromJson: _doubleFromJson, toJson: _doubleToJson)
   final double? amount;
   final String? unit;
   final String? notes;

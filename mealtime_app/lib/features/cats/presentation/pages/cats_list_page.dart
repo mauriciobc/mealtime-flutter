@@ -75,7 +75,7 @@ class _CatsListPageState extends State<CatsListPage> {
               children: [
                 _buildCatsList(state.cats),
                 Container(
-                  color: Colors.black.withOpacity(0.3),
+                  color: const Color.fromRGBO(0, 0, 0, 0.3),
                   child: Center(
                     child: Card(
                       child: Padding(
@@ -83,7 +83,7 @@ class _CatsListPageState extends State<CatsListPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const CircularProgressIndicator(),
+                            const Material3LoadingIndicator(size: 32.0),
                             const SizedBox(height: 16),
                             Text(state.operation),
                           ],

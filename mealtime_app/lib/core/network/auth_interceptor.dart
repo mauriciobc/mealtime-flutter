@@ -15,10 +15,16 @@ class AuthInterceptor extends Interceptor {
         options.headers['Authorization'] = 'Bearer $accessToken';
       }
 
-      // ✅ NOVO: Adicionar header x-user-id para requisições autenticadas
+      // ✅ Adicionar header X-User-ID para requisições autenticadas
       final userId = await TokenManager.getUserId();
       if (userId != null) {
-        options.headers['x-user-id'] = userId;
+        options.headers['X-User-ID'] = userId;
+      }
+
+      // ✅ Adicionar header X-Household-ID do perfil do usuário (quando disponível)
+      final householdId = await TokenManager.getHouseholdId();
+      if (householdId != null) {
+        options.headers['X-Household-ID'] = householdId;
       }
     }
 
@@ -32,13 +38,33 @@ class AuthInterceptor extends Interceptor {
       final newToken = await TokenManager.refreshAccessToken();
 
       if (newToken != null) {
-        // Reenviar requisição original com novo token
+        // Reenviar requisição original com novo token usando o mesmo Dio
         final requestOptions = err.requestOptions;
         requestOptions.headers['Authorization'] = 'Bearer $newToken';
 
         try {
-          final dio = Dio();
-          final newResponse = await dio.fetch(requestOptions);
+          // Usar o mesmo Dio da requisição original para manter interceptors e configurações
+          // Criar novo Dio com as mesmas configurações base
+          final dio = Dio(BaseOptions(
+            baseUrl: err.requestOptions.baseUrl,
+            connectTimeout: err.requestOptions.connectTimeout,
+            receiveTimeout: err.requestOptions.receiveTimeout,
+            headers: requestOptions.headers,
+          ));
+          
+          // Reenviar requisição com novo token
+          final opts = Options(
+            method: requestOptions.method,
+            headers: requestOptions.headers,
+          );
+          
+          final newResponse = await dio.request(
+            requestOptions.path,
+            data: requestOptions.data,
+            queryParameters: requestOptions.queryParameters,
+            options: opts,
+          );
+          
           return handler.resolve(newResponse);
         } catch (e) {
           // Se ainda falhar, limpar tokens

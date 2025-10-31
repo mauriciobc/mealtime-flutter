@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 class AvatarWidget extends StatefulWidget {
   final String? imageUrl;
@@ -55,16 +56,7 @@ class _AvatarWidgetState extends State<AvatarWidget> {
                 ),
                 child: IconButton(
                   icon: _isLoading
-                      ? SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          ),
-                        )
+                      ? Material3LoadingIndicator(size: 16.0)
                       : Icon(
                           Icons.camera_alt,
                           size: 16,

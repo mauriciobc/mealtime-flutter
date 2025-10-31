@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 class CatCard extends StatelessWidget {
   final Cat cat;
@@ -18,7 +20,6 @@ class CatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -38,19 +39,58 @@ class CatCard extends StatelessWidget {
   }
 
   Widget _buildCatAvatar(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    // Validar se a URL existe e é válida (começa com http)
+    final imageUrl = cat.imageUrl;
+    final hasValidImageUrl = imageUrl != null && 
+        imageUrl.isNotEmpty && 
+        imageUrl.trim().isNotEmpty &&
+        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
+    
+    if (hasValidImageUrl) {
+      final trimmedUrl = imageUrl.trim();
+      
+      return SizedBox(
+        width: 60,
+        height: 60,
+        child: ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: trimmedUrl,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
+              width: 60,
+              height: 60,
+              color: theme.colorScheme.surfaceContainerHighest,
+              child: Center(
+                child: Material3LoadingIndicator(size: 24.0),
+              ),
+            ),
+            errorWidget: (context, url, error) {
+              return Container(
+                width: 60,
+                height: 60,
+                color: theme.colorScheme.primary.withOpacity(0.1),
+                child: Icon(
+                  Icons.pets,
+                  size: 30,
+                  color: theme.colorScheme.primary,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+    
     return CircleAvatar(
       radius: 30,
-      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-      backgroundImage: cat.imageUrl != null
-          ? NetworkImage(cat.imageUrl!)
-          : null,
-      child: cat.imageUrl == null
-          ? Icon(
-              Icons.pets,
-              size: 30,
-              color: Theme.of(context).colorScheme.primary,
-            )
-          : null,
+      backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+      child: Icon(
+        Icons.pets,
+        size: 30,
+        color: theme.colorScheme.primary,
+      ),
     );
   }
 
@@ -93,7 +133,9 @@ class CatCard extends StatelessWidget {
               Icon(
                 cat.gender == 'M' ? Icons.male : Icons.female,
                 size: 16,
-                color: cat.gender == 'M' ? Colors.blue : Colors.pink,
+                color: cat.gender == 'M' 
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.tertiary,
               ),
               const SizedBox(width: 4),
               Text(
@@ -145,19 +187,23 @@ class CatCard extends StatelessWidget {
         }
       },
       itemBuilder: (context) => [
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'edit',
           child: Row(
-            children: [Icon(Icons.edit), SizedBox(width: 8), Text('Editar')],
+            children: [
+              Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
+              const SizedBox(width: 8),
+              const Text('Editar'),
+            ],
           ),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'delete',
           child: Row(
             children: [
-              Icon(Icons.delete, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Excluir', style: TextStyle(color: Colors.red)),
+              Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+              const SizedBox(width: 8),
+              Text('Excluir', style: TextStyle(color: Theme.of(context).colorScheme.error)),
             ],
           ),
         ),

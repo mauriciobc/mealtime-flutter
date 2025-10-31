@@ -567,3 +567,4 @@ Alternativa de controle de migrações:
 **Documentação gerada via Cursor AI + Supabase MCP**  
 *Última atualização: 12/10/2025*
 
+

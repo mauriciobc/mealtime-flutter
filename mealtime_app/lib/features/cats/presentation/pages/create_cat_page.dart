@@ -6,6 +6,7 @@ import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/features/cats/presentation/widgets/cat_form.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 class CreateCatPage extends StatefulWidget {
   const CreateCatPage({super.key});
@@ -26,11 +27,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
           if (_isLoading)
             const Padding(
               padding: EdgeInsets.all(16.0),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
+              child: Material3LoadingIndicator(size: 20.0),
             ),
         ],
       ),

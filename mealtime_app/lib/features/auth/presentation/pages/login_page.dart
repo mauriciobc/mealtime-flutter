@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/main.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -37,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message), 
-              backgroundColor: Colors.red,
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
@@ -120,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: ElevatedButton(
                     onPressed: state is SimpleAuthLoading ? null : _handleAuth,
                     child: state is SimpleAuthLoading
-                        ? const CircularProgressIndicator()
+                        ? const Material3LoadingIndicator(size: 20.0)
                         : Text(_isSignUp ? 'Criar Conta' : 'Entrar'),
                   ),
                 );
@@ -165,9 +166,9 @@ class _LoginPageState extends State<LoginPage> {
 
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, digite seu email'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('Por favor, digite seu email'),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       return;
@@ -175,9 +176,9 @@ class _LoginPageState extends State<LoginPage> {
 
     if (password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, digite sua senha'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('Por favor, digite sua senha'),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       return;
@@ -188,9 +189,9 @@ class _LoginPageState extends State<LoginPage> {
 
       if (name.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Por favor, digite seu nome completo'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text('Por favor, digite seu nome completo'),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
         return;
@@ -198,9 +199,9 @@ class _LoginPageState extends State<LoginPage> {
 
       // TODO: Implementar registro via AuthBloc
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Funcionalidade de cadastro em desenvolvimento'),
-          backgroundColor: Colors.orange,
+        SnackBar(
+          content: const Text('Funcionalidade de cadastro em desenvolvimento'),
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         ),
       );
       return;

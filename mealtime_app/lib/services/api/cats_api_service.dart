@@ -3,182 +3,99 @@ import 'package:retrofit/retrofit.dart';
 import 'package:mealtime_app/core/constants/api_constants.dart';
 import 'package:mealtime_app/core/models/api_response.dart';
 import 'package:mealtime_app/features/cats/data/models/cat_model.dart';
-import 'package:mealtime_app/features/cats/data/models/weight_entry_model.dart';
 
 part 'cats_api_service.g.dart';
 
-@RestApi()
+@RestApi(baseUrl: ApiConstants.baseUrlV2)
 abstract class CatsApiService {
   factory CatsApiService(Dio dio, {String baseUrl}) = _CatsApiService;
 
-  @GET(ApiConstants.cats)
-  Future<ApiResponse<List<CatModel>>> getCats();
-
-  @GET('/cats/{id}')
-  Future<ApiResponse<CatModel>> getCatById(@Path('id') String id);
+  // V2 - Cats endpoints
+  @GET('/cats')
+  Future<ApiResponse<List<CatModel>>> getCats({
+    @Query('householdId') String? householdId,
+  });
 
   @POST('/cats')
-  Future<ApiResponse<CatModel>> createCat(@Body() CreateCatRequest request);
+  Future<ApiResponse<CatModel>> createCat(@Body() CreateCatRequestV2 request);
 
+  // Update and delete methods (V2 compatible)
   @PUT('/cats/{id}')
   Future<ApiResponse<CatModel>> updateCat(
     @Path('id') String id,
-    @Body() UpdateCatRequest request,
+    @Body() UpdateCatRequestV2 request,
   );
 
   @DELETE('/cats/{id}')
   Future<ApiResponse<EmptyResponse>> deleteCat(@Path('id') String id);
 
-  @GET('/cats/{catId}/weight')
-  Future<ApiResponse<List<WeightEntryModel>>> getWeightHistory(
-    @Path('catId') String catId,
-  );
-
-  @POST('/cats/{catId}/weight')
-  Future<ApiResponse<WeightEntryModel>> addWeightEntry(
-    @Path('catId') String catId,
-    @Body() AddWeightEntryRequest request,
-  );
-
-  @PUT('/cats/{catId}/weight/{entryId}')
-  Future<ApiResponse<WeightEntryModel>> updateWeightEntry(
-    @Path('catId') String catId,
-    @Path('entryId') String entryId,
-    @Body() UpdateWeightEntryRequest request,
-  );
-
-  @DELETE('/cats/{catId}/weight/{entryId}')
-  Future<ApiResponse<EmptyResponse>> deleteWeightEntry(
-    @Path('catId') String catId,
-    @Path('entryId') String entryId,
-  );
-
-  @GET('/homes/{homeId}/cats')
-  Future<ApiResponse<List<CatModel>>> getCatsByHome(
-    @Path('homeId') String homeId,
-  );
-
-  @PUT('/cats/{catId}/weight')
+  @PATCH('/cats/{id}/weight')
   Future<ApiResponse<CatModel>> updateCatWeight(
-    @Path('catId') String catId,
-    @Body() UpdateCatWeightRequest request,
+    @Path('id') String id,
+    @Body() UpdateWeightRequest request,
   );
 }
 
-class CreateCatRequest {
+// V2 - Request Model conforme documentação API V2
+class CreateCatRequestV2 {
   final String name;
-  final String? breed;
-  final DateTime birthDate;
-  final String? gender;
-  final String? color;
-  final String? description;
-  final String? imageUrl;
-  final double? currentWeight;
-  final double? targetWeight;
-  final String homeId;
+  final String householdId;  // mudou de homeId
+  final String? photoUrl;    // mudou de imageUrl
+  final DateTime birthdate;  // mudou de birthDate
+  final double? weight;
+  final int? feedingInterval; // novo campo
 
-  CreateCatRequest({
+  CreateCatRequestV2({
     required this.name,
-    this.breed,
-    required this.birthDate,
-    this.gender,
-    this.color,
-    this.description,
-    this.imageUrl,
-    this.currentWeight,
-    this.targetWeight,
-    required this.homeId,
+    required this.householdId,
+    this.photoUrl,
+    required this.birthdate,
+    this.weight,
+    this.feedingInterval,
   });
 
   Map<String, dynamic> toJson() => {
     'name': name,
-    if (breed != null) 'breed': breed,
-    'birth_date': birthDate.toIso8601String(),
-    if (gender != null) 'gender': gender,
-    if (color != null) 'color': color,
-    if (description != null) 'description': description,
-    if (imageUrl != null) 'image_url': imageUrl,
-    if (currentWeight != null) 'current_weight': currentWeight,
-    if (targetWeight != null) 'target_weight': targetWeight,
-    'home_id': homeId,
+    'householdId': householdId,
+    if (photoUrl != null) 'photoUrl': photoUrl,
+    'birthdate': birthdate.toIso8601String(),
+    if (weight != null) 'weight': weight,
+    if (feedingInterval != null) 'feeding_interval': feedingInterval,
   };
 }
 
-class UpdateCatRequest {
+// Request models
+class UpdateCatRequestV2 {
   final String? name;
-  final String? breed;
-  final DateTime? birthDate;
-  final String? gender;
-  final String? color;
-  final String? description;
-  final String? imageUrl;
-  final double? currentWeight;
-  final double? targetWeight;
-  final String? homeId;
+  final String? householdId;
+  final String? photoUrl;
+  final DateTime? birthdate;
+  final double? weight;
+  final int? feedingInterval;
 
-  UpdateCatRequest({
+  UpdateCatRequestV2({
     this.name,
-    this.breed,
-    this.birthDate,
-    this.gender,
-    this.color,
-    this.description,
-    this.imageUrl,
-    this.currentWeight,
-    this.targetWeight,
-    this.homeId,
+    this.householdId,
+    this.photoUrl,
+    this.birthdate,
+    this.weight,
+    this.feedingInterval,
   });
 
   Map<String, dynamic> toJson() => {
     if (name != null) 'name': name,
-    if (breed != null) 'breed': breed,
-    if (birthDate != null) 'birth_date': birthDate!.toIso8601String(),
-    if (gender != null) 'gender': gender,
-    if (color != null) 'color': color,
-    if (description != null) 'description': description,
-    if (imageUrl != null) 'image_url': imageUrl,
-    if (currentWeight != null) 'current_weight': currentWeight,
-    if (targetWeight != null) 'target_weight': targetWeight,
-    if (homeId != null) 'home_id': homeId,
-  };
-}
-
-class AddWeightEntryRequest {
-  final double weight;
-  final DateTime measuredAt;
-  final String? notes;
-
-  AddWeightEntryRequest({
-    required this.weight,
-    required this.measuredAt,
-    this.notes,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'weight': weight,
-    'measured_at': measuredAt.toIso8601String(),
-    if (notes != null) 'notes': notes,
-  };
-}
-
-class UpdateWeightEntryRequest {
-  final double? weight;
-  final DateTime? measuredAt;
-  final String? notes;
-
-  UpdateWeightEntryRequest({this.weight, this.measuredAt, this.notes});
-
-  Map<String, dynamic> toJson() => {
+    if (householdId != null) 'householdId': householdId,
+    if (photoUrl != null) 'photoUrl': photoUrl,
+    if (birthdate != null) 'birthdate': birthdate!.toIso8601String(),
     if (weight != null) 'weight': weight,
-    if (measuredAt != null) 'measured_at': measuredAt!.toIso8601String(),
-    if (notes != null) 'notes': notes,
+    if (feedingInterval != null) 'feeding_interval': feedingInterval,
   };
 }
 
-class UpdateCatWeightRequest {
+class UpdateWeightRequest {
   final double weight;
 
-  UpdateCatWeightRequest({required this.weight});
+  UpdateWeightRequest({required this.weight});
 
   Map<String, dynamic> toJson() => {'weight': weight};
 }

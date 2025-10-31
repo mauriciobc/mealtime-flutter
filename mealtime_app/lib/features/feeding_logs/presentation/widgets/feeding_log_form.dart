@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mealtime_app/features/feeding_logs/domain/entities/meal.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 
 class FeedingLogForm extends StatelessWidget {
   final TextEditingController catIdController;

@@ -1,126 +1,130 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:mealtime_app/core/constants/api_constants.dart';
 import 'package:mealtime_app/core/models/api_response.dart';
 import 'package:mealtime_app/features/feeding_logs/data/models/feeding_log_model.dart';
 
 part 'feeding_logs_api_service.g.dart';
 
-/// API Service para Feeding Logs
-/// Baseado nos endpoints /feeding-logs e /feedings do backend Next.js
+/// API Service para Feeding Logs V2
+/// Baseado no endpoint /api/v2/feedings do backend conforme OpenAPI spec
 @RestApi()
 abstract class FeedingLogsApiService {
   factory FeedingLogsApiService(Dio dio, {String baseUrl}) =
       _FeedingLogsApiService;
 
-  /// Lista feeding logs com filtros opcionais
-  /// Endpoint: GET /feeding-logs
-  @GET(ApiConstants.feedingLogs)
+  // V2 - Feedings endpoints
+  /// Lista feeding logs com filtros
+  /// Endpoint: GET /v2/feedings
+  @GET(ApiConstants.v2Feedings)
   Future<ApiResponse<List<FeedingLogModel>>> getFeedingLogs({
-    @Query('catId') String? catId,
     @Query('householdId') String? householdId,
-    @Query('startDate') String? startDate,
-    @Query('endDate') String? endDate,
+    @Query('catId') String? catId,
   });
 
   /// Busca um feeding log específico por ID
-  /// Endpoint: GET /feeding-logs/{id}
-  @GET('/feeding-logs/{id}')
+  /// Endpoint: GET /v2/feedings/{id}
+  @GET('/v2/feedings/{id}')
   Future<ApiResponse<FeedingLogModel>> getFeedingLogById(@Path('id') String id);
 
   /// Cria um novo feeding log
-  /// Endpoint: POST /feeding-logs
-  @POST(ApiConstants.feedingLogs)
+  /// Endpoint: POST /v2/feedings
+  @POST(ApiConstants.v2Feedings)
   Future<ApiResponse<FeedingLogModel>> createFeedingLog(
     @Body() CreateFeedingLogRequest request,
   );
 
-  /// Atualiza um feeding log existente
-  /// Endpoint: PUT /feeding-logs/{id}
-  @PUT('/feeding-logs/{id}')
+  /// Cria múltiplos feeding logs em lote (batch)
+  /// Endpoint: POST /v2/feedings/batch
+  /// Nota: Se o endpoint não existir, usar createFeedingLog múltiplas vezes
+  @POST('/v2/feedings/batch')
+  Future<ApiResponse<List<FeedingLogModel>>> createFeedingLogsBatch(
+    @Body() CreateFeedingLogsBatchRequest request,
+  );
+
+  /// Atualiza um feeding log
+  /// Endpoint: PUT /v2/feedings/{id}
+  @PUT('/v2/feedings/{id}')
   Future<ApiResponse<FeedingLogModel>> updateFeedingLog(
     @Path('id') String id,
-    @Body() UpdateFeedingLogRequest request,
+    @Body() CreateFeedingLogRequest request,
   );
 
   /// Deleta um feeding log
-  /// Endpoint: DELETE /feeding-logs/{id}
-  @DELETE('/feeding-logs/{id}')
+  /// Endpoint: DELETE /v2/feedings/{id}
+  @DELETE('/v2/feedings/{id}')
   Future<ApiResponse<EmptyResponse>> deleteFeedingLog(@Path('id') String id);
 
-  /// Busca a última alimentação de um gato
-  /// Endpoint: GET /feedings/last/{catId}
-  @GET('/feedings/last/{catId}')
-  Future<ApiResponse<FeedingLogModel?>> getLastFeeding(
-    @Path('catId') String catId,
-  );
+  /// Estatísticas de alimentação
+  /// Endpoint: GET /v2/feedings/stats
+  @GET(ApiConstants.v2FeedingStats)
+  Future<ApiResponse<FeedingStatsModel>> getFeedingStats({
+    @Query('householdId') String? householdId,
+  });
 }
 
-/// Request para criar um novo feeding log
-class CreateFeedingLogRequest {
-  final String catId;
-  final String householdId;
-  final String mealType;  // 'breakfast', 'lunch', 'dinner', 'snack'
-  final double? amount;
-  final String? unit;
-  final String? notes;
-  final String fedBy;  // userId de quem alimentou
-  final DateTime fedAt;
+/// Request para criar múltiplos feeding logs em lote
+class CreateFeedingLogsBatchRequest {
+  final List<CreateFeedingLogRequest> feedings;
 
-  CreateFeedingLogRequest({
-    required this.catId,
-    required this.householdId,
-    required this.mealType,
-    this.amount,
-    this.unit,
-    this.notes,
-    required this.fedBy,
-    required this.fedAt,
-  });
+  CreateFeedingLogsBatchRequest({required this.feedings});
 
   Map<String, dynamic> toJson() => {
-        'cat_id': catId,
-        'household_id': householdId,
-        'meal_type': mealType,
-        if (amount != null) 'amount': amount,
-        if (unit != null) 'unit': unit,
-        if (notes != null) 'notes': notes,
-        'fed_by': fedBy,
-        'fed_at': fedAt.toIso8601String(),
+        'feedings': feedings.map((f) => f.toJson()).toList(),
       };
 }
 
-/// Request para atualizar um feeding log
-class UpdateFeedingLogRequest {
-  final String? mealType;
+/// Request para criar um novo feeding log
+/// Uses camelCase to match OpenAPI spec (not snake_case)
+class CreateFeedingLogRequest {
+  final String catId;
+  final String? mealType;  // 'breakfast', 'lunch', 'dinner', 'snack' - optional, defaults to 'manual'
   final double? amount;
-  final String? unit;
-  final String? notes;
-  final DateTime? fedAt;
+  final String? unit;  // optional, defaults to 'g'
+  final String? notes;  // optional, maxLength 255
 
-  UpdateFeedingLogRequest({
+  CreateFeedingLogRequest({
+    required this.catId,
     this.mealType,
     this.amount,
     this.unit,
     this.notes,
-    this.fedAt,
   });
 
   Map<String, dynamic> toJson() => {
-        if (mealType != null) 'meal_type': mealType,
-        if (amount != null) 'amount': amount,
-        if (unit != null) 'unit': unit,
-        if (notes != null) 'notes': notes,
-        if (fedAt != null) 'fed_at': fedAt!.toIso8601String(),
+        'catId': catId,  // camelCase per OpenAPI spec
+        if (mealType != null) 'meal_type': mealType,  // snake_case per OpenAPI spec
+        if (amount != null) 'amount': amount,  // camelCase per OpenAPI spec
+        if (unit != null) 'unit': unit,  // camelCase per OpenAPI spec
+        if (notes != null) 'notes': notes,  // camelCase per OpenAPI spec
       };
 }
 
+// UpdateFeedingLogRequest removido - V2 não suporta atualização de feeding logs
+
+/// Modelo para estatísticas de alimentação
+/// Aceita qualquer estrutura de dados do backend
+class FeedingStatsModel {
+  final Map<String, dynamic> data;
+
+  const FeedingStatsModel({required this.data});
+
+  factory FeedingStatsModel.fromJson(Map<String, dynamic> json) {
+    // O backend retorna o Map diretamente, então retornamos ele mesmo
+    return FeedingStatsModel(data: json);
+  }
+
+  Map<String, dynamic> toJson() => data;
+}
+
 /// Classe para respostas vazias da API
+@JsonSerializable()
 class EmptyResponse {
   const EmptyResponse();
 
   factory EmptyResponse.fromJson(Map<String, dynamic> json) =>
-      const EmptyResponse();
+      _$EmptyResponseFromJson(json);
 
-  Map<String, dynamic> toJson() => {};
+  Map<String, dynamic> toJson() => _$EmptyResponseToJson(this);
 }

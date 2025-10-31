@@ -3,8 +3,8 @@ import 'package:equatable/equatable.dart';
 import 'package:mealtime_app/core/usecases/usecase.dart';
 import 'package:mealtime_app/features/auth/domain/entities/user.dart';
 import 'package:mealtime_app/features/auth/domain/usecases/simple_login_usecase.dart';
-import 'package:mealtime_app/features/auth/domain/usecases/login_usecase.dart';
-import 'package:mealtime_app/features/auth/domain/usecases/register_usecase.dart';
+import 'package:mealtime_app/features/auth/domain/usecases/login_usecase.dart' show LoginParams;
+import 'package:mealtime_app/features/auth/domain/usecases/register_usecase.dart' show RegisterParams;
 
 part 'simple_auth_event.dart';
 part 'simple_auth_state.dart';
@@ -90,21 +90,17 @@ class SimpleAuthBloc extends Bloc<SimpleAuthEvent, SimpleAuthState> {
     Emitter<SimpleAuthState> emit,
   ) async {
     try {
-      print('[SimpleAuthBloc] Checking authentication...');
       final result = await getCurrentUserUseCase(NoParams());
 
       result.fold(
         (failure) {
-          print('[SimpleAuthBloc] Auth check failed: ${failure.message}');
           emit(SimpleAuthInitial());
         },
         (user) {
-          print('[SimpleAuthBloc] Auth check success: ${user.email}');
           emit(SimpleAuthSuccess(user));
         },
       );
     } catch (e) {
-      print('[SimpleAuthBloc] Auth check error: $e');
       emit(SimpleAuthInitial());
     }
   }

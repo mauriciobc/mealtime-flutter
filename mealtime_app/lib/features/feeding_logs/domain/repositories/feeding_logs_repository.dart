@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:mealtime_app/core/errors/failures.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 
-/// Repository abstrato para Feeding Logs
+/// Repository abstrato para Feeding Logs V2
 /// Segue os princípios da Clean Architecture
 abstract class FeedingLogsRepository {
   /// Lista todos os feeding logs com filtros opcionais
@@ -19,12 +19,20 @@ abstract class FeedingLogsRepository {
   /// Cria um novo feeding log
   Future<Either<Failure, FeedingLog>> createFeedingLog(FeedingLog feedingLog);
 
-  /// Atualiza um feeding log existente
+  /// Cria múltiplos feeding logs em lote (batch)
+  Future<Either<Failure, List<FeedingLog>>> createFeedingLogsBatch(
+    List<FeedingLog> feedingLogs,
+  );
+
+  /// Atualiza um feeding log
   Future<Either<Failure, FeedingLog>> updateFeedingLog(FeedingLog feedingLog);
 
   /// Deleta um feeding log
   Future<Either<Failure, void>> deleteFeedingLog(String id);
 
-  /// Busca a última alimentação de um gato
-  Future<Either<Failure, FeedingLog?>> getLastFeeding(String catId);
+  /// Busca feeding logs de um gato específico
+  Future<Either<Failure, List<FeedingLog>>> getFeedingLogsByCat(String catId);
+
+  /// Busca feeding logs de hoje
+  Future<Either<Failure, List<FeedingLog>>> getTodayFeedingLogs({String? householdId});
 }

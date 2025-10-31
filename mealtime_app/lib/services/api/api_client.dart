@@ -5,14 +5,14 @@ import 'package:mealtime_app/core/network/auth_interceptor.dart';
 
 part 'api_client.g.dart';
 
-@RestApi(baseUrl: ApiConstants.baseUrl)
+@RestApi(baseUrl: ApiConstants.baseUrlV2)
 abstract class ApiClient {
   factory ApiClient(Dio dio, {String baseUrl}) = _ApiClient;
 
   static ApiClient create() {
     final dio = Dio(
       BaseOptions(
-        baseUrl: ApiConstants.baseUrl,
+        baseUrl: ApiConstants.baseUrlV2,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         headers: {

@@ -4,6 +4,7 @@ import 'package:mealtime_app/core/supabase/supabase_config.dart';
 import 'package:mealtime_app/features/auth/data/models/user_profile.dart';
 import 'package:mealtime_app/features/auth/presentation/pages/login_page.dart';
 import 'package:mealtime_app/shared/widgets/avatar_widget.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/main.dart';
 
 class AccountPage extends StatefulWidget {
@@ -196,7 +197,11 @@ class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        body: Center(
+          child: Material3LoadingIndicator(),
+        ),
+      );
     }
 
     return Scaffold(
@@ -262,7 +267,7 @@ class _AccountPageState extends State<AccountPage> {
             child: ElevatedButton(
               onPressed: _loading ? null : _updateProfile,
               child: _loading
-                  ? const CircularProgressIndicator()
+                  ? const Material3LoadingIndicator(size: 20.0)
                   : const Text('Atualizar Perfil'),
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 class CatForm extends StatefulWidget {
   final Cat? initialCat;
@@ -230,11 +231,7 @@ class _CatFormState extends State<CatForm> {
     return ElevatedButton(
       onPressed: widget.isLoading ? null : _submitForm,
       child: widget.isLoading
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
+          ? const Material3LoadingIndicator(size: 20.0)
           : Text(widget.initialCat != null ? 'Atualizar Gato' : 'Criar Gato'),
     );
   }

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:mealtime_app/core/constants/api_constants.dart';
-import 'package:mealtime_app/features/feeding_logs/data/models/meal_model.dart';
+import 'package:mealtime_app/features/feeding_logs/data/models/feeding_log_model.dart';
 
 class FeedingLogsApiService {
   final Dio _dio;

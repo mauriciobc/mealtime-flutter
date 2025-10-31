@@ -20,8 +20,16 @@ class CatsLoading extends CatsState {
 class CatsLoaded extends CatsState {
   final List<Cat> cats;
   final Cat? selectedCat;
+  final Map<String, Cat>? _catsById;
 
-  const CatsLoaded({required this.cats, this.selectedCat});
+  CatsLoaded({required this.cats, this.selectedCat}) 
+      : _catsById = Map.fromEntries(cats.map((cat) => MapEntry(cat.id, cat)));
+
+  // O(1) lookup for cat by ID
+  Cat? getCatById(String id) => _catsById?[id];
+
+  // Expose map for direct access when needed
+  Map<String, Cat>? get catsById => _catsById;
 
   @override
   List<Object?> get props => [cats, selectedCat];

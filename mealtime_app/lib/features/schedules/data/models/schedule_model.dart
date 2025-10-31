@@ -3,16 +3,45 @@ import 'package:mealtime_app/features/schedules/domain/entities/schedule.dart';
 
 part 'schedule_model.g.dart';
 
-/// Model de Schedule mapeado da tabela schedules do Supabase
-/// Usa snake_case para compatibilidade com o banco de dados
+@JsonSerializable(fieldRename: FieldRename.snake)
+class CatBasicModel {
+  final String id;
+  final String name;
+
+  const CatBasicModel({
+    required this.id,
+    required this.name,
+  });
+
+  factory CatBasicModel.fromJson(Map<String, dynamic> json) =>
+      _$CatBasicModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CatBasicModelToJson(this);
+
+  CatBasic toEntity() {
+    return CatBasic(
+      id: id,
+      name: name,
+    );
+  }
+
+  factory CatBasicModel.fromEntity(CatBasic cat) {
+    return CatBasicModel(
+      id: cat.id,
+      name: cat.name,
+    );
+  }
+}
+
 @JsonSerializable(fieldRename: FieldRename.snake)
 class ScheduleModel {
   final String id;
   final String catId;
-  final String type;  // 'feeding', 'weight_check'
-  final int? interval;  // em horas
-  final List<String>? times;  // ["08:00", "12:00", "18:00"]
+  final String type; // 'interval' ou 'fixedTime'
+  final int? interval;
+  final List<String> times;
   final bool enabled;
+  final CatBasicModel? cat;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -21,8 +50,9 @@ class ScheduleModel {
     required this.catId,
     required this.type,
     this.interval,
-    this.times,
+    required this.times,
     required this.enabled,
+    this.cat,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -32,32 +62,33 @@ class ScheduleModel {
 
   Map<String, dynamic> toJson() => _$ScheduleModelToJson(this);
 
-  /// Cria um model a partir de uma entidade
-  factory ScheduleModel.fromEntity(Schedule schedule) {
-    return ScheduleModel(
-      id: schedule.id,
-      catId: schedule.catId,
-      type: schedule.type == ScheduleType.feeding ? 'feeding' : 'weight_check',
-      interval: schedule.interval,
-      times: schedule.times,
-      enabled: schedule.enabled,
-      createdAt: schedule.createdAt,
-      updatedAt: schedule.updatedAt,
-    );
-  }
-
-  /// Converte o model para entidade de domínio
   Schedule toEntity() {
     return Schedule(
       id: id,
       catId: catId,
-      type: type == 'feeding' ? ScheduleType.feeding : ScheduleType.weightCheck,
+      type: type == 'interval' ? ScheduleType.interval : ScheduleType.fixedTime,
       interval: interval,
       times: times,
       enabled: enabled,
+      cat: cat?.toEntity(),
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
   }
-}
 
+  factory ScheduleModel.fromEntity(Schedule schedule) {
+    return ScheduleModel(
+      id: schedule.id,
+      catId: schedule.catId,
+      type: schedule.type == ScheduleType.interval ? 'interval' : 'fixedTime',
+      interval: schedule.interval,
+      times: schedule.times,
+      enabled: schedule.enabled,
+      cat: schedule.cat != null
+          ? CatBasicModel.fromEntity(schedule.cat!)
+          : null,
+      createdAt: schedule.createdAt,
+      updatedAt: schedule.updatedAt,
+    );
+  }
+}
