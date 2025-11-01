@@ -7,7 +7,7 @@ part 'schedules_dao.g.dart';
 @DriftAccessor(tables: [Schedules])
 class SchedulesDao extends DatabaseAccessor<AppDatabase>
     with _$SchedulesDaoMixin {
-  SchedulesDao(AppDatabase db) : super(db);
+  SchedulesDao(super.db);
 
   Future<List<Schedule>> getAllSchedules() =>
       (select(schedules)..where((s) => s.isDeleted.equals(false))).get();

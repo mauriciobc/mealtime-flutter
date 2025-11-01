@@ -39,7 +39,8 @@ class HomeSelector extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         DropdownButtonFormField<Home>(
-          value: selectedHome,
+          key: ValueKey('home_${selectedHome?.id}'),
+          initialValue: selectedHome,
           onChanged: onHomeChanged,
           decoration: const InputDecoration(
             prefixIcon: Icon(Icons.home),
@@ -104,7 +105,7 @@ class HomeSelector extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         DropdownButtonFormField<String>(
-          value: null,
+          initialValue: null,
           onChanged: null,
           decoration: const InputDecoration(
             prefixIcon: Icon(Icons.home),
@@ -126,7 +127,7 @@ class HomeSelector extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         DropdownButtonFormField<String>(
-          value: null,
+          initialValue: null,
           onChanged: null,
           decoration: const InputDecoration(
             prefixIcon: Icon(Icons.error),

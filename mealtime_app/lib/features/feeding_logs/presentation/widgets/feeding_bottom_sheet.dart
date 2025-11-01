@@ -158,7 +158,7 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
       builder: (context, state) {
         List<FeedingLog> feedingLogs = [];
         if (state is FeedingLogsLoaded) {
-          feedingLogs = state.feeding_logs;
+          feedingLogs = state.feedingLogs;
         }
 
         return ListView.builder(
@@ -193,7 +193,7 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -335,7 +335,7 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
           lastError = currentState.failure.message;
           successCount = 0;
         } else if (currentState is FeedingLogOperationSuccess) {
-          successCount = currentState.feeding_logs.length;
+          successCount = currentState.feedingLogs.length;
         }
 
         Navigator.of(context).pop();

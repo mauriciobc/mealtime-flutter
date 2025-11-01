@@ -36,7 +36,7 @@ class _SchedulesApiService implements SchedulesApiService {
     )
         .compose(
           _dio.options,
-          '/v2/schedules',
+          '/schedules',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -79,7 +79,7 @@ class _SchedulesApiService implements SchedulesApiService {
     )
         .compose(
           _dio.options,
-          '/v2/schedules',
+          '/schedules',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -115,7 +115,7 @@ class _SchedulesApiService implements SchedulesApiService {
     )
         .compose(
           _dio.options,
-          '/v2/schedules/${id}',
+          '/schedules/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -155,7 +155,7 @@ class _SchedulesApiService implements SchedulesApiService {
     )
         .compose(
           _dio.options,
-          '/v2/schedules/${id}',
+          '/schedules/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -191,7 +191,7 @@ class _SchedulesApiService implements SchedulesApiService {
     )
         .compose(
           _dio.options,
-          '/v2/schedules/${id}',
+          '/schedules/${id}',
           queryParameters: queryParameters,
           data: _data,
         )

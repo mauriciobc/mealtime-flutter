@@ -12,8 +12,8 @@ class ApiConstants {
   static const String resetPassword = '/auth/reset-password';
 
   // ✅ V2 - Cats endpoints
-  static const String v2Cats = '/v2/cats';
-  static String v2CatNextFeeding(String catId) => '/v2/cats/$catId/next-feeding';
+  static const String v2Cats = '/cats';
+  static String v2CatNextFeeding(String catId) => '/cats/$catId/next-feeding';
   
   // ❌ V1 - Cats endpoints (DEPRECATED - será removido em 28/07/2025)
   static const String cats = '/cats';
@@ -26,24 +26,24 @@ class ApiConstants {
   // Use schedules abaixo em vez de meals
 
   // ✅ V2 - Feedings endpoints
-  static const String v2Feedings = '/v2/feedings';
-  static String v2FeedingById(String id) => '/v2/feedings/$id';
-  static const String v2FeedingStats = '/v2/feedings/stats';
+  static const String v2Feedings = '/feedings';
+  static String v2FeedingById(String id) => '/feedings/$id';
+  static const String v2FeedingStats = '/feedings/stats';
 
   // ✅ V2 - Schedules endpoints  
-  static const String v2Schedules = '/v2/schedules';
-  static String v2ScheduleById(String id) => '/v2/schedules/$id';
+  static const String v2Schedules = '/schedules';
+  static String v2ScheduleById(String id) => '/schedules/$id';
 
   // ✅ V2 - Weight Logs endpoints
-  static const String v2WeightLogs = '/v2/weight-logs';
+  static const String v2WeightLogs = '/weight-logs';
 
   // ✅ V2 - Goals endpoints
-  static const String v2Goals = '/v2/goals';
+  static const String v2Goals = '/goals';
 
   // ✅ V2 - Households endpoints
-  static String v2HouseholdCats(String householdId) => '/v2/households/$householdId/cats';
-  static String v2HouseholdInvite(String householdId) => '/v2/households/$householdId/invite';
-  static String v2HouseholdInviteCode(String householdId) => '/v2/households/$householdId/invite-code';
+  static String v2HouseholdCats(String householdId) => '/households/$householdId/cats';
+  static String v2HouseholdInvite(String householdId) => '/households/$householdId/invite';
+  static String v2HouseholdInviteCode(String householdId) => '/households/$householdId/invite-code';
 
   // ❌ V1 - Feeding Logs endpoints (DEPRECATED - será removido em 28/07/2025)
   static const String feedingLogs = '/feeding-logs';

@@ -69,7 +69,7 @@ class _HomesListPageState extends State<HomesListPage> {
           Icon(
             Icons.home_outlined,
             size: 80,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -80,7 +80,7 @@ class _HomesListPageState extends State<HomesListPage> {
           Text(
             'Adicione sua primeira residência para começar',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 24),

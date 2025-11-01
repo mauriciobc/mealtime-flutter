@@ -90,7 +90,7 @@ class _HomePageState extends State<HomePage> {
       } else {
         debugPrint('[HomePage] Household ID unchanged, checking if reload needed');
         // If household unchanged but no data, reload anyway
-        if (feedingLogsState is! FeedingLogsLoaded || feedingLogsState.feeding_logs.isEmpty) {
+        if (feedingLogsState is! FeedingLogsLoaded || feedingLogsState.feedingLogs.isEmpty) {
           debugPrint('[HomePage] Reloading feeding logs (no data or not loaded)');
           context.read<FeedingLogsBloc>().add(LoadTodayFeedingLogs(householdId: householdId));
         }
@@ -159,7 +159,7 @@ class _HomePageState extends State<HomePage> {
                 // Overlay de loader Material 3 que não bloqueia listeners
                 if (isLoading)
                   Material(
-                    color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
                     child: const Center(
                       child: Material3LoadingIndicator(),
                     ),
@@ -220,7 +220,7 @@ class _HomePageState extends State<HomePage> {
             // Always rebuild on state type change (Initial -> Loading -> Loaded)
             if (previous.runtimeType != current.runtimeType) return true;
             if (previous is FeedingLogsLoaded && current is FeedingLogsLoaded) {
-              return previous.feeding_logs.length != current.feeding_logs.length;
+              return previous.feedingLogs.length != current.feedingLogs.length;
             }
             return false;
           },
@@ -229,7 +229,7 @@ class _HomePageState extends State<HomePage> {
             // Count only today's feedings for the summary card
             final now = DateTime.now();
             final todayCount = feedingLogsState is FeedingLogsLoaded 
-                ? feedingLogsState.feeding_logs.where((feeding) {
+                ? feedingLogsState.feedingLogs.where((feeding) {
                     final feedingDate = feeding.fedAt;
                     return feedingDate.year == now.year &&
                            feedingDate.month == now.month &&
@@ -240,14 +240,17 @@ class _HomePageState extends State<HomePage> {
             // Calculate average portion from all feeding logs
             double averagePortion = 0.0;
             String averagePortionText = '0g';
-            if (feedingLogsState is FeedingLogsLoaded && feedingLogsState.feeding_logs.isNotEmpty) {
-              final amounts = feedingLogsState.feeding_logs
+            if (feedingLogsState is FeedingLogsLoaded && feedingLogsState.feedingLogs.isNotEmpty) {
+              final amounts = feedingLogsState.feedingLogs
                   .where((f) => f.amount != null && f.amount! > 0)
                   .map((f) => f.amount!)
                   .toList();
               if (amounts.isNotEmpty) {
                 averagePortion = amounts.reduce((a, b) => a + b) / amounts.length;
-                averagePortionText = '${averagePortion.toStringAsFixed(1)}g';
+                // Validar que o resultado não seja NaN ou Infinity
+                if (averagePortion.isFinite) {
+                  averagePortionText = '${averagePortion.toStringAsFixed(1)}g';
+                }
               }
             }
             
@@ -340,11 +343,11 @@ class _HomePageState extends State<HomePage> {
             // Rebuild if both are loaded and data changed
             if (previous is FeedingLogsLoaded && current is FeedingLogsLoaded) {
               // Compare by length first (fastest check)
-              if (previous.feeding_logs.length != current.feeding_logs.length) return true;
+              if (previous.feedingLogs.length != current.feedingLogs.length) return true;
               // If same length, compare by IDs
-              if (previous.feeding_logs.isEmpty && current.feeding_logs.isEmpty) return false;
-              final prevIds = previous.feeding_logs.map((e) => e.id).toSet();
-              final currIds = current.feeding_logs.map((e) => e.id).toSet();
+              if (previous.feedingLogs.isEmpty && current.feedingLogs.isEmpty) return false;
+              final prevIds = previous.feedingLogs.map((e) => e.id).toSet();
+              final currIds = current.feedingLogs.map((e) => e.id).toSet();
               return prevIds != currIds;
             }
             return false;
@@ -355,7 +358,7 @@ class _HomePageState extends State<HomePage> {
             
             // Check if we have feeding logs data
             if (feedingLogsState is FeedingLogsLoaded) {
-              debugPrint('[HomePage] _buildLastFeedingSection - FeedingLogsLoaded: ${feedingLogsState.feeding_logs.length} logs');
+              debugPrint('[HomePage] _buildLastFeedingSection - FeedingLogsLoaded: ${feedingLogsState.feedingLogs.length} logs');
               lastFeeding = feedingLogsState.lastFeeding;
               debugPrint('[HomePage] _buildLastFeedingSection - Last feeding: ${lastFeeding?.id ?? 'null'}');
               
@@ -471,7 +474,7 @@ class _HomePageState extends State<HomePage> {
                             Icon(
                               Icons.pets_outlined,
                               size: 48,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -514,14 +517,14 @@ class _HomePageState extends State<HomePage> {
           buildWhen: (previous, current) {
             if (previous.runtimeType != current.runtimeType) return true;
             if (previous is FeedingLogsLoaded && current is FeedingLogsLoaded) {
-              return previous.feeding_logs.length != current.feeding_logs.length;
+              return previous.feedingLogs.length != current.feedingLogs.length;
             }
             return false;
           },
           builder: (context, feedingLogsState) {
             final List<Cat> cats = catsState is CatsLoaded ? catsState.cats : <Cat>[];
             final List<FeedingLog> feedingLogs = feedingLogsState is FeedingLogsLoaded 
-                ? feedingLogsState.feeding_logs 
+                ? feedingLogsState.feedingLogs 
                 : <FeedingLog>[];
 
             // Processar dados dos últimos 7 dias
@@ -558,10 +561,12 @@ class _HomePageState extends State<HomePage> {
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Theme.of(context).colorScheme.outline),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: !chartData.isEmpty
-                        ? _buildChart(context, chartData)
+                        ? _buildChartWithErrorHandling(context, chartData)
                         : _buildEmptyChart(context),
                   ),
                   const SizedBox(height: 8),
@@ -614,10 +619,16 @@ class _HomePageState extends State<HomePage> {
             return logDateKey == dateKey && log.catId == cat.id;
           }).length;
           
+          // Validar valor para evitar NaN ou Infinity
+          final feedingsValue = catFeedings.toDouble();
+          final safeValue = feedingsValue.isFinite && feedingsValue >= 0 
+              ? feedingsValue 
+              : 0.0;
+          
           final colors = _getCatColors(context);
           segments.add(
             StackedBarSegment(
-              value: catFeedings.toDouble(),
+              value: safeValue,
               color: colors[catIndex % colors.length],
               label: cat.name,
             ),
@@ -648,9 +659,15 @@ class _HomePageState extends State<HomePage> {
           return logDateKey == dateKey;
         }).length;
         
+        // Validar valor para evitar NaN ou Infinity
+        final feedingsValue = dayFeedings.toDouble();
+        final safeValue = feedingsValue.isFinite && feedingsValue >= 0 
+            ? feedingsValue 
+            : 0.0;
+        
         barData.add(
           BarChartData(
-            value: dayFeedings.toDouble(),
+            value: safeValue,
             label: dayLabel,
           ),
         );
@@ -661,64 +678,134 @@ class _HomePageState extends State<HomePage> {
   }
 
 
+  /// Constrói o gráfico usando material_charts com tratamento de erro
+  Widget _buildChartWithErrorHandling(
+    BuildContext context,
+    ChartDataResult chartDataResult,
+  ) {
+    try {
+      return _buildChart(context, chartDataResult);
+    } catch (e, stackTrace) {
+      debugPrint('[HomePage] Erro ao renderizar gráfico: $e');
+      debugPrint('[HomePage] Stack trace: $stackTrace');
+      // Retornar empty chart ao invés de quebrar
+      return _buildEmptyChart(context);
+    }
+  }
+
   /// Constrói o gráfico usando material_charts
   Widget _buildChart(BuildContext context, ChartDataResult chartDataResult) {
-    // Obter largura disponível (container tem padding de 16 de cada lado)
-    final screenWidth = MediaQuery.of(context).size.width;
-    // Garantir que chartWidth seja válido e não negativo/NaN
-    final chartWidth = (screenWidth - 64).clamp(200.0, double.infinity);
-    final chartHeight = 160.0;
-    final colorScheme = Theme.of(context).colorScheme;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Obter largura disponível do constraints
+        final availableWidth = constraints.maxWidth;
+        // Garantir que chartWidth seja válido e não negativo/NaN/Infinity
+        final double chartWidth;
+        if (availableWidth.isFinite && availableWidth > 0) {
+          chartWidth = availableWidth.clamp(200.0, 800.0);
+        } else {
+          chartWidth = 400.0; // Fallback seguro
+        }
+        final chartHeight = 160.0;
+        final colorScheme = Theme.of(context).colorScheme;
 
-    if (chartDataResult.stackedData != null) {
-      // Gráfico empilhado (até 5 gatos)
-      return MaterialStackedBarChart(
-        data: chartDataResult.stackedData!,
-        width: chartWidth,
-        height: chartHeight,
-        showGrid: true,
-        showValues: true,
-        style: StackedBarChartStyle(
-          backgroundColor: colorScheme.surface,
-          gridColor: colorScheme.outline.withValues(alpha: 0.2),
-          labelStyle: TextStyle(
-            color: colorScheme.onSurfaceVariant,
-            fontSize: 10,
-          ),
-          valueStyle: TextStyle(
-            color: colorScheme.onSurface,
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-          ),
-          // Colunas finas - barSpacing menor = barras mais largas, maior = barras mais finas
-          barSpacing: 0.8, // Espaço maior entre barras (colunas mais finas)
-          cornerRadius: 2, // Cantos arredondados pequenos
-        ),
-      );
-    } else {
-      // Gráfico simples (mais de 5 gatos)
-      return MaterialBarChart(
-        data: chartDataResult.barData!,
-        width: chartWidth,
-        height: chartHeight,
-        showGrid: true,
-        showValues: true,
-        style: BarChartStyle(
-          barColor: colorScheme.primary,
-          backgroundColor: colorScheme.surface,
-          barSpacing: 0.8, // Colunas finas - valor maior = barras mais finas
-          labelStyle: TextStyle(
-            color: colorScheme.onSurfaceVariant,
-            fontSize: 10,
-          ),
-          valueStyle: TextStyle(
-            color: colorScheme.onSurface,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      );
-    }
+        if (chartDataResult.stackedData != null) {
+          // Validar dados antes de renderizar
+          final stackedData = chartDataResult.stackedData!;
+          final validData = stackedData.where((data) {
+            return data.segments.every((segment) {
+              return segment.value.isFinite && segment.value >= 0;
+            });
+          }).toList();
+          
+          if (validData.isEmpty) {
+            return _buildEmptyChart(context);
+          }
+
+          // Validar width e height antes de usar
+          final safeWidth = chartWidth.isFinite && chartWidth > 0 
+              ? chartWidth.clamp(200.0, 1000.0) 
+              : 400.0;
+          final safeHeight = chartHeight.isFinite && chartHeight > 0 
+              ? chartHeight.clamp(150.0, 500.0) 
+              : 160.0;
+
+          // Gráfico empilhado (até 5 gatos)
+          return SizedBox(
+            width: safeWidth,
+            height: safeHeight,
+            child: MaterialStackedBarChart(
+              data: validData,
+              width: safeWidth,
+              height: safeHeight,
+              showGrid: true,
+              showValues: true,
+              style: StackedBarChartStyle(
+                backgroundColor: colorScheme.surface,
+                gridColor: colorScheme.outline.withValues(alpha: 0.2),
+                labelStyle: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontSize: 10,
+                ),
+                valueStyle: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                ),
+                // Colunas finas - barSpacing menor = barras mais largas, maior = barras mais finas
+                barSpacing: 0.3, // Espaço maior entre barras (colunas mais finas)
+                cornerRadius: 2, // Cantos arredondados pequenos
+              ),
+            ),
+          );
+        } else {
+          // Validar dados antes de renderizar
+          final barData = chartDataResult.barData!;
+          final validData = barData.where((data) {
+            return data.value.isFinite && data.value >= 0;
+          }).toList();
+          
+          if (validData.isEmpty) {
+            return _buildEmptyChart(context);
+          }
+
+          // Validar width e height antes de usar
+          final safeWidth = chartWidth.isFinite && chartWidth > 0 
+              ? chartWidth.clamp(200.0, 1000.0) 
+              : 400.0;
+          final safeHeight = chartHeight.isFinite && chartHeight > 0 
+              ? chartHeight.clamp(150.0, 500.0) 
+              : 160.0;
+
+          // Gráfico simples (mais de 5 gatos)
+          return SizedBox(
+            width: safeWidth,
+            height: safeHeight,
+            child: MaterialBarChart(
+              data: validData,
+              width: safeWidth,
+              height: safeHeight,
+              showGrid: true,
+              showValues: true,
+              style: BarChartStyle(
+                barColor: colorScheme.primary,
+                backgroundColor: colorScheme.surface,
+                barSpacing: 0.3, // Colunas finas - valor maior = barras mais finas
+                labelStyle: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontSize: 10,
+                ),
+                valueStyle: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          );
+        }
+      },
+    );
   }
 
   /// Widget para quando não há dados
@@ -730,7 +817,7 @@ class _HomePageState extends State<HomePage> {
           Icon(
             Icons.bar_chart_outlined,
             size: 48,
-            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 8),
           Text(
@@ -774,10 +861,10 @@ class _HomePageState extends State<HomePage> {
       buildWhen: (previous, current) {
         if (previous.runtimeType != current.runtimeType) return true;
         if (previous is FeedingLogsLoaded && current is FeedingLogsLoaded) {
-          if (previous.feeding_logs.length != current.feeding_logs.length) return true;
+          if (previous.feedingLogs.length != current.feedingLogs.length) return true;
           // Compare first 3 by IDs
-          final prevFirst3 = previous.feeding_logs.take(3).map((e) => e.id).toList();
-          final currFirst3 = current.feeding_logs.take(3).map((e) => e.id).toList();
+          final prevFirst3 = previous.feedingLogs.take(3).map((e) => e.id).toList();
+          final currFirst3 = current.feedingLogs.take(3).map((e) => e.id).toList();
           return prevFirst3.length != currFirst3.length || 
                  prevFirst3.toString() != currFirst3.toString();
         }
@@ -786,7 +873,7 @@ class _HomePageState extends State<HomePage> {
       builder: (context, state) {
         List<FeedingLog> recentFeedings = [];
         if (state is FeedingLogsLoaded) {
-          recentFeedings = state.feeding_logs.take(3).toList();
+          recentFeedings = state.feedingLogs.take(3).toList();
         }
 
         return Padding(
@@ -1032,7 +1119,7 @@ class _HomePageState extends State<HomePage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0),
+      backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0),
       builder: (context) => SizedBox(
         height: MediaQuery.of(context).size.height * 0.9,
         child: FeedingBottomSheet(
@@ -1075,7 +1162,7 @@ class _HomePageState extends State<HomePage> {
               return Container(
                 width: 60,
                 height: 60,
-                color: theme.colorScheme.primary.withOpacity(0.1),
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
                 child: Icon(
                   Icons.pets,
                   size: 30,

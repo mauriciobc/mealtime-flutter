@@ -9,6 +9,7 @@ part 'feeding_logs_api_service.g.dart';
 
 /// API Service para Feeding Logs V2
 /// Baseado no endpoint /api/v2/feedings do backend conforme OpenAPI spec
+/// Nota: baseUrl já inclui /v2, então endpoints não devem incluir o prefixo
 @RestApi()
 abstract class FeedingLogsApiService {
   factory FeedingLogsApiService(Dio dio, {String baseUrl}) =
@@ -16,7 +17,7 @@ abstract class FeedingLogsApiService {
 
   // V2 - Feedings endpoints
   /// Lista feeding logs com filtros
-  /// Endpoint: GET /v2/feedings
+  /// Endpoint: GET /feedings
   @GET(ApiConstants.v2Feedings)
   Future<ApiResponse<List<FeedingLogModel>>> getFeedingLogs({
     @Query('householdId') String? householdId,
@@ -24,40 +25,40 @@ abstract class FeedingLogsApiService {
   });
 
   /// Busca um feeding log específico por ID
-  /// Endpoint: GET /v2/feedings/{id}
-  @GET('/v2/feedings/{id}')
+  /// Endpoint: GET /feedings/{id}
+  @GET('/feedings/{id}')
   Future<ApiResponse<FeedingLogModel>> getFeedingLogById(@Path('id') String id);
 
   /// Cria um novo feeding log
-  /// Endpoint: POST /v2/feedings
+  /// Endpoint: POST /feedings
   @POST(ApiConstants.v2Feedings)
   Future<ApiResponse<FeedingLogModel>> createFeedingLog(
     @Body() CreateFeedingLogRequest request,
   );
 
   /// Cria múltiplos feeding logs em lote (batch)
-  /// Endpoint: POST /v2/feedings/batch
+  /// Endpoint: POST /feedings/batch
   /// Nota: Se o endpoint não existir, usar createFeedingLog múltiplas vezes
-  @POST('/v2/feedings/batch')
+  @POST('/feedings/batch')
   Future<ApiResponse<List<FeedingLogModel>>> createFeedingLogsBatch(
     @Body() CreateFeedingLogsBatchRequest request,
   );
 
   /// Atualiza um feeding log
-  /// Endpoint: PUT /v2/feedings/{id}
-  @PUT('/v2/feedings/{id}')
+  /// Endpoint: PUT /feedings/{id}
+  @PUT('/feedings/{id}')
   Future<ApiResponse<FeedingLogModel>> updateFeedingLog(
     @Path('id') String id,
     @Body() CreateFeedingLogRequest request,
   );
 
   /// Deleta um feeding log
-  /// Endpoint: DELETE /v2/feedings/{id}
-  @DELETE('/v2/feedings/{id}')
+  /// Endpoint: DELETE /feedings/{id}
+  @DELETE('/feedings/{id}')
   Future<ApiResponse<EmptyResponse>> deleteFeedingLog(@Path('id') String id);
 
   /// Estatísticas de alimentação
-  /// Endpoint: GET /v2/feedings/stats
+  /// Endpoint: GET /feedings/stats
   @GET(ApiConstants.v2FeedingStats)
   Future<ApiResponse<FeedingStatsModel>> getFeedingStats({
     @Query('householdId') String? householdId,

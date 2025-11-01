@@ -60,7 +60,7 @@ class HouseholdCatCard extends StatelessWidget {
                   Text(
                     lastFeedingStatus ?? 'Nunca alimentado',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -183,13 +183,13 @@ class HouseholdCatCard extends StatelessWidget {
         Icon(
           icon,
           size: 16,
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
         ),
         const SizedBox(width: 4),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
           ),
         ),
       ],

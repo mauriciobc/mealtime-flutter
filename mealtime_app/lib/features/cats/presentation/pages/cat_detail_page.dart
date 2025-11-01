@@ -161,7 +161,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
               return Container(
                 width: 80,
                 height: 80,
-                color: theme.colorScheme.primary.withOpacity(0.1),
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
                 child: Icon(
                   Icons.pets,
                   size: 40,
@@ -175,7 +175,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
     } else {
       avatarWidget = CircleAvatar(
         radius: 40,
-        backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
         child: Icon(
           Icons.pets,
           size: 40,
@@ -208,7 +208,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.7),
+                        ).colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -220,7 +220,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                         size: 16,
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.6),
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -228,7 +228,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(
                             context,
-                          ).colorScheme.onSurface.withOpacity(0.6),
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                       if (cat.gender != null) ...[
@@ -247,7 +247,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                               ?.copyWith(
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.onSurface.withOpacity(0.6),
+                                ).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                         ),
                       ],
@@ -333,7 +333,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.6),
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
             ],
@@ -359,7 +359,18 @@ class _CatDetailPageState extends State<CatDetailPage> {
       return const SizedBox.shrink();
     }
 
+    // Validar que targetWeight não seja zero para evitar divisão por zero
+    if (cat.targetWeight == 0 || !cat.targetWeight!.isFinite) {
+      return const SizedBox.shrink();
+    }
+
     final progress = cat.currentWeight! / cat.targetWeight!;
+    
+    // Validar que o progress não seja NaN ou Infinity
+    if (!progress.isFinite) {
+      return const SizedBox.shrink();
+    }
+    
     final isOverweight = progress > 1.1;
     final isUnderweight = progress < 0.9;
 
@@ -448,7 +459,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
               '$label:',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ),

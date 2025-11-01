@@ -30,6 +30,8 @@ class _CatFormState extends State<CatForm> {
   String? _selectedGender;
   DateTime? _selectedBirthDate;
   String? _selectedHomeId;
+  
+  Key _genderFieldKey = const ValueKey(null);
 
   @override
   void initState() {
@@ -124,7 +126,8 @@ class _CatFormState extends State<CatForm> {
 
   Widget _buildGenderField() {
     return DropdownButtonFormField<String>(
-      value: _selectedGender,
+      key: _genderFieldKey,
+      initialValue: _selectedGender,
       decoration: const InputDecoration(
         labelText: 'Sexo',
         border: OutlineInputBorder(),
@@ -136,6 +139,7 @@ class _CatFormState extends State<CatForm> {
       onChanged: (value) {
         setState(() {
           _selectedGender = value;
+          _genderFieldKey = ValueKey(value);
         });
       },
     );

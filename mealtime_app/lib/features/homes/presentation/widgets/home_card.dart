@@ -38,7 +38,7 @@ class HomeCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Theme.of(
                         context,
-                      ).colorScheme.primary.withOpacity(0.1),
+                      ).colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -65,7 +65,7 @@ class HomeCard extends StatelessWidget {
                                 ?.copyWith(
                                   color: Theme.of(
                                     context,
-                                  ).colorScheme.onSurface.withOpacity(0.7),
+                                  ).colorScheme.onSurface.withValues(alpha: 0.7),
                                 ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -113,7 +113,7 @@ class HomeCard extends StatelessWidget {
                       size: 16,
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withOpacity(0.6),
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -121,7 +121,7 @@ class HomeCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.6),
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -134,7 +134,7 @@ class HomeCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withOpacity(0.6),
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   const Spacer(),

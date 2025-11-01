@@ -7,7 +7,7 @@ part 'weight_logs_dao.g.dart';
 @DriftAccessor(tables: [WeightLogs])
 class WeightLogsDao extends DatabaseAccessor<AppDatabase>
     with _$WeightLogsDaoMixin {
-  WeightLogsDao(AppDatabase db) : super(db);
+  WeightLogsDao(super.db);
 
   Future<List<WeightLog>> getAllWeightLogs() =>
       (select(weightLogs)..where((w) => w.isDeleted.equals(false))).get();

@@ -73,7 +73,7 @@ class _SplashPageState extends State<SplashPage> {
                 'Gerencie a alimentação dos seus gatos',
                 style: TextStyle(
                   fontSize: 18,
-                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(height: 48),

@@ -18,6 +18,7 @@ import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/homes/presentation/pages/homes_list_page.dart';
 import 'package:mealtime_app/features/homes/presentation/pages/create_home_page.dart';
 import 'package:mealtime_app/features/homes/presentation/pages/home_detail_page.dart';
+import 'package:mealtime_app/features/statistics/presentation/pages/statistics_page.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 class AppRouter {
@@ -151,6 +152,10 @@ class AppRouter {
               );
             },
           ),
+          GoRoute(
+            path: '/statistics',
+            builder: (context, state) => const StatisticsPage(),
+          ),
         ],
       ),
     ],
@@ -170,6 +175,7 @@ class AppRouter {
   static const String createHome = '/homes/create';
   static const String editHome = '/homes';
   static const String homeDetail = '/homes';
+  static const String statistics = '/statistics';
 
   static GoRouter get router => _router;
 }

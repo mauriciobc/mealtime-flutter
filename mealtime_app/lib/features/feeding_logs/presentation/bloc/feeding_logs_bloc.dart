@@ -55,7 +55,7 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
 
     result.fold(
       (failure) => emit(FeedingLogsError(failure)),
-      (feeding_logs) => emit(FeedingLogsLoaded(feeding_logs: feeding_logs)),
+      (feedingLogs) => emit(FeedingLogsLoaded(feedingLogs: feedingLogs)),
     );
   }
 
@@ -69,7 +69,7 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
 
     result.fold(
       (failure) => emit(FeedingLogsError(failure)),
-      (feeding_logs) => emit(FeedingLogsLoaded(feeding_logs: feeding_logs)),
+      (feedingLogs) => emit(FeedingLogsLoaded(feedingLogs: feedingLogs)),
     );
   }
 
@@ -97,7 +97,7 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
 
     result.fold(
       (failure) => emit(FeedingLogsError(failure)),
-      (feeding_logs) => emit(FeedingLogsLoaded(feeding_logs: feeding_logs)),
+      (feedingLogs) => emit(FeedingLogsLoaded(feedingLogs: feedingLogs)),
     );
   }
 
@@ -107,7 +107,7 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
       emit(
         FeedingLogOperationInProgress(
           operation: 'Criando refeição...',
-          feeding_logs: currentState.feeding_logs,
+          feedingLogs: currentState.feedingLogs,
         ),
       );
     }
@@ -116,11 +116,11 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
 
     result.fold((failure) => emit(FeedingLogsError(failure)), (newFeedingLog) {
       if (currentState is FeedingLogsLoaded) {
-        final updatedFeedingLogs = <FeedingLog>[...currentState.feeding_logs, newFeedingLog];
+        final updatedFeedingLogs = <FeedingLog>[...currentState.feedingLogs, newFeedingLog];
         emit(
           FeedingLogOperationSuccess(
             message: 'Refeição criada com sucesso!',
-            feeding_logs: updatedFeedingLogs,
+            feedingLogs: updatedFeedingLogs,
             updatedFeedingLog: newFeedingLog,
           ),
         );
@@ -128,7 +128,7 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
         emit(
           FeedingLogOperationSuccess(
             message: 'Refeição criada com sucesso!',
-            feeding_logs: [newFeedingLog],
+            feedingLogs: [newFeedingLog],
             updatedFeedingLog: newFeedingLog,
           ),
         );
@@ -145,7 +145,7 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
       emit(
         FeedingLogOperationInProgress(
           operation: 'Criando ${event.meals.length} refeição(ões)...',
-          feeding_logs: currentState.feeding_logs,
+          feedingLogs: currentState.feedingLogs,
         ),
       );
     }
@@ -155,20 +155,20 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
     result.fold((failure) => emit(FeedingLogsError(failure)), (newFeedingLogs) {
       if (currentState is FeedingLogsLoaded) {
         final updatedFeedingLogs = <FeedingLog>[
-          ...currentState.feeding_logs,
+          ...currentState.feedingLogs,
           ...newFeedingLogs,
         ];
         emit(
           FeedingLogOperationSuccess(
             message: '${newFeedingLogs.length} refeição(ões) criada(s) com sucesso!',
-            feeding_logs: updatedFeedingLogs,
+            feedingLogs: updatedFeedingLogs,
           ),
         );
       } else {
         emit(
           FeedingLogOperationSuccess(
             message: '${newFeedingLogs.length} refeição(ões) criada(s) com sucesso!',
-            feeding_logs: newFeedingLogs,
+            feedingLogs: newFeedingLogs,
           ),
         );
       }
@@ -181,7 +181,7 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
       emit(
         FeedingLogOperationInProgress(
           operation: 'Atualizando refeição...',
-          feeding_logs: currentState.feeding_logs,
+          feedingLogs: currentState.feedingLogs,
         ),
       );
     }
@@ -190,13 +190,13 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
 
     result.fold((failure) => emit(FeedingLogsError(failure)), (updatedFeedingLog) {
       if (currentState is FeedingLogsLoaded) {
-        final updatedFeedingLogs = currentState.feeding_logs.map<FeedingLog>((meal) {
+        final updatedFeedingLogs = currentState.feedingLogs.map<FeedingLog>((meal) {
           return meal.id == updatedFeedingLog.id ? updatedFeedingLog : meal;
         }).toList();
         emit(
           FeedingLogOperationSuccess(
             message: 'Refeição atualizada com sucesso!',
-            feeding_logs: updatedFeedingLogs,
+            feedingLogs: updatedFeedingLogs,
             updatedFeedingLog: updatedFeedingLog,
           ),
         );
@@ -204,7 +204,7 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
         emit(
           FeedingLogOperationSuccess(
             message: 'Refeição atualizada com sucesso!',
-            feeding_logs: [updatedFeedingLog],
+            feedingLogs: [updatedFeedingLog],
             updatedFeedingLog: updatedFeedingLog,
           ),
         );
@@ -218,7 +218,7 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
       emit(
         FeedingLogOperationInProgress(
           operation: 'Excluindo refeição...',
-          feeding_logs: currentState.feeding_logs,
+          feedingLogs: currentState.feedingLogs,
         ),
       );
     }
@@ -227,20 +227,20 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
 
     result.fold((failure) => emit(FeedingLogsError(failure)), (_) {
       if (currentState is FeedingLogsLoaded) {
-        final updatedFeedingLogs = currentState.feeding_logs
+        final updatedFeedingLogs = currentState.feedingLogs
             .where((meal) => meal.id != event.mealId)
             .toList();
         emit(
           FeedingLogOperationSuccess(
             message: 'Refeição excluída com sucesso!',
-            feeding_logs: updatedFeedingLogs,
+            feedingLogs: updatedFeedingLogs,
           ),
         );
       } else {
         emit(
           const FeedingLogOperationSuccess(
             message: 'Refeição excluída com sucesso!',
-            feeding_logs: [],
+            feedingLogs: [],
           ),
         );
       }

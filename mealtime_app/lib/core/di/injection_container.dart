@@ -45,6 +45,7 @@ import 'package:mealtime_app/features/auth/data/datasources/supabase_auth_dataso
 import 'package:mealtime_app/features/auth/data/datasources/supabase_storage_datasource.dart';
 import 'package:mealtime_app/services/api/feeding_logs_api_service.dart';
 import 'package:mealtime_app/features/feeding_logs/data/datasources/feeding_logs_remote_datasource.dart';
+import 'package:mealtime_app/features/feeding_logs/data/datasources/feeding_logs_local_datasource.dart';
 import 'package:mealtime_app/features/feeding_logs/data/repositories/feeding_logs_repository_impl.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/repositories/feeding_logs_repository.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/usecases/get_feeding_logs.dart';
@@ -57,6 +58,13 @@ import 'package:mealtime_app/features/feeding_logs/domain/usecases/update_feedin
 import 'package:mealtime_app/features/feeding_logs/domain/usecases/delete_feeding_log.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/core/sync/sync_service.dart';
+import 'package:mealtime_app/features/statistics/data/datasources/statistics_local_datasource.dart';
+import 'package:mealtime_app/features/statistics/data/datasources/statistics_remote_datasource.dart';
+import 'package:mealtime_app/features/statistics/data/repositories/statistics_repository_impl.dart';
+import 'package:mealtime_app/features/statistics/domain/repositories/statistics_repository.dart';
+import 'package:mealtime_app/features/statistics/domain/usecases/get_statistics.dart';
+import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_bloc.dart';
+import 'package:mealtime_app/services/notifications/notification_service.dart';
 
 final sl = GetIt.instance;
 
@@ -265,9 +273,17 @@ Future<void> init() async {
     () => FeedingLogsRemoteDataSourceImpl(apiService: sl()),
   );
 
+  sl.registerLazySingleton<FeedingLogsLocalDataSource>(
+    () => FeedingLogsLocalDataSourceImpl(database: sl()),
+  );
+
   // FeedingLogs - Repositories
   sl.registerLazySingleton<FeedingLogsRepository>(
-    () => FeedingLogsRepositoryImpl(sl()),
+    () => FeedingLogsRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+      syncService: sl(),
+    ),
   );
 
   // FeedingLogs - Use Cases
@@ -293,4 +309,34 @@ Future<void> init() async {
       deleteFeedingLog: sl(),
     ),
   );
+
+  // Statistics - Data Sources
+  sl.registerLazySingleton<StatisticsLocalDataSource>(
+    () => StatisticsLocalDataSourceImpl(database: sl()),
+  );
+
+  sl.registerLazySingleton<StatisticsRemoteDataSource>(
+    () => StatisticsRemoteDataSourceImpl(
+      apiService: sl<FeedingLogsApiService>(),
+    ),
+  );
+
+  // Statistics - Repositories
+  sl.registerLazySingleton<StatisticsRepository>(
+    () => StatisticsRepositoryImpl(
+      localDataSource: sl(),
+      remoteDataSource: sl(),
+    ),
+  );
+
+  // Statistics - Use Cases
+  sl.registerLazySingleton(() => GetStatistics(sl()));
+
+  // Statistics - BLoC
+  sl.registerFactory(
+    () => StatisticsBloc(getStatistics: sl()),
+  );
+
+  // Notification Service
+  sl.registerLazySingleton(() => NotificationService());
 }

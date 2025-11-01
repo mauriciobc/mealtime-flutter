@@ -7,30 +7,31 @@ part 'schedules_api_service.g.dart';
 
 /// API Service para Schedules V2
 /// Baseado no endpoint /api/v2/schedules do backend conforme OpenAPI spec
+/// Nota: baseUrl já inclui /v2, então endpoints não devem incluir o prefixo
 @RestApi()
 abstract class SchedulesApiService {
   factory SchedulesApiService(Dio dio, {String baseUrl}) =
       _SchedulesApiService;
 
   // V2 - Schedules endpoints
-  @GET('/v2/schedules')
+  @GET('/schedules')
   Future<ApiResponse<List<ScheduleModel>>> getSchedules({
     @Query('householdId') String? householdId,
   });
 
-  @POST('/v2/schedules')
+  @POST('/schedules')
   Future<ApiResponse<ScheduleModel>> createSchedule(@Body() ScheduleModel schedule);
 
-  @GET('/v2/schedules/{id}')
+  @GET('/schedules/{id}')
   Future<ApiResponse<ScheduleModel>> getScheduleById(@Path('id') String id);
 
-  @PATCH('/v2/schedules/{id}')
+  @PATCH('/schedules/{id}')
   Future<ApiResponse<ScheduleModel>> updateSchedule(
     @Path('id') String id,
     @Body() ScheduleModel schedule,
   );
 
-  @DELETE('/v2/schedules/{id}')
+  @DELETE('/schedules/{id}')
   Future<ApiResponse<EmptyResponse>> deleteSchedule(@Path('id') String id);
 }
 

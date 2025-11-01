@@ -7,7 +7,7 @@ part 'sync_queue_dao.g.dart';
 @DriftAccessor(tables: [SyncQueue])
 class SyncQueueDao extends DatabaseAccessor<AppDatabase>
     with _$SyncQueueDaoMixin {
-  SyncQueueDao(AppDatabase db) : super(db);
+  SyncQueueDao(super.db);
 
   Future<List<SyncOperation>> getPendingOperations() =>
       (select(syncQueue)

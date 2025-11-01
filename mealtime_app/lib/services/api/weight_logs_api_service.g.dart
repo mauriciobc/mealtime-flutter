@@ -42,7 +42,7 @@ class _WeightLogsApiService implements WeightLogsApiService {
     )
             .compose(
               _dio.options,
-              '/v2/weight-logs',
+              '/weight-logs',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -85,7 +85,7 @@ class _WeightLogsApiService implements WeightLogsApiService {
     )
         .compose(
           _dio.options,
-          '/v2/weight-logs',
+          '/weight-logs',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -123,7 +123,7 @@ class _WeightLogsApiService implements WeightLogsApiService {
     )
         .compose(
           _dio.options,
-          '/v2/weight-logs',
+          '/weight-logs',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -160,7 +160,7 @@ class _WeightLogsApiService implements WeightLogsApiService {
     )
         .compose(
           _dio.options,
-          '/v2/weight-logs',
+          '/weight-logs',
           queryParameters: queryParameters,
           data: _data,
         )

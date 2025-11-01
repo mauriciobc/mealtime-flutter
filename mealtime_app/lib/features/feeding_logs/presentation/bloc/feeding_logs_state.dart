@@ -18,19 +18,19 @@ class FeedingLogsLoading extends FeedingLogsState {
 }
 
 class FeedingLogsLoaded extends FeedingLogsState {
-  final List<FeedingLog> feeding_logs;
+  final List<FeedingLog> feedingLogs;
   final FeedingLog? _lastFeeding;
 
-  FeedingLogsLoaded({required this.feeding_logs}) 
-      : _lastFeeding = feeding_logs.isNotEmpty 
-          ? (List<FeedingLog>.from(feeding_logs)..sort((a, b) => b.fedAt.compareTo(a.fedAt))).first
+  FeedingLogsLoaded({required this.feedingLogs}) 
+      : _lastFeeding = feedingLogs.isNotEmpty 
+          ? (List<FeedingLog>.from(feedingLogs)..sort((a, b) => b.fedAt.compareTo(a.fedAt))).first
           : null;
 
   // Get the most recent feeding (sorted by fedAt descending)
   FeedingLog? get lastFeeding => _lastFeeding;
 
   @override
-  List<Object?> get props => [feeding_logs];
+  List<Object?> get props => [feedingLogs];
 }
 
 class FeedingLogLoaded extends FeedingLogsState {
@@ -44,27 +44,27 @@ class FeedingLogLoaded extends FeedingLogsState {
 
 class FeedingLogOperationInProgress extends FeedingLogsState {
   final String operation;
-  final List<FeedingLog> feeding_logs;
+  final List<FeedingLog> feedingLogs;
 
-  const FeedingLogOperationInProgress({required this.operation, required this.feeding_logs});
+  const FeedingLogOperationInProgress({required this.operation, required this.feedingLogs});
 
   @override
-  List<Object> get props => [operation, feeding_logs];
+  List<Object> get props => [operation, feedingLogs];
 }
 
 class FeedingLogOperationSuccess extends FeedingLogsState {
   final String message;
-  final List<FeedingLog> feeding_logs;
+  final List<FeedingLog> feedingLogs;
   final FeedingLog? updatedFeedingLog;
 
   const FeedingLogOperationSuccess({
     required this.message,
-    required this.feeding_logs,
+    required this.feedingLogs,
     this.updatedFeedingLog,
   });
 
   @override
-  List<Object?> get props => [message, feeding_logs, updatedFeedingLog];
+  List<Object?> get props => [message, feedingLogs, updatedFeedingLog];
 }
 
 class FeedingLogsError extends FeedingLogsState {

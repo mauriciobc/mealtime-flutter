@@ -6,7 +6,7 @@ part 'cats_dao.g.dart';
 
 @DriftAccessor(tables: [Cats])
 class CatsDao extends DatabaseAccessor<AppDatabase> with _$CatsDaoMixin {
-  CatsDao(AppDatabase db) : super(db);
+  CatsDao(super.db);
 
   Future<List<Cat>> getAllCats() =>
       (select(cats)..where((c) => c.isDeleted.equals(false))).get();

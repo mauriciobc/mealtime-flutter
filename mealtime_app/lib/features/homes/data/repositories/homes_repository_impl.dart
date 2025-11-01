@@ -16,34 +16,47 @@ class HomesRepositoryImpl implements HomesRepository {
   @override
   Future<List<Home>> getHomes() async {
     try {
-      debugPrint('[HomesRepository] Buscando households do servidor...');
-      final homeModels = await remoteDataSource.getHomes();
-      debugPrint('[HomesRepository] Recebidos ${homeModels.length} households do servidor');
+      // 1. Retorna dados do banco local imediatamente (se existir)
+      debugPrint('[HomesRepository] Buscando households do cache local...');
+      final localHomes = await localDataSource.getCachedHomes();
       
-      final homes = homeModels.map((model) => model.toEntity()).toList();
-      await localDataSource.cacheHomes(homes);
-      debugPrint('[HomesRepository] Households armazenados em cache local');
+      // 2. Sincroniza com API em background (não bloqueia UI)
+      _syncWithRemote();
       
-      return homes;
-    } catch (e, stackTrace) {
-      debugPrint('[HomesRepository] Erro ao buscar households do servidor: $e');
-      debugPrint('[HomesRepository] Stack trace: $stackTrace');
-      
-      // Tentar buscar dados do cache local
+      debugPrint('[HomesRepository] Retornando ${localHomes.length} households do cache local');
+      return localHomes;
+    } catch (e) {
+      debugPrint('[HomesRepository] Erro ao buscar households locais: $e');
+      // Se não há dados no cache, tentar API como último recurso
       try {
-        final cachedHomes = await localDataSource.getCachedHomes();
-        if (cachedHomes.isNotEmpty) {
-          debugPrint('[HomesRepository] Retornando ${cachedHomes.length} households do cache local');
-          return cachedHomes;
-        }
-      } catch (cacheError) {
-        debugPrint('[HomesRepository] Erro ao buscar cache local: $cacheError');
+        debugPrint('[HomesRepository] Tentando buscar do servidor...');
+        final homeModels = await remoteDataSource.getHomes();
+        final homes = homeModels.map((model) => model.toEntity()).toList();
+        await localDataSource.cacheHomes(homes);
+        return homes;
+      } catch (apiError) {
+        debugPrint('[HomesRepository] Erro ao buscar do servidor: $apiError');
+        // Se ainda assim falhar, retornar lista vazia ao invés de quebrar
+        return [];
       }
-      
-      // Se não há dados no cache, relançar a exceção para que o erro seja mostrado ao usuário
-      debugPrint('[HomesRepository] Nenhum dado encontrado, relançando exceção...');
-      rethrow;
     }
+  }
+
+  /// Sincroniza dados locais com remoto em background
+  void _syncWithRemote() {
+    // Executar em background sem bloquear
+    Future.microtask(() async {
+      try {
+        debugPrint('[HomesRepository] Iniciando sincronização em background...');
+        final homeModels = await remoteDataSource.getHomes();
+        final homes = homeModels.map((model) => model.toEntity()).toList();
+        await localDataSource.cacheHomes(homes);
+        debugPrint('[HomesRepository] Sincronização em background concluída');
+      } catch (e) {
+        debugPrint('[HomesRepository] Erro na sincronização em background: $e');
+        // Não relançar erro - apenas logar
+      }
+    });
   }
 
   @override

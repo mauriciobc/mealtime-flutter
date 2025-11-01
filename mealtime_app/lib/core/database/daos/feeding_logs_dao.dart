@@ -7,7 +7,7 @@ part 'feeding_logs_dao.g.dart';
 @DriftAccessor(tables: [FeedingLogs])
 class FeedingLogsDao extends DatabaseAccessor<AppDatabase>
     with _$FeedingLogsDaoMixin {
-  FeedingLogsDao(AppDatabase db) : super(db);
+  FeedingLogsDao(super.db);
 
   Future<List<FeedingLog>> getAllFeedingLogs() =>
       (select(feedingLogs)..where((f) => f.isDeleted.equals(false))).get();

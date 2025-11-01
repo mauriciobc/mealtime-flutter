@@ -51,7 +51,7 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
     )
         .compose(
           _dio.options,
-          '/v2/feedings',
+          '/feedings',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -92,7 +92,7 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
     )
         .compose(
           _dio.options,
-          '/v2/feedings/${id}',
+          '/feedings/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -130,7 +130,7 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
     )
         .compose(
           _dio.options,
-          '/v2/feedings',
+          '/feedings',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -168,7 +168,7 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
     )
         .compose(
           _dio.options,
-          '/v2/feedings/batch',
+          '/feedings/batch',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -213,7 +213,7 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
     )
         .compose(
           _dio.options,
-          '/v2/feedings/${id}',
+          '/feedings/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -249,7 +249,7 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
     )
         .compose(
           _dio.options,
-          '/v2/feedings/${id}',
+          '/feedings/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -287,7 +287,7 @@ class _FeedingLogsApiService implements FeedingLogsApiService {
     )
         .compose(
           _dio.options,
-          '/v2/feedings/stats',
+          '/feedings/stats',
           queryParameters: queryParameters,
           data: _data,
         )

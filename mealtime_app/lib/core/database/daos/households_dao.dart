@@ -7,7 +7,7 @@ part 'households_dao.g.dart';
 @DriftAccessor(tables: [Households])
 class HouseholdsDao extends DatabaseAccessor<AppDatabase>
     with _$HouseholdsDaoMixin {
-  HouseholdsDao(AppDatabase db) : super(db);
+  HouseholdsDao(super.db);
 
   Future<List<Household>> getAllHouseholds() =>
       (select(households)..where((h) => h.isDeleted.equals(false))).get();

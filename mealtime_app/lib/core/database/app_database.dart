@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:mealtime_app/core/database/tables/cats.dart';
 import 'package:mealtime_app/core/database/tables/feeding_logs.dart';
 import 'package:mealtime_app/core/database/tables/households.dart';
@@ -9,8 +6,7 @@ import 'package:mealtime_app/core/database/tables/profiles.dart';
 import 'package:mealtime_app/core/database/tables/schedules.dart';
 import 'package:mealtime_app/core/database/tables/sync_queue.dart';
 import 'package:mealtime_app/core/database/tables/weight_logs.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'package:mealtime_app/core/database/database_connection.dart';
 
 import 'daos/cats_dao.dart';
 import 'daos/feeding_logs_dao.dart';
@@ -41,7 +37,7 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase() : super(createDatabaseConnection());
 
   @override
   int get schemaVersion => 2;
@@ -92,10 +88,3 @@ class AppDatabase extends _$AppDatabase {
   }
 }
 
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'db.sqlite'));
-    return NativeDatabase.createInBackground(file);
-  });
-}

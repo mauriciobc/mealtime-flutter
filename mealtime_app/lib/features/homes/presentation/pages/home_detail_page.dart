@@ -124,7 +124,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
           Text(
             'Criada em $formattedDate por $ownerName',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -259,7 +259,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
           Icon(
             Icons.people_outline,
             size: 80,
-            color: theme.colorScheme.primary.withOpacity(0.5),
+            color: theme.colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -270,7 +270,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
           Text(
             'Convide pessoas para participar desta residência',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             textAlign: TextAlign.center,
           ),
@@ -306,7 +306,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
                 Text(
                   'Gatos gerenciados nesta residência.',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -355,7 +355,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
           Icon(
             Icons.pets,
             size: 80,
-            color: theme.colorScheme.primary.withOpacity(0.5),
+            color: theme.colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -366,7 +366,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
           Text(
             'Adicione os gatos que moram nesta residência',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             textAlign: TextAlign.center,
           ),

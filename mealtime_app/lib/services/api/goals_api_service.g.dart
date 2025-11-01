@@ -41,7 +41,7 @@ class _GoalsApiService implements GoalsApiService {
     )
         .compose(
           _dio.options,
-          '/v2/goals',
+          '/goals',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -83,7 +83,7 @@ class _GoalsApiService implements GoalsApiService {
     )
         .compose(
           _dio.options,
-          '/v2/goals',
+          '/goals',
           queryParameters: queryParameters,
           data: _data,
         )

@@ -82,7 +82,8 @@ class FeedingFormFields extends StatelessWidget {
 
   Widget _buildStatusField(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: data.status,
+      key: ValueKey('status_${data.status}'),
+      initialValue: data.status,
       decoration: const InputDecoration(
         labelText: 'Status',
         border: OutlineInputBorder(),
@@ -110,7 +111,8 @@ class FeedingFormFields extends StatelessWidget {
 
   Widget _buildFoodTypeField(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: data.foodType,
+      key: ValueKey('foodType_${data.foodType}'),
+      initialValue: data.foodType,
       decoration: const InputDecoration(
         labelText: 'Tipo',
         border: OutlineInputBorder(),

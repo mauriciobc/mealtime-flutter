@@ -70,7 +70,7 @@ class CatCard extends StatelessWidget {
               return Container(
                 width: 60,
                 height: 60,
-                color: theme.colorScheme.primary.withOpacity(0.1),
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
                 child: Icon(
                   Icons.pets,
                   size: 30,
@@ -85,7 +85,7 @@ class CatCard extends StatelessWidget {
     
     return CircleAvatar(
       radius: 30,
-      backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
       child: Icon(
         Icons.pets,
         size: 30,
@@ -95,21 +95,23 @@ class CatCard extends StatelessWidget {
   }
 
   Widget _buildCatInfo(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           cat.name,
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
         const SizedBox(height: 4),
         if (cat.breed != null) ...[
           Text(
             cat.breed!,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 4),
@@ -119,13 +121,13 @@ class CatCard extends StatelessWidget {
             Icon(
               Icons.cake,
               size: 16,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 4),
             Text(
               cat.ageDescription,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
             if (cat.gender != null) ...[
@@ -143,7 +145,7 @@ class CatCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.6),
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
             ],
@@ -156,7 +158,7 @@ class CatCard extends StatelessWidget {
               Icon(
                 Icons.monitor_weight,
                 size: 16,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               const SizedBox(width: 4),
               Text(
@@ -164,7 +166,7 @@ class CatCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.6),
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
             ],
@@ -210,7 +212,7 @@ class CatCard extends StatelessWidget {
       ],
       child: Icon(
         Icons.more_vert,
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
       ),
     );
   }
