@@ -447,11 +447,24 @@ class WeightBloc extends Bloc<WeightEvent, WeightState> {
             )
           : null;
 
+      // Filtrar logs e meta para o gato selecionado para evitar mostrar dados do gato anterior
+      final filteredWeightLogs = selectedCat != null
+          ? currentState.weightLogs
+              .where((log) => log.catId == selectedCat.id)
+              .toList()
+          : <WeightEntry>[];
+      
+      final filteredActiveGoal = selectedCat != null &&
+              currentState.activeGoal != null &&
+              currentState.activeGoal!.catId == selectedCat.id
+          ? currentState.activeGoal
+          : null;
+
       emit(
         WeightLoaded(
           selectedCat: selectedCat,
-          weightLogs: currentState.weightLogs,
-          activeGoal: currentState.activeGoal,
+          weightLogs: filteredWeightLogs,
+          activeGoal: filteredActiveGoal,
           timeRangeDays: currentState.timeRangeDays,
           cats: currentState.cats,
         ),

@@ -164,36 +164,22 @@ class _WeightPageState extends State<WeightPage> {
       onRefresh: () async {
         context.read<WeightBloc>().add(const RefreshWeightData());
       },
-      child: AnimatedSwitcher(
-        duration: M3Animation.durationShort4, // 300ms padrão M3
-        transitionBuilder: (child, animation) {
-          return M3Transitions.slideTransition(
-            child,
-            animation,
-            begin: const Offset(0, 0.05), // Movimento sutil M3
-          );
-        },
-        child: ListView(
-          key: ValueKey('weight-content-${weightState.selectedCat?.id}'),
-          padding: const EdgeInsets.all(16),
-          children: [
+      child: ListView(
+        key: ValueKey(
+          'weight-content-${weightState.selectedCat?.id}-'
+          '${weightState.filteredWeightLogs.length}-'
+          '${weightState.activeGoal?.id ?? 'none'}',
+        ),
+        padding: const EdgeInsets.all(16),
+        children: <Widget>[
             // Header
-            _buildHeader(),
+            _buildHeader(weightState, cats),
             const SizedBox(height: 24),
             
             // Estado vazio quando não há gatos
             if (cats.isEmpty) ...[
               _buildEmptyState(),
             ],
-
-            // Botão Nova Meta
-            if (weightState.activeGoal == null && weightState.selectedCat != null)
-              AnimatedSwitcher(
-                duration: M3Animation.durationShort3, // 250ms M3
-                child: _buildNewGoalButton(weightState),
-              ),
-            if (weightState.activeGoal == null && weightState.selectedCat != null)
-              const SizedBox(height: 16),
             
             // Seletor de Gatos (se houver mais de um)
             if (cats.length > 1) ...[
@@ -209,61 +195,77 @@ class _WeightPageState extends State<WeightPage> {
 
             // Indicadores de Peso
             if (weightState.selectedCat != null) ...[
-              _buildWeightIndicators(weightState),
+              RepaintBoundary(
+                child: _buildWeightIndicators(weightState),
+              ),
               const SizedBox(height: 24),
             ],
 
             // Progresso da Meta
             if (weightState.activeGoal != null) ...[
-              AnimatedSwitcher(
-                duration: M3Animation.durationShort3, // 250ms M3
-                child: _buildProgressCard(weightState),
+              RepaintBoundary(
+                child: AnimatedSwitcher(
+                  duration: M3Animation.durationShort3, // 250ms M3
+                  switchInCurve: M3Animation.deceleratedCurve,
+                  switchOutCurve: M3Animation.acceleratedCurve,
+                  child: _buildProgressCard(weightState),
+                ),
               ),
               const SizedBox(height: 24),
             ],
 
             // Gráfico de Tendência
             if (cats.isNotEmpty) ...[
-              _buildTrendChart(weightState),
+              RepaintBoundary(
+                child: WeightTrendChart(
+                  key: ValueKey(
+                    'trend-chart-${weightState.selectedCat?.id}-'
+                    '${weightState.filteredWeightLogs.length}-'
+                    '${weightState.timeRangeDays}',
+                  ),
+                  weightLogs: weightState.filteredWeightLogs,
+                  goal: weightState.activeGoal,
+                  timeRangeDays: weightState.timeRangeDays,
+                  onTimeRangeChanged: (days) {
+                    context.read<WeightBloc>().add(ChangeTimeRange(days));
+                  },
+                ),
+              ),
               const SizedBox(height: 24),
             ],
 
             // Histórico Recente
             if (cats.isNotEmpty) ...[
-              _buildHistoryList(weightState),
+              RepaintBoundary(
+                child: _buildHistoryList(weightState),
+              ),
             ],
-          ],
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(WeightLoaded weightState, List<cat_entity.Cat> cats) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Painel de Peso',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 4),
-              Text(
                 'Acompanhe a saúde do seu gato',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface.withValues(
-                            alpha: 0.6,
+                            alpha: 0.8,
                           ),
                     ),
               ),
             ],
           ),
         ),
+        _buildNewGoalButton(weightState, cats),
       ],
     );
   }
@@ -312,34 +314,48 @@ class _WeightPageState extends State<WeightPage> {
     );
   }
 
-  Widget _buildNewGoalButton(WeightLoaded weightState) {
+  Widget _buildNewGoalButton(
+    WeightLoaded weightState,
+    List<cat_entity.Cat> cats,
+  ) {
+    // O botão deve estar desabilitado quando:
+    // - Não há gatos disponíveis
+    // - Nenhum gato está selecionado
+    // - Já existe uma meta ativa
+    final isDisabled = cats.isEmpty ||
+        weightState.selectedCat == null ||
+        weightState.activeGoal != null;
+
     return ElevatedButton.icon(
-      onPressed: () {
-        if (weightState.selectedCat == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Selecione um gato primeiro'),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              action: SnackBarAction(
-                label: 'OK',
-                onPressed: () {},
-              ),
-            ),
-          );
-          return;
-        }
-        showDialog(
-          context: context,
-          barrierDismissible: true,
-          builder: (context) => CreateGoalDialog(
-            selectedCat: weightState.selectedCat!,
-            weightLogs: weightState.weightLogs,
-          ),
-        );
-      },
+      key: const ValueKey('new-goal-button'),
+      onPressed: isDisabled
+          ? null
+          : () {
+              if (weightState.selectedCat == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Selecione um gato primeiro'),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    action: SnackBarAction(
+                      label: 'OK',
+                      onPressed: () {},
+                    ),
+                  ),
+                );
+                return;
+              }
+              showDialog(
+                context: context,
+                barrierDismissible: true,
+                builder: (context) => CreateGoalDialog(
+                  selectedCat: weightState.selectedCat!,
+                  weightLogs: weightState.weightLogs,
+                ),
+              );
+            },
       icon: const Icon(Icons.flag),
       label: const Text('Nova Meta'),
     );
@@ -439,11 +455,16 @@ class _WeightPageState extends State<WeightPage> {
   Widget _buildWeightIndicators(WeightLoaded weightState) {
     return AnimatedSwitcher(
       duration: M3Animation.durationShort4, // 300ms M3
+      switchInCurve: M3Animation.deceleratedCurve,
+      switchOutCurve: M3Animation.acceleratedCurve,
       transitionBuilder: (child, animation) {
         return M3Transitions.scaleTransition(child, animation);
       },
       child: Row(
-        key: ValueKey('indicators-${weightState.currentWeight}'),
+        key: ValueKey(
+          'indicators-${weightState.selectedCat?.id}-'
+          '${weightState.currentWeight?.toStringAsFixed(1) ?? 'null'}',
+        ),
         children: [
           Expanded(
             child: _buildWeightCard(
@@ -512,7 +533,7 @@ class _WeightPageState extends State<WeightPage> {
       curve: M3Animation.emphasizedCurve, // Emphasized para elementos importantes M3
       builder: (context, animatedProgress, child) {
         return Card(
-          key: const ValueKey('progress-card'),
+          key: ValueKey('progress-card-${weightState.activeGoal?.id ?? 'none'}'),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -563,16 +584,6 @@ class _WeightPageState extends State<WeightPage> {
     );
   }
 
-  Widget _buildTrendChart(WeightLoaded weightState) {
-    return WeightTrendChart(
-      weightLogs: weightState.filteredWeightLogs,
-      goal: weightState.activeGoal,
-      timeRangeDays: weightState.timeRangeDays,
-      onTimeRangeChanged: (days) {
-        context.read<WeightBloc>().add(ChangeTimeRange(days));
-      },
-    );
-  }
 
   Widget _buildHistoryList(WeightLoaded weightState) {
     if (weightState.weightLogs.isEmpty) {
@@ -634,79 +645,66 @@ class _WeightPageState extends State<WeightPage> {
               final previousLog = index < weightState.weightLogs.length - 1
                   ? weightState.weightLogs[index + 1]
                   : null;
-              
+
               double? variation;
               if (previousLog != null) {
                 variation = log.weight - previousLog.weight;
               }
 
-              return TweenAnimationBuilder<double>(
-                duration: M3Animation.durationShort4, // 300ms M3 - movimento coordenado
-                tween: Tween(begin: 0.0, end: 1.0),
-                curve: M3Animation.deceleratedCurve, // Entrada M3
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: Transform.translate(
-                      offset: Offset(16 * (1 - value), 0), // Movimento mais sutil M3
-                      child: child,
-                    ),
-                  );
-                },
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: variation != null && variation > 0
-                        ? Colors.green.withValues(alpha: 0.2)
+              return ListTile(
+                key: ValueKey('weight-log-${log.id}'),
+                leading: CircleAvatar(
+                  backgroundColor: variation != null && variation > 0
+                      ? Colors.green.withValues(alpha: 0.2)
+                      : variation != null && variation < 0
+                          ? Colors.red.withValues(alpha: 0.2)
+                          : Colors.grey.withValues(alpha: 0.2),
+                  child: Icon(
+                    variation != null && variation > 0
+                        ? Icons.trending_up
                         : variation != null && variation < 0
-                            ? Colors.red.withValues(alpha: 0.2)
-                            : Colors.grey.withValues(alpha: 0.2),
-                    child: Icon(
-                      variation != null && variation > 0
-                          ? Icons.trending_up
-                          : variation != null && variation < 0
-                              ? Icons.trending_down
-                              : Icons.remove,
-                      color: variation != null && variation > 0
-                          ? Colors.green
-                          : variation != null && variation < 0
-                              ? Colors.red
-                              : Colors.grey,
-                      size: 20,
-                    ),
+                            ? Icons.trending_down
+                            : Icons.remove,
+                    color: variation != null && variation > 0
+                        ? Colors.green
+                        : variation != null && variation < 0
+                            ? Colors.red
+                            : Colors.grey,
+                    size: 20,
                   ),
-                  title: Text('${log.weight.toStringAsFixed(1)} kg'),
-                  subtitle: Text(
-                    '${log.measuredAt.day}/${log.measuredAt.month}/${log.measuredAt.year} ${log.measuredAt.hour.toString().padLeft(2, '0')}:${log.measuredAt.minute.toString().padLeft(2, '0')}',
-                  ),
-                  trailing: variation != null
-                      ? Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: variation > 0
-                                ? Colors.green.withValues(alpha: 0.1)
-                                : variation < 0
-                                    ? Colors.red.withValues(alpha: 0.1)
-                                    : Colors.grey.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '${variation > 0 ? '+' : ''}${variation.toStringAsFixed(2)} kg',
-                            style: TextStyle(
-                              color: variation > 0
-                                  ? Colors.green.shade700
-                                  : variation < 0
-                                      ? Colors.red.shade700
-                                      : Colors.grey.shade700,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        )
-                      : null,
                 ),
+                title: Text('${log.weight.toStringAsFixed(1)} kg'),
+                subtitle: Text(
+                  '${log.measuredAt.day}/${log.measuredAt.month}/${log.measuredAt.year} ${log.measuredAt.hour.toString().padLeft(2, '0')}:${log.measuredAt.minute.toString().padLeft(2, '0')}',
+                ),
+                trailing: variation != null
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: variation > 0
+                              ? Colors.green.withValues(alpha: 0.1)
+                              : variation < 0
+                                  ? Colors.red.withValues(alpha: 0.1)
+                                  : Colors.grey.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${variation > 0 ? '+' : ''}${variation.toStringAsFixed(2)} kg',
+                          style: TextStyle(
+                            color: variation > 0
+                                ? Colors.green.shade700
+                                : variation < 0
+                                    ? Colors.red.shade700
+                                    : Colors.grey.shade700,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      )
+                    : null,
               );
             },
           ),
