@@ -85,8 +85,8 @@ class HourlyDistributionChart extends StatelessWidget {
                     data: validData,
                     width: chartWidth,
                     height: chartHeight,
-                    showGrid: true,
-                    showValues: true,
+                    showGrid: false,  // ✅ Desabilitado para melhorar performance
+                    showValues: false,  // ✅ Desabilitado para melhorar performance
                     style: BarChartStyle(
                       barColor: theme.colorScheme.tertiary,
                       backgroundColor: theme.colorScheme.surface,

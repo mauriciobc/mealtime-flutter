@@ -1,0 +1,17 @@
+Checklist de Execução - Modo: baseline
+Data: dom 02 nov 2025 16:51:02 -03
+Dispositivo: Found
+
+Cenários:
+- [ ] 1. scenario_1_login_cold_start.json
+- [ ] 2. scenario_2_homepage_complete.json
+- [ ] 3. scenario_3_cats_list_scroll.json
+- [ ] 4. scenario_4_create_cat_flow.json
+- [ ] 5. scenario_5_feeding_logs_bottom_sheet.json
+- [ ] 6. scenario_6_statistics_page.json
+- [ ] 7. scenario_7_change_household.json
+- [ ] 8. scenario_8_navigation_end_to_end.json
+
+Template de Métricas:
+Consulte BENCHMARK_TEST_SCENARIOS.md para template completo
+

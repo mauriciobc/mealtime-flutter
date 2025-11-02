@@ -283,6 +283,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   /// Helper para obter a última alimentação de qualquer estado que contenha logs
   FeedingLog? _getLastFeedingFromState(FeedingLogsState state) {
+    // FeedingLogsLoaded já tem lastFeeding pré-computado
+    if (state is FeedingLogsLoaded) {
+      return state.lastFeeding;
+    }
+    
+    // Para outros estados, fazer sort apenas se necessário
     final logs = _getFeedingLogsFromState(state);
     if (logs.isEmpty) return null;
     final sorted = List<FeedingLog>.from(logs)
@@ -1009,6 +1015,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               : 160.0;
 
           // Gráfico empilhado (até 5 gatos)
+          // PERFORMANCE: Desabilitar grid e values para melhorar Raster
           return SizedBox(
             width: safeWidth,
             height: safeHeight,
@@ -1016,8 +1023,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               data: validData,
               width: safeWidth,
               height: safeHeight,
-              showGrid: true,
-              showValues: true,
+              showGrid: false,  // ✅ Desabilitado para melhorar performance
+              showValues: false,  // ✅ Desabilitado para melhorar performance
               style: StackedBarChartStyle(
                 backgroundColor: colorScheme.surface,
                 gridColor: colorScheme.outline.withValues(alpha: 0.2),
@@ -1030,9 +1037,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
                 ),
-                // Colunas finas - barSpacing menor = barras mais largas, maior = barras mais finas
-                barSpacing: 0.3, // Espaço maior entre barras (colunas mais finas)
-                cornerRadius: 2, // Cantos arredondados pequenos
+                barSpacing: 0.3,
+                cornerRadius: 2,
               ),
             ),
           );
@@ -1056,6 +1062,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               : 160.0;
 
           // Gráfico simples (mais de 5 gatos)
+          // PERFORMANCE: Desabilitar grid e values para melhorar Raster
           return SizedBox(
             width: safeWidth,
             height: safeHeight,
@@ -1063,12 +1070,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               data: validData,
               width: safeWidth,
               height: safeHeight,
-              showGrid: true,
-              showValues: true,
+              showGrid: false,  // ✅ Desabilitado para melhorar performance
+              showValues: false,  // ✅ Desabilitado para melhorar performance
               style: BarChartStyle(
                 barColor: colorScheme.primary,
                 backgroundColor: colorScheme.surface,
-                barSpacing: 0.3, // Colunas finas - valor maior = barras mais finas
+                barSpacing: 0.3,
                 labelStyle: TextStyle(
                   color: colorScheme.onSurfaceVariant,
                   fontSize: 10,

@@ -311,12 +311,13 @@ class WeightTrendChart extends StatelessWidget {
     
     try {
       debugPrint('[WeightTrendChart] 🎨 Criando MaterialChartLine...');
+      // PERFORMANCE: Desabilitar grid, points e tooltips para melhorar Raster
       final chart = MaterialChartLine(
         data: data,
         width: width,
         height: height,
-        showGrid: true,
-        showPoints: true,
+        showGrid: false,  // ✅ Desabilitado para melhorar performance
+        showPoints: false,  // ✅ Desabilitado para melhorar performance
         showTooltips: false,
         style: LineChartStyle(
           lineColor: theme.colorScheme.primary,

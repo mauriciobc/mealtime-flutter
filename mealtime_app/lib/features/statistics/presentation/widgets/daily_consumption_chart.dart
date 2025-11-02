@@ -106,12 +106,13 @@ class DailyConsumptionChart extends StatelessWidget {
                   child: Builder(
                     builder: (context) {
                       try {
+                        // PERFORMANCE: Desabilitar grid e values para melhorar Raster
                         return MaterialBarChart(
                           data: validData,
                           width: safeWidth,
                           height: safeHeight,
-                          showGrid: true,
-                          showValues: true,
+                          showGrid: false,  // ✅ Desabilitado para melhorar performance
+                          showValues: false,  // ✅ Desabilitado para melhorar performance
                           style: BarChartStyle(
                             barColor: theme.colorScheme.primary,
                             backgroundColor: theme.colorScheme.surface,

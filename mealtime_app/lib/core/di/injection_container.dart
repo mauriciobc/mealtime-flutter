@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -120,15 +121,18 @@ Future<void> init() async {
   // 3. LogInterceptor - deve ser o último para logar tudo
   dio.interceptors.add(AuthInterceptor());
   dio.interceptors.add(ApiResponseInterceptor());
-  dio.interceptors.add(
-    LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      error: true,
-      requestHeader: true,
-      responseHeader: false,
-    ),
-  );
+  // LogInterceptor apenas em debug mode para evitar overhead em produção
+  if (kDebugMode) {
+    dio.interceptors.add(
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        error: true,
+        requestHeader: true,
+        responseHeader: false,
+      ),
+    );
+  }
   sl.registerLazySingleton(() => dio);
   
   // Dio específico para V2 (usado apenas quando necessário)
@@ -149,15 +153,18 @@ Future<void> init() async {
   // 3. LogInterceptor - deve ser o último para logar tudo
   dioV2.interceptors.add(AuthInterceptor());
   dioV2.interceptors.add(ApiResponseInterceptor());
-  dioV2.interceptors.add(
-    LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      error: true,
-      requestHeader: true,
-      responseHeader: false,
-    ),
-  );
+  // LogInterceptor apenas em debug mode para evitar overhead em produção
+  if (kDebugMode) {
+    dioV2.interceptors.add(
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        error: true,
+        requestHeader: true,
+        responseHeader: false,
+      ),
+    );
+  }
   sl.registerLazySingleton<Dio>(() => dioV2, instanceName: 'dioV2');
 
   // API Client

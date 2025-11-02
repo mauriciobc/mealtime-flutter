@@ -34,10 +34,7 @@ class FeedingFormFields extends StatelessWidget {
         children: [
           Row(
             children: [
-              Flexible(
-                flex: 2,
-                child: _buildPortionField(context),
-              ),
+              _buildPortionField(context),
               const SizedBox(width: 8),
               Expanded(
                 child: _buildStatusField(context),
@@ -56,28 +53,31 @@ class FeedingFormFields extends StatelessWidget {
   }
 
   Widget _buildPortionField(BuildContext context) {
-    return TextFormField(
-      initialValue: data.portion.toStringAsFixed(0),
-      decoration: InputDecoration(
-        labelText: 'Porção (g)',
-        suffixText: 'g',
-        border: const OutlineInputBorder(),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 8,
+    return SizedBox(
+      width: 110,
+      child: TextFormField(
+        initialValue: data.portion.toStringAsFixed(0),
+        decoration: InputDecoration(
+          labelText: 'Porção (g)',
+          suffixText: 'g',
+          border: const OutlineInputBorder(),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
         ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+        ],
+        textInputAction: TextInputAction.next,
+        onChanged: (value) {
+          final portion = double.tryParse(value) ?? data.portion;
+          if (portion > 0) {
+            onChanged(data.copyWith(portion: portion));
+          }
+        },
       ),
-      keyboardType: TextInputType.number,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-      ],
-      textInputAction: TextInputAction.next,
-      onChanged: (value) {
-        final portion = double.tryParse(value) ?? data.portion;
-        if (portion > 0) {
-          onChanged(data.copyWith(portion: portion));
-        }
-      },
     );
   }
 
