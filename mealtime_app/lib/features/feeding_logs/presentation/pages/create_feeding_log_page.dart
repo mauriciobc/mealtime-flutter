@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_event.dart';
@@ -145,6 +146,34 @@ class _CreateFeedingLogPageState extends State<CreateFeedingLogPage> {
       return;
     }
 
+    // Obter userId do SimpleAuthBloc
+    final authState = context.read<SimpleAuthBloc>().state;
+    String? userId;
+    
+    if (authState is SimpleAuthSuccess) {
+      userId = authState.user.id;
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Usuário não autenticado. Faça login novamente.',
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+
+    if (userId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('ID do usuário não encontrado'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+
     final scheduledAt = DateTime(
       _selectedDate.year,
       _selectedDate.month,
@@ -159,7 +188,7 @@ class _CreateFeedingLogPageState extends State<CreateFeedingLogPage> {
       householdId: _selectedHomeId!,
       mealType: _selectedType,
       fedAt: scheduledAt,
-      fedBy: 'current-user-id', // TODO: Pegar do auth
+      fedBy: userId,
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),

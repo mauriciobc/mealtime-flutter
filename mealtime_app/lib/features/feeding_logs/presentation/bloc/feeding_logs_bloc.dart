@@ -93,7 +93,10 @@ class FeedingLogsBloc extends Bloc<FeedingLogsEvent, FeedingLogsState> {
   ) async {
     emit(const FeedingLogsLoading());
 
-    final result = await getTodayFeedingLogs(householdId: event.householdId);
+    final result = await getTodayFeedingLogs(
+      householdId: event.householdId,
+      forceRemote: event.forceRemote,
+    );
 
     result.fold(
       (failure) => emit(FeedingLogsError(failure)),

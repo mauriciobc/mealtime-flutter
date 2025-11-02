@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -5,8 +6,12 @@ import 'package:intl/intl.dart';
 import 'package:material_charts/material_charts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
+import 'package:mealtime_app/core/di/injection_container.dart';
+import 'package:mealtime_app/core/supabase/supabase_config.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
+import 'package:mealtime_app/services/notifications/realtime_notification_service.dart';
+import 'package:mealtime_app/services/notifications/notification_service.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
@@ -47,12 +52,18 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   String? _currentHouseholdId;
+  bool _notificationsInitialized = false;
+  int _unreadNotificationsCount = 0; // Inicializar com 0, será carregado do banco
+  Timer? _periodicSyncHandle; // Handle para cancelar periodic sync
 
   @override
   void initState() {
     super.initState();
+    // Registrar observer para detectar quando app volta ao foreground
+    WidgetsBinding.instance.addObserver(this);
+    
     // Carregar dados iniciais
     context.read<CatsBloc>().add(LoadCats());
     // Homes loading is optional - don't block UI if it fails
@@ -61,6 +72,157 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       debugPrint('[HomePage] Failed to load homes (non-critical): $e');
     }
+    // Inicializar notificações REALTIME
+    _initializeNotifications();
+    
+    // Iniciar periodic sync para alimentações
+    _startPeriodicSync();
+  }
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Recarregar dados quando app volta ao foreground
+    if (state == AppLifecycleState.resumed) {
+      debugPrint('[HomePage] App retornou ao foreground, recarregando dados...');
+      _loadFeedingLogs();
+    }
+  }
+  
+  /// Inicia sincronização periódica de feeding logs a cada 30 segundos
+  void _startPeriodicSync() {
+    // Limpar handle anterior se existir
+    _periodicSyncHandle?.cancel();
+    
+    // Criar periodic timer
+    _periodicSyncHandle = _createPeriodicTimer();
+    
+    debugPrint('[HomePage] Periodic sync iniciado (a cada 2 minutos)');
+  }
+  
+  /// Cria um timer periódico que sincroniza feeding logs
+  Timer _createPeriodicTimer() {
+    return Timer.periodic(const Duration(minutes: 2), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      debugPrint('[HomePage] Periodic sync executando...');
+      _loadFeedingLogs(forceRemote: true);
+    });
+  }
+
+  Future<void> _initializeNotifications() async {
+    if (_notificationsInitialized) return;
+    
+    try {
+      // Inicializar NotificationService primeiro
+      final notificationService = sl<NotificationService>();
+      await notificationService.initialize();
+      
+      // Inicializar RealtimeNotificationService
+      final realtimeService = sl<RealtimeNotificationService>();
+      
+      // Configurar callback para incrementar badge quando notificação for recebida
+      realtimeService.onNotificationReceived = _incrementNotificationCount;
+      
+      await realtimeService.initialize();
+      
+      // Buscar notificações não lidas do banco de dados
+      await _loadUnreadNotificationsCount();
+      
+      _notificationsInitialized = true;
+      debugPrint('[HomePage] Notificações REALTIME inicializadas');
+    } catch (e) {
+      debugPrint('[HomePage] Erro ao inicializar notificações: $e');
+    }
+  }
+
+  /// Incrementa o contador de notificações não lidas
+  void _incrementNotificationCount() {
+    if (mounted) {
+      setState(() {
+        _unreadNotificationsCount++;
+      });
+    }
+  }
+
+
+  /// Carrega a contagem de notificações não lidas do banco de dados
+  Future<void> _loadUnreadNotificationsCount() async {
+    try {
+      final supabase = SupabaseConfig.client;
+      final user = supabase.auth.currentUser;
+      
+      if (user == null) {
+        debugPrint('[HomePage] Usuário não autenticado, não é possível carregar notificações');
+        if (mounted) {
+          setState(() {
+            _unreadNotificationsCount = 0;
+          });
+        }
+        return;
+      }
+
+      // Buscar notificações não lidas da tabela notifications
+      // Tentar primeiro com is_read, se falhar, usar read_at
+      try {
+        final response = await supabase
+            .from('notifications')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('is_read', false);
+        
+        if (mounted) {
+          final count = response.length;
+          setState(() {
+            _unreadNotificationsCount = count;
+          });
+          debugPrint('[HomePage] Notificações não lidas carregadas: $_unreadNotificationsCount');
+        }
+      } catch (_) {
+        // Se is_read não existir, usar read_at (timestamp)
+        final response = await supabase
+            .from('notifications')
+            .select('id, read_at')
+            .eq('user_id', user.id);
+        
+        final unreadCount = (response as List)
+            .where((n) => (n as Map<String, dynamic>)['read_at'] == null)
+            .length;
+        
+        if (mounted) {
+          setState(() {
+            _unreadNotificationsCount = unreadCount;
+          });
+          debugPrint('[HomePage] Notificações não lidas carregadas: $_unreadNotificationsCount');
+        }
+      }
+    } catch (e) {
+      debugPrint('[HomePage] Erro ao carregar notificações não lidas: $e');
+      // Em caso de erro, manter o valor atual ou 0
+      if (mounted) {
+        setState(() {
+          _unreadNotificationsCount = 0;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    // Remover observer
+    WidgetsBinding.instance.removeObserver(this);
+    
+    // Cancelar periodic sync
+    _periodicSyncHandle?.cancel();
+    
+    // Desconectar notificações quando sair da página
+    try {
+      sl<RealtimeNotificationService>().disconnect();
+    } catch (e) {
+      debugPrint('[HomePage] Erro ao desconectar notificações: $e');
+    }
+    super.dispose();
   }
 
   @override
@@ -70,7 +232,7 @@ class _HomePageState extends State<HomePage> {
     // Loading is now handled by BlocListener<CatsBloc> only
   }
 
-  void _loadFeedingLogs() {
+  void _loadFeedingLogs({bool forceRemote = false}) {
     final catsState = context.read<CatsBloc>().state;
     final feedingLogsState = context.read<FeedingLogsBloc>().state;
     
@@ -86,18 +248,46 @@ class _HomePageState extends State<HomePage> {
       if (_currentHouseholdId != householdId) {
         _currentHouseholdId = householdId;
         debugPrint('[HomePage] Loading feeding logs for household: $householdId');
-        context.read<FeedingLogsBloc>().add(LoadTodayFeedingLogs(householdId: householdId));
+        context.read<FeedingLogsBloc>().add(
+          LoadTodayFeedingLogs(householdId: householdId, forceRemote: forceRemote),
+        );
       } else {
         debugPrint('[HomePage] Household ID unchanged, checking if reload needed');
         // If household unchanged but no data, reload anyway
-        if (feedingLogsState is! FeedingLogsLoaded || feedingLogsState.feedingLogs.isEmpty) {
-          debugPrint('[HomePage] Reloading feeding logs (no data or not loaded)');
-          context.read<FeedingLogsBloc>().add(LoadTodayFeedingLogs(householdId: householdId));
+        final hasData = _getFeedingLogsFromState(feedingLogsState).isNotEmpty;
+        if (!hasData || forceRemote) {
+          debugPrint(
+            '[HomePage] Reloading feeding logs (no data or not loaded or forceRemote=$forceRemote)',
+          );
+          context.read<FeedingLogsBloc>().add(
+            LoadTodayFeedingLogs(householdId: householdId, forceRemote: forceRemote),
+          );
         }
       }
     } else {
       debugPrint('[HomePage] Cannot load feeding logs: cats not loaded or empty');
     }
+  }
+
+  /// Helper para extrair feeding logs de qualquer estado que os contenha
+  List<FeedingLog> _getFeedingLogsFromState(FeedingLogsState state) {
+    if (state is FeedingLogsLoaded) {
+      return state.feedingLogs;
+    } else if (state is FeedingLogOperationSuccess) {
+      return state.feedingLogs;
+    } else if (state is FeedingLogOperationInProgress) {
+      return state.feedingLogs;
+    }
+    return [];
+  }
+
+  /// Helper para obter a última alimentação de qualquer estado que contenha logs
+  FeedingLog? _getLastFeedingFromState(FeedingLogsState state) {
+    final logs = _getFeedingLogsFromState(state);
+    if (logs.isEmpty) return null;
+    final sorted = List<FeedingLog>.from(logs)
+      ..sort((a, b) => b.fedAt.compareTo(a.fedAt));
+    return sorted.first;
   }
 
   @override
@@ -118,57 +308,81 @@ class _HomePageState extends State<HomePage> {
             });
           }
         },
-        child: BlocBuilder<CatsBloc, CatsState>(
-          builder: (context, catsState) {
-            // Mostrar loader apenas quando está carregando pela primeira vez
-            final bool isLoading = catsState is CatsLoading || 
-                                 (catsState is CatsInitial);
+        child: BlocListener<FeedingLogsBloc, FeedingLogsState>(
+          listener: (context, feedingLogsState) {
+            // Recarregar dados quando uma operação de criação for bem-sucedida
+            if (feedingLogsState is FeedingLogOperationSuccess) {
+              final catsState = context.read<CatsBloc>().state;
+              if (catsState is CatsLoaded && catsState.cats.isNotEmpty) {
+                final householdId = catsState.cats.first.homeId;
+                final feedingLogsBloc = context.read<FeedingLogsBloc>();
+                debugPrint(
+                  '[HomePage] Operação bem-sucedida, recarregando dados para household: $householdId',
+                );
+                // Aguardar um pouco para garantir que o servidor processou
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    if (!mounted) return;
+                    feedingLogsBloc.add(
+                          LoadTodayFeedingLogs(householdId: householdId),
+                        );
+                  });
+                });
+              }
+            }
+          },
+          child: BlocBuilder<CatsBloc, CatsState>(
+            builder: (context, catsState) {
+              // Mostrar loader apenas quando está carregando pela primeira vez
+              final bool isLoading = catsState is CatsLoading || 
+                                   (catsState is CatsInitial);
 
-            return Stack(
-              children: [
-                Scaffold(
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                  body: SafeArea(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildHeader(context),
-                          const SizedBox(height: 24),
-                          _buildSummaryCards(context),
-                          const SizedBox(height: 24),
-                          _buildLastFeedingSection(context),
-                          const SizedBox(height: 24),
-                          _buildFeedingsChartSection(context),
-                          const SizedBox(height: 24),
-                          _buildRecentRecordsSection(context),
-                          const SizedBox(height: 24),
-                          _buildMyCatsSection(context),
-                          const SizedBox(height: 80), // Espaço para a navegação inferior
-                        ],
+              return Stack(
+                children: [
+                  Scaffold(
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    body: SafeArea(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _buildHeader(context),
+                            const SizedBox(height: 24),
+                            _buildSummaryCards(context),
+                            const SizedBox(height: 24),
+                            _buildLastFeedingSection(context),
+                            const SizedBox(height: 24),
+                            _buildFeedingsChartSection(context),
+                            const SizedBox(height: 24),
+                            _buildRecentRecordsSection(context),
+                            const SizedBox(height: 24),
+                            _buildMyCatsSection(context),
+                            const SizedBox(height: 80), // Espaço para a navegação inferior
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  floatingActionButton: FloatingActionButton(
-                    onPressed: _showFeedingBottomSheet,
-                    tooltip: 'Registrar Alimentação',
-                    child: const Icon(Icons.add),
-                  ),
-                  floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-                ),
-                // Overlay de loader Material 3 que não bloqueia listeners
-                if (isLoading)
-                  Material(
-                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
-                    child: const Center(
-                      child: Material3LoadingIndicator(),
+                    floatingActionButton: FloatingActionButton(
+                      onPressed: _showFeedingBottomSheet,
+                      tooltip: 'Registrar Alimentação',
+                      child: const Icon(Icons.add),
                     ),
+                    floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
                   ),
-              ],
-            );
+                  // Overlay de loader Material 3 que não bloqueia listeners
+                  if (isLoading)
+                    Material(
+                      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
+                      child: const Center(
+                        child: Material3LoadingIndicator(),
+                      ),
+                    ),
+                ],
+              );
           },
         ),
       ),
+    ),
     );
   }
 
@@ -187,11 +401,60 @@ class _HomePageState extends State<HomePage> {
           ),
           Row(
             children: [
-              IconButton(
-                icon: Icon(Icons.notifications_outlined, color: Theme.of(context).colorScheme.onSurface),
-                onPressed: () {
-                  // TODO: Implementar notificações
-                },
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.notifications_outlined,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    onPressed: () async {
+                      // Navegar para a página de notificações com callback
+                      await context.push(
+                        AppRouter.notifications,
+                        extra: {
+                          'onUnreadCountChanged': _loadUnreadNotificationsCount,
+                        },
+                      );
+                      
+                      // Recarregar contagem ao voltar da página (backup)
+                      if (mounted) {
+                        await _loadUnreadNotificationsCount();
+                      }
+                    },
+                  ),
+                  // Badge de notificações não lidas
+                  if (_unreadNotificationsCount > 0)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.error,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Center(
+                          child: Text(
+                            _unreadNotificationsCount > 99
+                                ? '99+'
+                                : '$_unreadNotificationsCount',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onError,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               CircleAvatar(
                 radius: 20,
@@ -217,31 +480,41 @@ class _HomePageState extends State<HomePage> {
       builder: (context, catsState) {
         return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
           buildWhen: (previous, current) {
-            // Always rebuild on state type change (Initial -> Loading -> Loaded)
+            // Always rebuild on state type change (Initial -> Loading -> Loaded/Success)
             if (previous.runtimeType != current.runtimeType) return true;
-            if (previous is FeedingLogsLoaded && current is FeedingLogsLoaded) {
-              return previous.feedingLogs.length != current.feedingLogs.length;
+            
+            // Rebuild if both are data states (Loaded or Success) and length changed
+            final prevLogs = _getFeedingLogsFromState(previous);
+            final currLogs = _getFeedingLogsFromState(current);
+            if (prevLogs.length != currLogs.length) return true;
+            
+            // Rebuild if IDs changed (new feeding added)
+            if (prevLogs.isNotEmpty && currLogs.isNotEmpty) {
+              final prevIds = prevLogs.map((e) => e.id).toSet();
+              final currIds = currLogs.map((e) => e.id).toSet();
+              return prevIds != currIds;
             }
+            
             return false;
           },
           builder: (context, feedingLogsState) {
             final catsCount = catsState is CatsLoaded ? catsState.cats.length : 0;
+            final feedingLogs = _getFeedingLogsFromState(feedingLogsState);
+            
             // Count only today's feedings for the summary card
             final now = DateTime.now();
-            final todayCount = feedingLogsState is FeedingLogsLoaded 
-                ? feedingLogsState.feedingLogs.where((feeding) {
-                    final feedingDate = feeding.fedAt;
-                    return feedingDate.year == now.year &&
-                           feedingDate.month == now.month &&
-                           feedingDate.day == now.day;
-                  }).length
-                : 0;
+            final todayCount = feedingLogs.where((feeding) {
+              final feedingDate = feeding.fedAt;
+              return feedingDate.year == now.year &&
+                     feedingDate.month == now.month &&
+                     feedingDate.day == now.day;
+            }).length;
             
             // Calculate average portion from all feeding logs
             double averagePortion = 0.0;
             String averagePortionText = '0g';
-            if (feedingLogsState is FeedingLogsLoaded && feedingLogsState.feedingLogs.isNotEmpty) {
-              final amounts = feedingLogsState.feedingLogs
+            if (feedingLogs.isNotEmpty) {
+              final amounts = feedingLogs
                   .where((f) => f.amount != null && f.amount! > 0)
                   .map((f) => f.amount!)
                   .toList();
@@ -256,8 +529,9 @@ class _HomePageState extends State<HomePage> {
             
             // Get last feeding time
             String lastFeedingTime = '--:--';
-            if (feedingLogsState is FeedingLogsLoaded && feedingLogsState.lastFeeding != null) {
-              lastFeedingTime = _formatTime(feedingLogsState.lastFeeding!.fedAt);
+            final lastFeeding = _getLastFeedingFromState(feedingLogsState);
+            if (lastFeeding != null) {
+              lastFeedingTime = _formatTime(lastFeeding.fedAt);
             }
             
             return Padding(
@@ -338,64 +612,46 @@ class _HomePageState extends State<HomePage> {
         // Inner BlocBuilder for FeedingLogs - has access to catsState from outer builder
         return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
           buildWhen: (previous, current) {
-            // Always rebuild on state type change (Initial -> Loading -> Loaded)
+            // Always rebuild on state type change
             if (previous.runtimeType != current.runtimeType) return true;
-            // Rebuild if both are loaded and data changed
-            if (previous is FeedingLogsLoaded && current is FeedingLogsLoaded) {
-              // Compare by length first (fastest check)
-              if (previous.feedingLogs.length != current.feedingLogs.length) return true;
-              // If same length, compare by IDs
-              if (previous.feedingLogs.isEmpty && current.feedingLogs.isEmpty) return false;
-              final prevIds = previous.feedingLogs.map((e) => e.id).toSet();
-              final currIds = current.feedingLogs.map((e) => e.id).toSet();
+            
+            // Rebuild if data changed
+            final prevLogs = _getFeedingLogsFromState(previous);
+            final currLogs = _getFeedingLogsFromState(current);
+            if (prevLogs.length != currLogs.length) return true;
+            
+            // Compare by IDs if same length
+            if (prevLogs.isNotEmpty && currLogs.isNotEmpty) {
+              final prevIds = prevLogs.map((e) => e.id).toSet();
+              final currIds = currLogs.map((e) => e.id).toSet();
               return prevIds != currIds;
             }
+            
             return false;
           },
           builder: (context, feedingLogsState) {
-            FeedingLog? lastFeeding;
+            final lastFeeding = _getLastFeedingFromState(feedingLogsState);
             Cat? cat;
             
-            // Check if we have feeding logs data
-            if (feedingLogsState is FeedingLogsLoaded) {
-              debugPrint('[HomePage] _buildLastFeedingSection - FeedingLogsLoaded: ${feedingLogsState.feedingLogs.length} logs');
-              lastFeeding = feedingLogsState.lastFeeding;
-              debugPrint('[HomePage] _buildLastFeedingSection - Last feeding: ${lastFeeding?.id ?? 'null'}');
-              
-              if (lastFeeding != null) {
-                debugPrint('[HomePage] _buildLastFeedingSection - Last feeding details - catId: ${lastFeeding.catId}, amount: ${lastFeeding.amount}, fedAt: ${lastFeeding.fedAt}');
-                
-                // Get cat object using optimized O(1) lookup
-                if (catsState is CatsLoaded) {
-                  cat = catsState.getCatById(lastFeeding.catId);
-                  if (cat == null) {
-                    debugPrint('[HomePage] _buildLastFeedingSection - WARNING: Cat not found in map, trying fallback');
-                    // Fallback if cat not in map yet
-                    try {
-                      cat = catsState.cats.firstWhere(
-                        (c) => c.id == lastFeeding!.catId,
-                      );
-                    } catch (e) {
-                      // If no exact match, just use first cat as fallback
-                      if (catsState.cats.isNotEmpty) {
-                        cat = catsState.cats.first;
-                      }
+            if (lastFeeding != null) {
+              // Get cat object using optimized O(1) lookup
+              if (catsState is CatsLoaded) {
+                cat = catsState.getCatById(lastFeeding.catId);
+                if (cat == null) {
+                  debugPrint('[HomePage] _buildLastFeedingSection - WARNING: Cat not found in map, trying fallback');
+                  // Fallback if cat not in map yet
+                  try {
+                    cat = catsState.cats.firstWhere(
+                      (c) => c.id == lastFeeding.catId,
+                    );
+                  } catch (e) {
+                    // If no exact match, just use first cat as fallback
+                    if (catsState.cats.isNotEmpty) {
+                      cat = catsState.cats.first;
                     }
                   }
-                  debugPrint('[HomePage] _buildLastFeedingSection - Cat for ${lastFeeding.catId}: ${cat?.name ?? 'null'}, imageUrl: ${cat?.imageUrl ?? 'null'}');
-                } else {
-                  debugPrint('[HomePage] _buildLastFeedingSection - WARNING: Cats not loaded yet (state: ${catsState.runtimeType})');
                 }
-                debugPrint('[HomePage] _buildLastFeedingSection - WILL DISPLAY lastFeeding: ${lastFeeding.id}, catName: ${cat?.name ?? 'null'}');
-              } else {
-                debugPrint('[HomePage] _buildLastFeedingSection - lastFeeding is NULL - will show empty state');
               }
-            } else if (feedingLogsState is FeedingLogsLoading) {
-              debugPrint('[HomePage] _buildLastFeedingSection - FeedingLogsLoading...');
-            } else if (feedingLogsState is FeedingLogsError) {
-              debugPrint('[HomePage] _buildLastFeedingSection - FeedingLogsError: ${feedingLogsState.failure}');
-            } else {
-              debugPrint('[HomePage] _buildLastFeedingSection - FeedingLogsState: ${feedingLogsState.runtimeType}');
             }
 
         return Padding(
@@ -439,13 +695,38 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
-                                  lastFeeding.amount != null 
-                                      ? '${lastFeeding.amount!.toStringAsFixed(0)}g de ração'
-                                      : 'Ração não especificada',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
+                                Builder(
+                                  builder: (context) {
+                                    final currentUserId = SupabaseConfig.client.auth.currentUser?.id;
+                                    final fedByText = currentUserId != null && 
+                                        lastFeeding.fedBy == currentUserId
+                                        ? 'Você'
+                                        : 'Outro usuário';
+                                    
+                                    final foodTypeText = lastFeeding.foodType ?? 'Ração Seca';
+                                    final amountText = lastFeeding.amount != null 
+                                        ? '${lastFeeding.amount!.toStringAsFixed(0)}g de $foodTypeText'
+                                        : foodTypeText;
+                                    
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          amountText,
+                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Alimentado por $fedByText',
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -516,16 +797,13 @@ class _HomePageState extends State<HomePage> {
         return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
           buildWhen: (previous, current) {
             if (previous.runtimeType != current.runtimeType) return true;
-            if (previous is FeedingLogsLoaded && current is FeedingLogsLoaded) {
-              return previous.feedingLogs.length != current.feedingLogs.length;
-            }
-            return false;
+            final prevLogs = _getFeedingLogsFromState(previous);
+            final currLogs = _getFeedingLogsFromState(current);
+            return prevLogs.length != currLogs.length;
           },
           builder: (context, feedingLogsState) {
             final List<Cat> cats = catsState is CatsLoaded ? catsState.cats : <Cat>[];
-            final List<FeedingLog> feedingLogs = feedingLogsState is FeedingLogsLoaded 
-                ? feedingLogsState.feedingLogs 
-                : <FeedingLog>[];
+            final List<FeedingLog> feedingLogs = _getFeedingLogsFromState(feedingLogsState);
 
             // Processar dados dos últimos 7 dias
             final chartData = _prepareChartData(
@@ -860,21 +1138,18 @@ class _HomePageState extends State<HomePage> {
     return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
       buildWhen: (previous, current) {
         if (previous.runtimeType != current.runtimeType) return true;
-        if (previous is FeedingLogsLoaded && current is FeedingLogsLoaded) {
-          if (previous.feedingLogs.length != current.feedingLogs.length) return true;
-          // Compare first 3 by IDs
-          final prevFirst3 = previous.feedingLogs.take(3).map((e) => e.id).toList();
-          final currFirst3 = current.feedingLogs.take(3).map((e) => e.id).toList();
-          return prevFirst3.length != currFirst3.length || 
-                 prevFirst3.toString() != currFirst3.toString();
-        }
-        return false;
+        final prevLogs = _getFeedingLogsFromState(previous);
+        final currLogs = _getFeedingLogsFromState(current);
+        if (prevLogs.length != currLogs.length) return true;
+        // Compare first 3 by IDs
+        final prevFirst3 = prevLogs.take(3).map((e) => e.id).toList();
+        final currFirst3 = currLogs.take(3).map((e) => e.id).toList();
+        return prevFirst3.length != currFirst3.length || 
+               prevFirst3.toString() != currFirst3.toString();
       },
       builder: (context, state) {
-        List<FeedingLog> recentFeedings = [];
-        if (state is FeedingLogsLoaded) {
-          recentFeedings = state.feedingLogs.take(3).toList();
-        }
+        final allFeedings = _getFeedingLogsFromState(state);
+        final recentFeedings = allFeedings.take(3).toList();
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1116,15 +1391,25 @@ class _HomePageState extends State<HomePage> {
     // Pegar householdId do primeiro gato (assumindo mesmo household)
     final householdId = catsState.cats.first.homeId;
 
+    // Obter os blocs do contexto atual para passar ao bottom sheet
+    final authBloc = context.read<SimpleAuthBloc>();
+    final feedingLogsBloc = context.read<FeedingLogsBloc>();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0),
-      builder: (context) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.9,
-        child: FeedingBottomSheet(
-          availableCats: catsState.cats,
-          householdId: householdId,
+      builder: (bottomSheetContext) => BlocProvider.value(
+        value: authBloc,
+        child: BlocProvider.value(
+          value: feedingLogsBloc,
+          child: SizedBox(
+            height: MediaQuery.of(bottomSheetContext).size.height * 0.9,
+            child: FeedingBottomSheet(
+              availableCats: catsState.cats,
+              householdId: householdId,
+            ),
+          ),
         ),
       ),
     );

@@ -95,25 +95,15 @@ class FeedingLogsRemoteDataSourceImpl implements FeedingLogsRemoteDataSource {
       final requests = feedingLogs.map((feedingLog) => CreateFeedingLogRequest(
         catId: feedingLog.catId,
         mealType: feedingLog.mealType.name,
+        foodType: feedingLog.foodType,
         amount: feedingLog.amount,
         unit: feedingLog.unit,
         notes: feedingLog.notes,
       )).toList();
 
-      // Tentar usar batch endpoint primeiro
-      try {
-        final batchRequest = CreateFeedingLogsBatchRequest(feedings: requests);
-        final apiResponse = await apiService.createFeedingLogsBatch(batchRequest);
-
-        if (apiResponse.success && apiResponse.data != null) {
-          return apiResponse.data!.map((model) => model.toEntity()).toList();
-        }
-      } catch (e) {
-        // Se batch endpoint não existir (404) ou falhar, usar criação paralela
-        // Isso é esperado se o endpoint batch não estiver implementado no backend
-      }
-
-      // Fallback: criar em paralelo usando Future.wait
+      // Desabilitar batch endpoint temporariamente - API tem estrutura diferente
+      // TODO: Implementar batch endpoint quando API estiver pronta
+      print('[FeedingLogsRemoteDataSource] Criando ${requests.length} feedings em paralelo...');
       final results = await Future.wait(
         requests.map((request) async {
           try {
@@ -134,8 +124,11 @@ class FeedingLogsRemoteDataSourceImpl implements FeedingLogsRemoteDataSource {
       );
 
       // Filtrar apenas resultados bem-sucedidos
-      return results.whereType<FeedingLog>().toList();
+      final successfulResults = results.whereType<FeedingLog>().toList();
+      print('[FeedingLogsRemoteDataSource] Feedings criados com sucesso: ${successfulResults.length}/${requests.length}');
+      return successfulResults;
     } catch (e) {
+      print('[FeedingLogsRemoteDataSource] Erro ao criar feedings em lote: $e');
       throw ServerException(
         'Erro ao registrar alimentações em lote: ${e.toString()}',
       );
@@ -145,12 +138,22 @@ class FeedingLogsRemoteDataSourceImpl implements FeedingLogsRemoteDataSource {
   @override
   Future<FeedingLog> createFeedingLog(FeedingLog feedingLog) async {
     try {
-      // API spec expects: { catId, meal_type?, amount?, unit?, notes? }
+      // Validações
+      if (feedingLog.catId.isEmpty) {
+        throw ServerException('catId é obrigatório para registrar alimentação');
+      }
+      
+      if (feedingLog.fedBy.isEmpty) {
+        throw ServerException('fedBy (ID do usuário) é obrigatório para registrar alimentação');
+      }
+
+      // API spec expects: { catId, meal_type?, food_type?, amount?, unit?, notes? }
       final request = CreateFeedingLogRequest(
         catId: feedingLog.catId,
         mealType: feedingLog.mealType.name,
+        foodType: feedingLog.foodType,
         amount: feedingLog.amount,
-        unit: feedingLog.unit,
+        unit: feedingLog.unit ?? 'g', // Default para gramas se não especificado
         notes: feedingLog.notes,
       );
 
@@ -162,7 +165,13 @@ class FeedingLogsRemoteDataSourceImpl implements FeedingLogsRemoteDataSource {
         );
       }
 
+      if (apiResponse.data == null) {
+        throw ServerException('Resposta da API não contém dados do feeding log');
+      }
+
       return apiResponse.data!.toEntity();
+    } on ServerException {
+      rethrow; // Re-lançar ServerException sem modificar
     } catch (e) {
       throw ServerException(
         'Erro ao registrar alimentação: ${e.toString()}',
@@ -176,6 +185,7 @@ class FeedingLogsRemoteDataSourceImpl implements FeedingLogsRemoteDataSource {
       final request = CreateFeedingLogRequest(
         catId: feedingLog.catId,
         mealType: feedingLog.mealType.name,
+        foodType: feedingLog.foodType,
         amount: feedingLog.amount,
         unit: feedingLog.unit,
         notes: feedingLog.notes,

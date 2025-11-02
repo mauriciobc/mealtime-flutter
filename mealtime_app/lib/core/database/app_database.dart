@@ -6,6 +6,7 @@ import 'package:mealtime_app/core/database/tables/profiles.dart';
 import 'package:mealtime_app/core/database/tables/schedules.dart';
 import 'package:mealtime_app/core/database/tables/sync_queue.dart';
 import 'package:mealtime_app/core/database/tables/weight_logs.dart';
+import 'package:mealtime_app/core/database/tables/weight_goals.dart';
 import 'package:mealtime_app/core/database/database_connection.dart';
 
 import 'daos/cats_dao.dart';
@@ -14,6 +15,7 @@ import 'daos/households_dao.dart';
 import 'daos/schedules_dao.dart';
 import 'daos/sync_queue_dao.dart';
 import 'daos/weight_logs_dao.dart';
+import 'daos/weight_goals_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -25,6 +27,7 @@ part 'app_database.g.dart';
     FeedingLogs,
     Schedules,
     WeightLogs,
+    WeightGoals,
     SyncQueue,
   ],
   daos: [
@@ -33,6 +36,7 @@ part 'app_database.g.dart';
     FeedingLogsDao,
     SchedulesDao,
     WeightLogsDao,
+    WeightGoalsDao,
     SyncQueueDao,
   ],
 )
@@ -40,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(createDatabaseConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -82,6 +86,11 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(schedules);
           await m.createTable(weightLogs);
           await m.createTable(syncQueue);
+        }
+        if (from < 3) {
+          // Migração da versão 2 para 3
+          // Adicionar tabela de weight goals
+          await m.createTable(weightGoals);
         }
       },
     );

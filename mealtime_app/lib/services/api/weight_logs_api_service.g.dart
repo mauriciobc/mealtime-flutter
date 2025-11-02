@@ -13,7 +13,9 @@ class _WeightLogsApiService implements WeightLogsApiService {
     this._dio, {
     this.baseUrl,
     this.errorLogger,
-  });
+  }) {
+    baseUrl ??= 'https://mealtime.app.br/api/v2';
+  }
 
   final Dio _dio;
 

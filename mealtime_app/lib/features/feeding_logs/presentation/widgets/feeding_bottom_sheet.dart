@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mealtime_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
@@ -267,11 +267,11 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
     setState(() => _isSubmitting = true);
 
     try {
-      // Obter userId do AuthBloc
-      final authState = context.read<AuthBloc>().state;
+      // Obter userId do SimpleAuthBloc
+      final authState = context.read<SimpleAuthBloc>().state;
       String? userId;
       
-      if (authState is AuthSuccess) {
+      if (authState is SimpleAuthSuccess) {
         userId = authState.user.id;
       } else {
         // Se não estiver autenticado, mostrar erro
@@ -304,7 +304,8 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
           id: const Uuid().v4(),
           catId: catId,
           householdId: widget.householdId,
-          mealType: MealType.snack,
+          mealType: MealType.snack, // Snack será mapeado para 'manual' na API
+          foodType: data.foodType,
           fedAt: now,
           fedBy: userId,
           amount: data.portion,
@@ -322,8 +323,16 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
         feedingLogsBloc.add(CreateFeedingLogsBatch(feedingLogs));
       }
 
-      // Aguardar processamento
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Aguardar processamento (timeout de 3 segundos)
+      final timeout = DateTime.now().add(const Duration(seconds: 3));
+      while (mounted && DateTime.now().isBefore(timeout)) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        final currentState = feedingLogsBloc.state;
+        if (currentState is FeedingLogOperationSuccess || 
+            currentState is FeedingLogsError) {
+          break;
+        }
+      }
 
       if (mounted) {
         // Verificar se houve erros
@@ -341,7 +350,10 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
         Navigator.of(context).pop();
 
         // Recarregar feedings após criação usando householdId
-        feedingLogsBloc.add(LoadTodayFeedingLogs(householdId: widget.householdId));
+        // O listener na home page também vai fazer isso, mas garantimos aqui também
+        if (currentState is! FeedingLogsError) {
+          feedingLogsBloc.add(LoadTodayFeedingLogs(householdId: widget.householdId));
+        }
 
         // Mostrar mensagem de sucesso ou erro
         if (lastError != null) {

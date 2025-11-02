@@ -9,13 +9,11 @@ import 'package:mealtime_app/core/router/app_router.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
 import 'package:mealtime_app/core/di/injection_container.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
-import 'package:mealtime_app/features/auth/data/repositories/simple_auth_repository.dart';
-import 'package:mealtime_app/features/auth/domain/usecases/simple_login_usecase.dart'
-    show SimpleLoginUseCase, SimpleRegisterUseCase, SimpleLogoutUseCase, SimpleGetCurrentUserUseCase;
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_bloc.dart';
+import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart';
 
 // Helper function to create a custom text theme with Outfit for headings and Atkinson Hyperlegible for body
 TextTheme _createCustomTextTheme(ColorScheme colorScheme) {
@@ -50,12 +48,6 @@ bool _hasSufficientContrast(Color color1, Color color2, double minDiff) {
   return (lum1 - lum2).abs() >= minDiff;
 }
 
-/// Ajusta uma cor para ter uma luminância específica, preservando matiz e saturação
-Color _adjustColorLightness(Color color, double targetLightness) {
-  final hsl = HSLColor.fromColor(color);
-  return hsl.withLightness(targetLightness.clamp(0.0, 1.0)).toColor();
-}
-
 /// Ajusta uma cor para ter luminância específica e reduz a saturação
 /// Útil para criar cores de containers mais neutras
 Color _adjustColorLightnessAndDesaturate(
@@ -76,7 +68,7 @@ Color _adjustColorLightnessAndDesaturate(
 /// Analisa e ajusta todas as cores do tema para garantir contraste adequado
 /// 
 /// Garante diferenças mínimas entre:
-/// - surface (background) e surfaceVariant
+/// - surface (background) e surfaceContainerHighest
 /// - surface e surfaceContainer (usado em cards)
 /// - surfaceContainer e suas variantes (High, Highest)
 /// 
@@ -101,13 +93,17 @@ ColorScheme _ensureThemeColorContrast(ColorScheme colorScheme) {
   
   ColorScheme adjusted = colorScheme;
   
-  // Ajusta surfaceVariant
-  if (!_hasSufficientContrast(surface, colorScheme.surfaceVariant, minVariantDiff)) {
+  // Ajusta surfaceContainerHighest (substitui surfaceVariant que está deprecated)
+  if (!_hasSufficientContrast(surface, colorScheme.surfaceContainerHighest, minVariantDiff)) {
     final variantLightness = brightness == Brightness.light
         ? baseLightness - minVariantDiff
         : baseLightness + minVariantDiff;
     adjusted = adjusted.copyWith(
-      surfaceVariant: _adjustColorLightness(surface, variantLightness),
+      surfaceContainerHighest: _adjustColorLightnessAndDesaturate(
+        surface,
+        variantLightness,
+        maxContainerSaturation,
+      ),
     );
   }
   
@@ -235,15 +231,28 @@ class MyApp extends StatelessWidget {
     brightness: Brightness.dark,
   );
 
+  /// Constrói um ThemeData a partir de um ColorScheme
+  /// Elimina duplicação entre theme e darkTheme
+  ThemeData _buildTheme(ColorScheme colorScheme) {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: colorScheme,
+      textTheme: _createCustomTextTheme(colorScheme),
+      splashFactory: InkSparkle.splashFactory,
+      // Configura Cards para usarem surfaceContainer (com contraste)
+      // em vez de surface (mesma cor do background)
+      cardTheme: CardThemeData(
+        color: colorScheme.surfaceContainer,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Criar instâncias do sistema simplificado
-    final authRepository = SimpleAuthRepository();
-    final loginUseCase = SimpleLoginUseCase(authRepository);
-    final registerUseCase = SimpleRegisterUseCase(authRepository);
-    final logoutUseCase = SimpleLogoutUseCase(authRepository);
-    final getCurrentUserUseCase = SimpleGetCurrentUserUseCase(authRepository);
-
     return DynamicColorBuilder(
       builder: (lightColorScheme, darkColorScheme) {
         // Ajusta os esquemas de cores para garantir contraste adequado entre todas as cores
@@ -257,12 +266,7 @@ class MyApp extends StatelessWidget {
         return MultiBlocProvider(
           providers: [
             BlocProvider<SimpleAuthBloc>(
-              create: (context) => SimpleAuthBloc(
-                loginUseCase: loginUseCase,
-                registerUseCase: registerUseCase,
-                logoutUseCase: logoutUseCase,
-                getCurrentUserUseCase: getCurrentUserUseCase,
-              ),
+              create: (context) => sl<SimpleAuthBloc>(),
             ),
             BlocProvider<CatsBloc>(
               create: (context) => sl<CatsBloc>(),
@@ -276,40 +280,15 @@ class MyApp extends StatelessWidget {
             BlocProvider<StatisticsBloc>(
               create: (context) => sl<StatisticsBloc>(),
             ),
+            BlocProvider<WeightBloc>(
+              create: (context) => sl<WeightBloc>(),
+            ),
           ],
           child: MaterialApp.router(
             title: 'MealTime',
             debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              useMaterial3: true,
-              colorScheme: adjustedLightScheme,
-              textTheme: _createCustomTextTheme(adjustedLightScheme),
-              splashFactory: InkSparkle.splashFactory,
-              // Configura Cards para usarem surfaceContainer (com contraste)
-              // em vez de surface (mesma cor do background)
-              cardTheme: CardThemeData(
-                color: adjustedLightScheme.surfaceContainer,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            darkTheme: ThemeData(
-              useMaterial3: true,
-              colorScheme: adjustedDarkScheme,
-              textTheme: _createCustomTextTheme(adjustedDarkScheme),
-              splashFactory: InkSparkle.splashFactory,
-              // Configura Cards para usarem surfaceContainer (com contraste)
-              // em vez de surface (mesma cor do background)
-              cardTheme: CardThemeData(
-                color: adjustedDarkScheme.surfaceContainer,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
+            theme: _buildTheme(adjustedLightScheme),
+            darkTheme: _buildTheme(adjustedDarkScheme),
             themeMode: ThemeMode.system,
             routerConfig: AppRouter.router,
           ),

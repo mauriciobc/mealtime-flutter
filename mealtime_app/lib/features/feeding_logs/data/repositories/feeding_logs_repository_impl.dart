@@ -93,11 +93,24 @@ class FeedingLogsRepositoryImpl implements FeedingLogsRepository {
         await localDataSource.cacheFeedingLog(remoteLog);
         await localDataSource.markAsSynced(remoteLog.id);
         return Right(remoteLog);
-      } catch (e) {
-        // Se falhar, adicionar à fila de sincronização
-        debugPrint('[FeedingLogsRepository] Erro ao criar feeding log no servidor: $e');
+      } on ServerException catch (e) {
+        // Erro do servidor - logar e retornar erro
+        debugPrint('[FeedingLogsRepository] Erro ao criar feeding log no servidor: ${e.message}');
+        debugPrint('[FeedingLogsRepository] FeedingLog local: $localFeedingLog');
+        // Retornar erro ao invés de sucesso local
+        return Left(ServerFailure('Erro ao registrar alimentação: ${e.message}'));
+      } on NetworkException catch (e) {
+        // Erro de rede - manter local e retornar
+        debugPrint('[FeedingLogsRepository] Erro de rede ao criar feeding log: ${e.message}');
+        debugPrint('[FeedingLogsRepository] FeedingLog salvo localmente com ID: ${localFeedingLog.id}');
         // Retornar mesmo assim - dados salvos localmente
         return Right(localFeedingLog);
+      } catch (e, stackTrace) {
+        // Erro inesperado - logar detalhes
+        debugPrint('[FeedingLogsRepository] Erro inesperado ao criar feeding log: $e');
+        debugPrint('[FeedingLogsRepository] Stack trace: $stackTrace');
+        debugPrint('[FeedingLogsRepository] FeedingLog local: $localFeedingLog');
+        return Left(ServerFailure('Erro inesperado ao registrar alimentação: ${e.toString()}'));
       }
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
@@ -171,8 +184,22 @@ class FeedingLogsRepositoryImpl implements FeedingLogsRepository {
   }
 
   @override
-  Future<Either<Failure, List<FeedingLog>>> getTodayFeedingLogs({String? householdId}) async {
+  Future<Either<Failure, List<FeedingLog>>> getTodayFeedingLogs({
+    String? householdId,
+    bool forceRemote = false,
+  }) async {
     try {
+      // Se forçar busca remota, buscar diretamente da API
+      if (forceRemote) {
+        debugPrint('[FeedingLogsRepo] Buscando feeding logs remotamente (forceRemote=true)...');
+        final feedingLogs = await remoteDataSource.getFeedingLogs(
+          householdId: householdId,
+        );
+        // Salvar no cache
+        await localDataSource.cacheFeedingLogs(feedingLogs);
+        return Right(feedingLogs);
+      }
+      
       // 1. Retorna dados do banco local imediatamente (se existir)
       debugPrint('[FeedingLogsRepo] Buscando feeding logs do cache local...');
       

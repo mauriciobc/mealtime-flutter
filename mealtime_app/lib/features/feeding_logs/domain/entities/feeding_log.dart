@@ -10,6 +10,7 @@ class FeedingLog extends Equatable {
   final String catId;
   final String householdId;  // ✅ Alterado de homeId para householdId
   final MealType mealType;  // ✅ Renomeado de type para mealType
+  final String? foodType;  // 'Ração Seca', 'Ração Úmida', 'Sachê', 'Petisco'
   final double? amount;
   final String? unit;
   final String? notes;
@@ -23,6 +24,7 @@ class FeedingLog extends Equatable {
     required this.catId,
     required this.householdId,
     required this.mealType,
+    this.foodType,
     this.amount,
     this.unit,
     this.notes,
@@ -38,6 +40,7 @@ class FeedingLog extends Equatable {
         catId,
         householdId,
         mealType,
+        foodType,
         amount,
         unit,
         notes,
@@ -52,6 +55,7 @@ class FeedingLog extends Equatable {
     String? catId,
     String? householdId,
     MealType? mealType,
+    String? foodType,
     double? amount,
     String? unit,
     String? notes,
@@ -65,6 +69,7 @@ class FeedingLog extends Equatable {
       catId: catId ?? this.catId,
       householdId: householdId ?? this.householdId,
       mealType: mealType ?? this.mealType,
+      foodType: foodType ?? this.foodType,
       amount: amount ?? this.amount,
       unit: unit ?? this.unit,
       notes: notes ?? this.notes,
@@ -102,5 +107,20 @@ class FeedingLog extends Equatable {
     if (amount == null) return 'Quantidade não especificada';
     final unitStr = unit ?? 'g';
     return '${amount!.toStringAsFixed(1)} $unitStr';
+  }
+
+  @override
+  String toString() {
+    return 'FeedingLog{'
+        'id: $id, '
+        'catId: $catId, '
+        'householdId: $householdId, '
+        'mealType: ${mealType.name}, '
+        'amount: $amount, '
+        'unit: $unit, '
+        'fedBy: $fedBy, '
+        'fedAt: $fedAt, '
+        'notes: $notes'
+        '}';
   }
 }

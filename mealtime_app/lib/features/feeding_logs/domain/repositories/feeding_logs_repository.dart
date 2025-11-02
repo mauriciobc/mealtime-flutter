@@ -34,5 +34,8 @@ abstract class FeedingLogsRepository {
   Future<Either<Failure, List<FeedingLog>>> getFeedingLogsByCat(String catId);
 
   /// Busca feeding logs de hoje
-  Future<Either<Failure, List<FeedingLog>>> getTodayFeedingLogs({String? householdId});
+  Future<Either<Failure, List<FeedingLog>>> getTodayFeedingLogs({
+    String? householdId,
+    bool forceRemote = false,
+  });
 }

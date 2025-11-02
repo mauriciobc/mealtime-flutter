@@ -19,6 +19,9 @@ import 'package:mealtime_app/features/auth/domain/usecases/register_usecase.dart
 import 'package:mealtime_app/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:mealtime_app/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:mealtime_app/features/auth/data/repositories/simple_auth_repository.dart';
+import 'package:mealtime_app/features/auth/domain/usecases/simple_login_usecase.dart';
+import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/features/cats/data/datasources/cats_remote_datasource.dart';
 import 'package:mealtime_app/features/cats/data/datasources/cats_local_datasource.dart';
 import 'package:mealtime_app/features/cats/data/repositories/cats_repository_impl.dart';
@@ -65,6 +68,25 @@ import 'package:mealtime_app/features/statistics/domain/repositories/statistics_
 import 'package:mealtime_app/features/statistics/domain/usecases/get_statistics.dart';
 import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_bloc.dart';
 import 'package:mealtime_app/services/notifications/notification_service.dart';
+import 'package:mealtime_app/services/notifications/realtime_notification_service.dart';
+import 'package:mealtime_app/services/api/weight_logs_api_service.dart';
+import 'package:mealtime_app/services/api/goals_api_service.dart';
+import 'package:mealtime_app/features/cats/data/datasources/weight_logs_remote_datasource.dart';
+import 'package:mealtime_app/features/weight/data/datasources/weight_logs_local_datasource.dart';
+import 'package:mealtime_app/features/weight/data/datasources/goals_remote_datasource.dart';
+import 'package:mealtime_app/features/weight/data/datasources/goals_local_datasource.dart';
+import 'package:mealtime_app/features/weight/data/repositories/weight_repository_impl.dart';
+import 'package:mealtime_app/features/weight/domain/repositories/weight_repository.dart';
+import 'package:mealtime_app/features/weight/domain/usecases/get_weight_logs.dart';
+import 'package:mealtime_app/features/weight/domain/usecases/get_weight_logs_by_cat.dart';
+import 'package:mealtime_app/features/weight/domain/usecases/get_weight_log_by_id.dart';
+import 'package:mealtime_app/features/weight/domain/usecases/create_weight_log.dart';
+import 'package:mealtime_app/features/weight/domain/usecases/update_weight_log.dart';
+import 'package:mealtime_app/features/weight/domain/usecases/delete_weight_log.dart';
+import 'package:mealtime_app/features/weight/domain/usecases/get_goals.dart';
+import 'package:mealtime_app/features/weight/domain/usecases/get_active_goal_by_cat.dart';
+import 'package:mealtime_app/features/weight/domain/usecases/create_goal.dart';
+import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -339,4 +361,88 @@ Future<void> init() async {
 
   // Notification Service
   sl.registerLazySingleton(() => NotificationService());
+
+  // Realtime Notification Service
+  sl.registerLazySingleton(
+    () => RealtimeNotificationService(sl<NotificationService>()),
+  );
+
+  // SimpleAuth - Repository
+  sl.registerLazySingleton(() => SimpleAuthRepository());
+
+  // SimpleAuth - Use Cases
+  sl.registerLazySingleton(() => SimpleLoginUseCase(sl()));
+  sl.registerLazySingleton(() => SimpleRegisterUseCase(sl()));
+  sl.registerLazySingleton(() => SimpleLogoutUseCase(sl()));
+  sl.registerLazySingleton(() => SimpleGetCurrentUserUseCase(sl()));
+
+  // SimpleAuth - BLoC
+  sl.registerFactory(
+    () => SimpleAuthBloc(
+      loginUseCase: sl(),
+      registerUseCase: sl(),
+      logoutUseCase: sl(),
+      getCurrentUserUseCase: sl(),
+    ),
+  );
+
+  // Weight - API Services
+  // Usa Dio V2 para garantir URL correta /api/v2/weight-logs e /api/v2/goals
+  sl.registerLazySingleton(() => WeightLogsApiService(sl<Dio>(instanceName: 'dioV2')));
+  sl.registerLazySingleton(() => GoalsApiService(sl<Dio>(instanceName: 'dioV2')));
+
+  // Weight - Data Sources
+  sl.registerLazySingleton<WeightLogsRemoteDataSource>(
+    () => WeightLogsRemoteDataSourceImpl(apiService: sl()),
+  );
+
+  sl.registerLazySingleton<WeightLogsLocalDataSource>(
+    () => WeightLogsLocalDataSourceImpl(database: sl()),
+  );
+
+  sl.registerLazySingleton<GoalsRemoteDataSource>(
+    () => GoalsRemoteDataSourceImpl(
+      apiService: sl(),
+    ),
+  );
+
+  sl.registerLazySingleton<GoalsLocalDataSource>(
+    () => GoalsLocalDataSourceImpl(database: sl()),
+  );
+
+  // Weight - Repository
+  sl.registerLazySingleton<WeightRepository>(
+    () => WeightRepositoryImpl(
+      weightLogsRemoteDataSource: sl(),
+      weightLogsLocalDataSource: sl(),
+      goalsRemoteDataSource: sl(),
+      goalsLocalDataSource: sl(),
+    ),
+  );
+
+  // Weight - Use Cases
+  sl.registerLazySingleton(() => GetWeightLogs(sl()));
+  sl.registerLazySingleton(() => GetWeightLogsByCat(sl()));
+  sl.registerLazySingleton(() => GetWeightLogById(sl()));
+  sl.registerLazySingleton(() => CreateWeightLog(sl()));
+  sl.registerLazySingleton(() => UpdateWeightLog(sl()));
+  sl.registerLazySingleton(() => DeleteWeightLog(sl()));
+  sl.registerLazySingleton(() => GetGoals(sl()));
+  sl.registerLazySingleton(() => GetActiveGoalByCat(sl()));
+  sl.registerLazySingleton(() => CreateGoal(sl()));
+
+  // Weight - BLoC
+  sl.registerFactory(
+    () => WeightBloc(
+      getWeightLogs: sl(),
+      getWeightLogsByCat: sl(),
+      getWeightLogById: sl(),
+      createWeightLog: sl(),
+      updateWeightLog: sl(),
+      deleteWeightLog: sl(),
+      getGoals: sl(),
+      getActiveGoalByCat: sl(),
+      createGoal: sl(),
+    ),
+  );
 }

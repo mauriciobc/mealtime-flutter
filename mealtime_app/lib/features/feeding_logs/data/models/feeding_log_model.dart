@@ -45,6 +45,8 @@ class FeedingLogModel {
   final String catId;
   final String householdId;
   final String mealType;  // 'breakfast', 'lunch', 'dinner', 'snack'
+  @JsonKey(name: 'food_type')
+  final String? foodType;  // 'Ração Seca', 'Ração Úmida', 'Sachê', 'Petisco'
   @JsonKey(fromJson: _doubleFromJson, toJson: _doubleToJson)
   final double? amount;
   final String? unit;
@@ -59,6 +61,7 @@ class FeedingLogModel {
     required this.catId,
     required this.householdId,
     required this.mealType,
+    this.foodType,
     this.amount,
     this.unit,
     this.notes,
@@ -80,6 +83,7 @@ class FeedingLogModel {
       catId: feedingLog.catId,
       householdId: feedingLog.householdId,
       mealType: feedingLog.mealType.name,
+      foodType: feedingLog.foodType,
       amount: feedingLog.amount,
       unit: feedingLog.unit,
       notes: feedingLog.notes,
@@ -100,6 +104,7 @@ class FeedingLogModel {
         (e) => e.name == mealType,
         orElse: () => MealType.snack,
       ),
+      foodType: foodType,
       amount: amount,
       unit: unit,
       notes: notes,

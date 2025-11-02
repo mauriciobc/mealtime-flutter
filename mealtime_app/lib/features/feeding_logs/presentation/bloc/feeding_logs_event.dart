@@ -32,11 +32,12 @@ class LoadFeedingLogById extends FeedingLogsEvent {
 
 class LoadTodayFeedingLogs extends FeedingLogsEvent {
   final String? householdId;
+  final bool forceRemote;
 
-  const LoadTodayFeedingLogs({this.householdId});
+  const LoadTodayFeedingLogs({this.householdId, this.forceRemote = false});
 
   @override
-  List<Object?> get props => [householdId];
+  List<Object?> get props => [householdId, forceRemote];
 }
 
 class CreateFeedingLog extends FeedingLogsEvent {

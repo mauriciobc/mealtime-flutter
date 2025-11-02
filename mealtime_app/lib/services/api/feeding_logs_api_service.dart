@@ -72,7 +72,7 @@ class CreateFeedingLogsBatchRequest {
   CreateFeedingLogsBatchRequest({required this.feedings});
 
   Map<String, dynamic> toJson() => {
-        'feedings': feedings.map((f) => f.toJson()).toList(),
+        'logs': feedings.map((f) => f.toJson()).toList(),
       };
 }
 
@@ -81,6 +81,7 @@ class CreateFeedingLogsBatchRequest {
 class CreateFeedingLogRequest {
   final String catId;
   final String? mealType;  // 'breakfast', 'lunch', 'dinner', 'snack' - optional, defaults to 'manual'
+  final String? foodType;  // 'Ração Seca', 'Ração Úmida', 'Sachê', 'Petisco'
   final double? amount;
   final String? unit;  // optional, defaults to 'g'
   final String? notes;  // optional, maxLength 255
@@ -88,6 +89,7 @@ class CreateFeedingLogRequest {
   CreateFeedingLogRequest({
     required this.catId,
     this.mealType,
+    this.foodType,
     this.amount,
     this.unit,
     this.notes,
@@ -95,11 +97,22 @@ class CreateFeedingLogRequest {
 
   Map<String, dynamic> toJson() => {
         'catId': catId,  // camelCase per OpenAPI spec
-        if (mealType != null) 'meal_type': mealType,  // snake_case per OpenAPI spec
+        if (mealType != null) 'meal_type': _mapMealTypeToApi(mealType),  // Map snack to manual
+        if (foodType != null) 'food_type': foodType,  // Tipo de comida
         if (amount != null) 'amount': amount,  // camelCase per OpenAPI spec
         if (unit != null) 'unit': unit,  // camelCase per OpenAPI spec
         if (notes != null) 'notes': notes,  // camelCase per OpenAPI spec
       };
+  
+  // Mapeia tipos de refeição do app para tipos aceitos pela API
+  // API aceita: 'manual', 'scheduled', 'automatic'
+  // App usa: 'breakfast', 'lunch', 'dinner', 'snack'
+  String _mapMealTypeToApi(String? mealType) {
+    if (mealType == null) return 'manual';
+    // Todos os tipos são mapeados para 'manual' por enquanto
+    // pois a API não diferencia entre breakfast, lunch, dinner, snack
+    return 'manual';
+  }
 }
 
 // UpdateFeedingLogRequest removido - V2 não suporta atualização de feeding logs

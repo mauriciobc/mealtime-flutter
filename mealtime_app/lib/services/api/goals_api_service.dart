@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:mealtime_app/core/constants/api_constants.dart';
 import 'package:mealtime_app/core/models/api_response.dart';
@@ -7,7 +8,7 @@ part 'goals_api_service.g.dart';
 
 /// API Service para Goals V2
 /// Baseado no endpoint /api/v2/goals do backend conforme OpenAPI spec
-@RestApi()
+@RestApi(baseUrl: ApiConstants.baseUrlV2)
 abstract class GoalsApiService {
   factory GoalsApiService(Dio dio, {String baseUrl}) = _GoalsApiService;
 
@@ -27,13 +28,28 @@ abstract class GoalsApiService {
 }
 
 /// Model de meta de peso
+@JsonSerializable()
 class GoalModel {
   final String id;
+  @JsonKey(name: 'cat_id')
   final String catId;
+  @JsonKey(name: 'target_weight', fromJson: _weightFromJson)
   final double targetWeight;
+  @JsonKey(name: 'target_date')
   final DateTime targetDate;
   final String? notes;
+  @JsonKey(name: 'created_at')
   final DateTime createdAt;
+  @JsonKey(name: 'goal_name', includeFromJson: true)
+  final String? goalName;
+  @JsonKey(name: 'start_weight', includeFromJson: true, fromJson: _nullableWeightFromJson)
+  final double? startWeight;
+  @JsonKey(name: 'unit', includeFromJson: true)
+  final String? unit;
+  @JsonKey(name: 'status', includeFromJson: true)
+  final String? status;
+  @JsonKey(name: 'updated_at', includeFromJson: true)
+  final DateTime? updatedAt;
 
   GoalModel({
     required this.id,
@@ -42,25 +58,32 @@ class GoalModel {
     required this.targetDate,
     this.notes,
     required this.createdAt,
+    this.goalName,
+    this.startWeight,
+    this.unit,
+    this.status,
+    this.updatedAt,
   });
 
-  factory GoalModel.fromJson(Map<String, dynamic> json) => GoalModel(
-    id: json['id'] as String,
-    catId: json['cat_id'] as String,
-    targetWeight: (json['target_weight'] as num).toDouble(),
-    targetDate: DateTime.parse(json['target_date'] as String),
-    notes: json['notes'] as String?,
-    createdAt: DateTime.parse(json['created_at'] as String),
-  );
+  factory GoalModel.fromJson(Map<String, dynamic> json) => _$GoalModelFromJson(json);
+  
+  Map<String, dynamic> toJson() => _$GoalModelToJson(this);
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'cat_id': catId,
-    'target_weight': targetWeight,
-    'target_date': targetDate.toIso8601String(),
-    if (notes != null) 'notes': notes,
-    'created_at': createdAt.toIso8601String(),
-  };
+  /// Helper para converter weight de String para double
+  static double _weightFromJson(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.parse(value);
+    throw FormatException('Cannot convert $value to double');
+  }
+
+  /// Helper para converter weight nullable de String para double
+  static double? _nullableWeightFromJson(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.parse(value);
+    throw FormatException('Cannot convert $value to double');
+  }
+
 }
 
 /// Request para criar uma nova meta

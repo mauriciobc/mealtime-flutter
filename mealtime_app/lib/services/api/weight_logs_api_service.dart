@@ -8,7 +8,7 @@ part 'weight_logs_api_service.g.dart';
 
 /// API Service para Weight Logs V2
 /// Baseado no endpoint /api/v2/weight-logs do backend conforme OpenAPI spec
-@RestApi()
+@RestApi(baseUrl: ApiConstants.baseUrlV2)
 abstract class WeightLogsApiService {
   factory WeightLogsApiService(Dio dio, {String baseUrl}) =
       _WeightLogsApiService;
@@ -61,7 +61,7 @@ class CreateWeightLogRequest {
   Map<String, dynamic> toJson() => {
     'catId': catId,
     'weight': weight,
-    'measuredAt': measuredAt.toIso8601String(),
+    'date': measuredAt.toIso8601String(), // Backend usa 'date' não 'measuredAt'
     if (notes != null) 'notes': notes,
   };
 }
@@ -83,7 +83,7 @@ class UpdateWeightLogRequest {
   Map<String, dynamic> toJson() => {
     'id': id,
     if (weight != null) 'weight': weight,
-    if (measuredAt != null) 'measuredAt': measuredAt!.toIso8601String(),
+    if (measuredAt != null) 'date': measuredAt!.toIso8601String(), // Backend usa 'date' não 'measuredAt'
     if (notes != null) 'notes': notes,
   };
 }

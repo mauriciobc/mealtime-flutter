@@ -4050,6 +4050,650 @@ class WeightLogsCompanion extends UpdateCompanion<WeightLog> {
   }
 }
 
+class $WeightGoalsTable extends WeightGoals
+    with TableInfo<$WeightGoalsTable, WeightGoal> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WeightGoalsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _syncedAtMeta =
+      const VerificationMeta('syncedAt');
+  @override
+  late final GeneratedColumn<DateTime> syncedAt = GeneratedColumn<DateTime>(
+      'synced_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _versionMeta =
+      const VerificationMeta('version');
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+      'version', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(1));
+  static const VerificationMeta _catIdMeta = const VerificationMeta('catId');
+  @override
+  late final GeneratedColumn<String> catId = GeneratedColumn<String>(
+      'cat_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES cats (id)'));
+  static const VerificationMeta _targetWeightMeta =
+      const VerificationMeta('targetWeight');
+  @override
+  late final GeneratedColumn<double> targetWeight = GeneratedColumn<double>(
+      'target_weight', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _startWeightMeta =
+      const VerificationMeta('startWeight');
+  @override
+  late final GeneratedColumn<double> startWeight = GeneratedColumn<double>(
+      'start_weight', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _startDateMeta =
+      const VerificationMeta('startDate');
+  @override
+  late final GeneratedColumn<DateTime> startDate = GeneratedColumn<DateTime>(
+      'start_date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _targetDateMeta =
+      const VerificationMeta('targetDate');
+  @override
+  late final GeneratedColumn<DateTime> targetDate = GeneratedColumn<DateTime>(
+      'target_date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _endDateMeta =
+      const VerificationMeta('endDate');
+  @override
+  late final GeneratedColumn<DateTime> endDate = GeneratedColumn<DateTime>(
+      'end_date', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _isDeletedMeta =
+      const VerificationMeta('isDeleted');
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+      'is_deleted', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_deleted" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        createdAt,
+        updatedAt,
+        syncedAt,
+        version,
+        catId,
+        targetWeight,
+        startWeight,
+        startDate,
+        targetDate,
+        endDate,
+        notes,
+        isDeleted
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'weight_goals';
+  @override
+  VerificationContext validateIntegrity(Insertable<WeightGoal> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('synced_at')) {
+      context.handle(_syncedAtMeta,
+          syncedAt.isAcceptableOrUnknown(data['synced_at']!, _syncedAtMeta));
+    }
+    if (data.containsKey('version')) {
+      context.handle(_versionMeta,
+          version.isAcceptableOrUnknown(data['version']!, _versionMeta));
+    }
+    if (data.containsKey('cat_id')) {
+      context.handle(
+          _catIdMeta, catId.isAcceptableOrUnknown(data['cat_id']!, _catIdMeta));
+    } else if (isInserting) {
+      context.missing(_catIdMeta);
+    }
+    if (data.containsKey('target_weight')) {
+      context.handle(
+          _targetWeightMeta,
+          targetWeight.isAcceptableOrUnknown(
+              data['target_weight']!, _targetWeightMeta));
+    } else if (isInserting) {
+      context.missing(_targetWeightMeta);
+    }
+    if (data.containsKey('start_weight')) {
+      context.handle(
+          _startWeightMeta,
+          startWeight.isAcceptableOrUnknown(
+              data['start_weight']!, _startWeightMeta));
+    } else if (isInserting) {
+      context.missing(_startWeightMeta);
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(_startDateMeta,
+          startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta));
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('target_date')) {
+      context.handle(
+          _targetDateMeta,
+          targetDate.isAcceptableOrUnknown(
+              data['target_date']!, _targetDateMeta));
+    } else if (isInserting) {
+      context.missing(_targetDateMeta);
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(_endDateMeta,
+          endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta));
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(_isDeletedMeta,
+          isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  WeightGoal map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return WeightGoal(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      syncedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}synced_at']),
+      version: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}version'])!,
+      catId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}cat_id'])!,
+      targetWeight: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}target_weight'])!,
+      startWeight: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}start_weight'])!,
+      startDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}start_date'])!,
+      targetDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}target_date'])!,
+      endDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}end_date']),
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      isDeleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_deleted'])!,
+    );
+  }
+
+  @override
+  $WeightGoalsTable createAlias(String alias) {
+    return $WeightGoalsTable(attachedDatabase, alias);
+  }
+}
+
+class WeightGoal extends DataClass implements Insertable<WeightGoal> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? syncedAt;
+  final int version;
+  final String catId;
+  final double targetWeight;
+  final double startWeight;
+  final DateTime startDate;
+  final DateTime targetDate;
+  final DateTime? endDate;
+  final String? notes;
+  final bool isDeleted;
+  const WeightGoal(
+      {required this.id,
+      required this.createdAt,
+      required this.updatedAt,
+      this.syncedAt,
+      required this.version,
+      required this.catId,
+      required this.targetWeight,
+      required this.startWeight,
+      required this.startDate,
+      required this.targetDate,
+      this.endDate,
+      this.notes,
+      required this.isDeleted});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || syncedAt != null) {
+      map['synced_at'] = Variable<DateTime>(syncedAt);
+    }
+    map['version'] = Variable<int>(version);
+    map['cat_id'] = Variable<String>(catId);
+    map['target_weight'] = Variable<double>(targetWeight);
+    map['start_weight'] = Variable<double>(startWeight);
+    map['start_date'] = Variable<DateTime>(startDate);
+    map['target_date'] = Variable<DateTime>(targetDate);
+    if (!nullToAbsent || endDate != null) {
+      map['end_date'] = Variable<DateTime>(endDate);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    return map;
+  }
+
+  WeightGoalsCompanion toCompanion(bool nullToAbsent) {
+    return WeightGoalsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      syncedAt: syncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncedAt),
+      version: Value(version),
+      catId: Value(catId),
+      targetWeight: Value(targetWeight),
+      startWeight: Value(startWeight),
+      startDate: Value(startDate),
+      targetDate: Value(targetDate),
+      endDate: endDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endDate),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      isDeleted: Value(isDeleted),
+    );
+  }
+
+  factory WeightGoal.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return WeightGoal(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      catId: serializer.fromJson<String>(json['catId']),
+      targetWeight: serializer.fromJson<double>(json['targetWeight']),
+      startWeight: serializer.fromJson<double>(json['startWeight']),
+      startDate: serializer.fromJson<DateTime>(json['startDate']),
+      targetDate: serializer.fromJson<DateTime>(json['targetDate']),
+      endDate: serializer.fromJson<DateTime?>(json['endDate']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'syncedAt': serializer.toJson<DateTime?>(syncedAt),
+      'version': serializer.toJson<int>(version),
+      'catId': serializer.toJson<String>(catId),
+      'targetWeight': serializer.toJson<double>(targetWeight),
+      'startWeight': serializer.toJson<double>(startWeight),
+      'startDate': serializer.toJson<DateTime>(startDate),
+      'targetDate': serializer.toJson<DateTime>(targetDate),
+      'endDate': serializer.toJson<DateTime?>(endDate),
+      'notes': serializer.toJson<String?>(notes),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+    };
+  }
+
+  WeightGoal copyWith(
+          {String? id,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> syncedAt = const Value.absent(),
+          int? version,
+          String? catId,
+          double? targetWeight,
+          double? startWeight,
+          DateTime? startDate,
+          DateTime? targetDate,
+          Value<DateTime?> endDate = const Value.absent(),
+          Value<String?> notes = const Value.absent(),
+          bool? isDeleted}) =>
+      WeightGoal(
+        id: id ?? this.id,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
+        version: version ?? this.version,
+        catId: catId ?? this.catId,
+        targetWeight: targetWeight ?? this.targetWeight,
+        startWeight: startWeight ?? this.startWeight,
+        startDate: startDate ?? this.startDate,
+        targetDate: targetDate ?? this.targetDate,
+        endDate: endDate.present ? endDate.value : this.endDate,
+        notes: notes.present ? notes.value : this.notes,
+        isDeleted: isDeleted ?? this.isDeleted,
+      );
+  WeightGoal copyWithCompanion(WeightGoalsCompanion data) {
+    return WeightGoal(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
+      version: data.version.present ? data.version.value : this.version,
+      catId: data.catId.present ? data.catId.value : this.catId,
+      targetWeight: data.targetWeight.present
+          ? data.targetWeight.value
+          : this.targetWeight,
+      startWeight:
+          data.startWeight.present ? data.startWeight.value : this.startWeight,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      targetDate:
+          data.targetDate.present ? data.targetDate.value : this.targetDate,
+      endDate: data.endDate.present ? data.endDate.value : this.endDate,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WeightGoal(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('version: $version, ')
+          ..write('catId: $catId, ')
+          ..write('targetWeight: $targetWeight, ')
+          ..write('startWeight: $startWeight, ')
+          ..write('startDate: $startDate, ')
+          ..write('targetDate: $targetDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('notes: $notes, ')
+          ..write('isDeleted: $isDeleted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      createdAt,
+      updatedAt,
+      syncedAt,
+      version,
+      catId,
+      targetWeight,
+      startWeight,
+      startDate,
+      targetDate,
+      endDate,
+      notes,
+      isDeleted);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is WeightGoal &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.syncedAt == this.syncedAt &&
+          other.version == this.version &&
+          other.catId == this.catId &&
+          other.targetWeight == this.targetWeight &&
+          other.startWeight == this.startWeight &&
+          other.startDate == this.startDate &&
+          other.targetDate == this.targetDate &&
+          other.endDate == this.endDate &&
+          other.notes == this.notes &&
+          other.isDeleted == this.isDeleted);
+}
+
+class WeightGoalsCompanion extends UpdateCompanion<WeightGoal> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> syncedAt;
+  final Value<int> version;
+  final Value<String> catId;
+  final Value<double> targetWeight;
+  final Value<double> startWeight;
+  final Value<DateTime> startDate;
+  final Value<DateTime> targetDate;
+  final Value<DateTime?> endDate;
+  final Value<String?> notes;
+  final Value<bool> isDeleted;
+  final Value<int> rowid;
+  const WeightGoalsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.syncedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.catId = const Value.absent(),
+    this.targetWeight = const Value.absent(),
+    this.startWeight = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.targetDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  WeightGoalsCompanion.insert({
+    required String id,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.syncedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    required String catId,
+    required double targetWeight,
+    required double startWeight,
+    required DateTime startDate,
+    required DateTime targetDate,
+    this.endDate = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        catId = Value(catId),
+        targetWeight = Value(targetWeight),
+        startWeight = Value(startWeight),
+        startDate = Value(startDate),
+        targetDate = Value(targetDate);
+  static Insertable<WeightGoal> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? syncedAt,
+    Expression<int>? version,
+    Expression<String>? catId,
+    Expression<double>? targetWeight,
+    Expression<double>? startWeight,
+    Expression<DateTime>? startDate,
+    Expression<DateTime>? targetDate,
+    Expression<DateTime>? endDate,
+    Expression<String>? notes,
+    Expression<bool>? isDeleted,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (syncedAt != null) 'synced_at': syncedAt,
+      if (version != null) 'version': version,
+      if (catId != null) 'cat_id': catId,
+      if (targetWeight != null) 'target_weight': targetWeight,
+      if (startWeight != null) 'start_weight': startWeight,
+      if (startDate != null) 'start_date': startDate,
+      if (targetDate != null) 'target_date': targetDate,
+      if (endDate != null) 'end_date': endDate,
+      if (notes != null) 'notes': notes,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  WeightGoalsCompanion copyWith(
+      {Value<String>? id,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? syncedAt,
+      Value<int>? version,
+      Value<String>? catId,
+      Value<double>? targetWeight,
+      Value<double>? startWeight,
+      Value<DateTime>? startDate,
+      Value<DateTime>? targetDate,
+      Value<DateTime?>? endDate,
+      Value<String?>? notes,
+      Value<bool>? isDeleted,
+      Value<int>? rowid}) {
+    return WeightGoalsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      syncedAt: syncedAt ?? this.syncedAt,
+      version: version ?? this.version,
+      catId: catId ?? this.catId,
+      targetWeight: targetWeight ?? this.targetWeight,
+      startWeight: startWeight ?? this.startWeight,
+      startDate: startDate ?? this.startDate,
+      targetDate: targetDate ?? this.targetDate,
+      endDate: endDate ?? this.endDate,
+      notes: notes ?? this.notes,
+      isDeleted: isDeleted ?? this.isDeleted,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (syncedAt.present) {
+      map['synced_at'] = Variable<DateTime>(syncedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (catId.present) {
+      map['cat_id'] = Variable<String>(catId.value);
+    }
+    if (targetWeight.present) {
+      map['target_weight'] = Variable<double>(targetWeight.value);
+    }
+    if (startWeight.present) {
+      map['start_weight'] = Variable<double>(startWeight.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<DateTime>(startDate.value);
+    }
+    if (targetDate.present) {
+      map['target_date'] = Variable<DateTime>(targetDate.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<DateTime>(endDate.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WeightGoalsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('version: $version, ')
+          ..write('catId: $catId, ')
+          ..write('targetWeight: $targetWeight, ')
+          ..write('startWeight: $startWeight, ')
+          ..write('startDate: $startDate, ')
+          ..write('targetDate: $targetDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('notes: $notes, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueTable extends SyncQueue
     with TableInfo<$SyncQueueTable, SyncOperation> {
   @override
@@ -4613,6 +5257,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $FeedingLogsTable feedingLogs = $FeedingLogsTable(this);
   late final $SchedulesTable schedules = $SchedulesTable(this);
   late final $WeightLogsTable weightLogs = $WeightLogsTable(this);
+  late final $WeightGoalsTable weightGoals = $WeightGoalsTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   late final CatsDao catsDao = CatsDao(this as AppDatabase);
   late final HouseholdsDao householdsDao = HouseholdsDao(this as AppDatabase);
@@ -4620,6 +5265,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       FeedingLogsDao(this as AppDatabase);
   late final SchedulesDao schedulesDao = SchedulesDao(this as AppDatabase);
   late final WeightLogsDao weightLogsDao = WeightLogsDao(this as AppDatabase);
+  late final WeightGoalsDao weightGoalsDao =
+      WeightGoalsDao(this as AppDatabase);
   late final SyncQueueDao syncQueueDao = SyncQueueDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -4632,6 +5279,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         feedingLogs,
         schedules,
         weightLogs,
+        weightGoals,
         syncQueue
       ];
 }
@@ -5797,6 +6445,20 @@ final class $$CatsTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
+
+  static MultiTypedResultKey<$WeightGoalsTable, List<WeightGoal>>
+      _weightGoalsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.weightGoals,
+          aliasName: $_aliasNameGenerator(db.cats.id, db.weightGoals.catId));
+
+  $$WeightGoalsTableProcessedTableManager get weightGoalsRefs {
+    final manager = $$WeightGoalsTableTableManager($_db, $_db.weightGoals)
+        .filter((f) => f.catId.id($_item.id));
+
+    final cache = $_typedResult.readTableOrNull(_weightGoalsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$CatsTableFilterComposer extends Composer<_$AppDatabase, $CatsTable> {
@@ -5966,6 +6628,27 @@ class $$CatsTableFilterComposer extends Composer<_$AppDatabase, $CatsTable> {
             $$WeightLogsTableFilterComposer(
               $db: $db,
               $table: $db.weightLogs,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> weightGoalsRefs(
+      Expression<bool> Function($$WeightGoalsTableFilterComposer f) f) {
+    final $$WeightGoalsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.weightGoals,
+        getReferencedColumn: (t) => t.catId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WeightGoalsTableFilterComposer(
+              $db: $db,
+              $table: $db.weightGoals,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -6265,6 +6948,27 @@ class $$CatsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> weightGoalsRefs<T extends Object>(
+      Expression<T> Function($$WeightGoalsTableAnnotationComposer a) f) {
+    final $$WeightGoalsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.weightGoals,
+        getReferencedColumn: (t) => t.catId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WeightGoalsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.weightGoals,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$CatsTableTableManager extends RootTableManager<
@@ -6283,7 +6987,8 @@ class $$CatsTableTableManager extends RootTableManager<
         bool ownerId,
         bool feedingLogsRefs,
         bool schedulesRefs,
-        bool weightLogsRefs})> {
+        bool weightLogsRefs,
+        bool weightGoalsRefs})> {
   $$CatsTableTableManager(_$AppDatabase db, $CatsTable table)
       : super(TableManagerState(
           db: db,
@@ -6407,13 +7112,15 @@ class $$CatsTableTableManager extends RootTableManager<
               ownerId = false,
               feedingLogsRefs = false,
               schedulesRefs = false,
-              weightLogsRefs = false}) {
+              weightLogsRefs = false,
+              weightGoalsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (feedingLogsRefs) db.feedingLogs,
                 if (schedulesRefs) db.schedules,
-                if (weightLogsRefs) db.weightLogs
+                if (weightLogsRefs) db.weightLogs,
+                if (weightGoalsRefs) db.weightGoals
               ],
               addJoins: <
                   T extends TableManagerState<
@@ -6485,6 +7192,18 @@ class $$CatsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem: (item,
                                 referencedItems) =>
                             referencedItems.where((e) => e.catId == item.id),
+                        typedResults: items),
+                  if (weightGoalsRefs)
+                    await $_getPrefetchedData(
+                        currentTable: table,
+                        referencedTable:
+                            $$CatsTableReferences._weightGoalsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$CatsTableReferences(db, table, p0)
+                                .weightGoalsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.catId == item.id),
                         typedResults: items)
                 ];
               },
@@ -6509,7 +7228,8 @@ typedef $$CatsTableProcessedTableManager = ProcessedTableManager<
         bool ownerId,
         bool feedingLogsRefs,
         bool schedulesRefs,
-        bool weightLogsRefs})>;
+        bool weightLogsRefs,
+        bool weightGoalsRefs})>;
 typedef $$FeedingLogsTableCreateCompanionBuilder = FeedingLogsCompanion
     Function({
   required String id,
@@ -7774,6 +8494,400 @@ typedef $$WeightLogsTableProcessedTableManager = ProcessedTableManager<
     (WeightLog, $$WeightLogsTableReferences),
     WeightLog,
     PrefetchHooks Function({bool catId})>;
+typedef $$WeightGoalsTableCreateCompanionBuilder = WeightGoalsCompanion
+    Function({
+  required String id,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> syncedAt,
+  Value<int> version,
+  required String catId,
+  required double targetWeight,
+  required double startWeight,
+  required DateTime startDate,
+  required DateTime targetDate,
+  Value<DateTime?> endDate,
+  Value<String?> notes,
+  Value<bool> isDeleted,
+  Value<int> rowid,
+});
+typedef $$WeightGoalsTableUpdateCompanionBuilder = WeightGoalsCompanion
+    Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> syncedAt,
+  Value<int> version,
+  Value<String> catId,
+  Value<double> targetWeight,
+  Value<double> startWeight,
+  Value<DateTime> startDate,
+  Value<DateTime> targetDate,
+  Value<DateTime?> endDate,
+  Value<String?> notes,
+  Value<bool> isDeleted,
+  Value<int> rowid,
+});
+
+final class $$WeightGoalsTableReferences
+    extends BaseReferences<_$AppDatabase, $WeightGoalsTable, WeightGoal> {
+  $$WeightGoalsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CatsTable _catIdTable(_$AppDatabase db) => db.cats
+      .createAlias($_aliasNameGenerator(db.weightGoals.catId, db.cats.id));
+
+  $$CatsTableProcessedTableManager? get catId {
+    if ($_item.catId == null) return null;
+    final manager = $$CatsTableTableManager($_db, $_db.cats)
+        .filter((f) => f.id($_item.catId!));
+    final item = $_typedResult.readTableOrNull(_catIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$WeightGoalsTableFilterComposer
+    extends Composer<_$AppDatabase, $WeightGoalsTable> {
+  $$WeightGoalsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get syncedAt => $composableBuilder(
+      column: $table.syncedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get version => $composableBuilder(
+      column: $table.version, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get targetWeight => $composableBuilder(
+      column: $table.targetWeight, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get startWeight => $composableBuilder(
+      column: $table.startWeight, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get startDate => $composableBuilder(
+      column: $table.startDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get targetDate => $composableBuilder(
+      column: $table.targetDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get endDate => $composableBuilder(
+      column: $table.endDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+      column: $table.isDeleted, builder: (column) => ColumnFilters(column));
+
+  $$CatsTableFilterComposer get catId {
+    final $$CatsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.catId,
+        referencedTable: $db.cats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CatsTableFilterComposer(
+              $db: $db,
+              $table: $db.cats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$WeightGoalsTableOrderingComposer
+    extends Composer<_$AppDatabase, $WeightGoalsTable> {
+  $$WeightGoalsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get syncedAt => $composableBuilder(
+      column: $table.syncedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get version => $composableBuilder(
+      column: $table.version, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get targetWeight => $composableBuilder(
+      column: $table.targetWeight,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get startWeight => $composableBuilder(
+      column: $table.startWeight, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get startDate => $composableBuilder(
+      column: $table.startDate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get targetDate => $composableBuilder(
+      column: $table.targetDate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get endDate => $composableBuilder(
+      column: $table.endDate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+      column: $table.isDeleted, builder: (column) => ColumnOrderings(column));
+
+  $$CatsTableOrderingComposer get catId {
+    final $$CatsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.catId,
+        referencedTable: $db.cats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CatsTableOrderingComposer(
+              $db: $db,
+              $table: $db.cats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$WeightGoalsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WeightGoalsTable> {
+  $$WeightGoalsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get syncedAt =>
+      $composableBuilder(column: $table.syncedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<double> get targetWeight => $composableBuilder(
+      column: $table.targetWeight, builder: (column) => column);
+
+  GeneratedColumn<double> get startWeight => $composableBuilder(
+      column: $table.startWeight, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get targetDate => $composableBuilder(
+      column: $table.targetDate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get endDate =>
+      $composableBuilder(column: $table.endDate, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  $$CatsTableAnnotationComposer get catId {
+    final $$CatsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.catId,
+        referencedTable: $db.cats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CatsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.cats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$WeightGoalsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $WeightGoalsTable,
+    WeightGoal,
+    $$WeightGoalsTableFilterComposer,
+    $$WeightGoalsTableOrderingComposer,
+    $$WeightGoalsTableAnnotationComposer,
+    $$WeightGoalsTableCreateCompanionBuilder,
+    $$WeightGoalsTableUpdateCompanionBuilder,
+    (WeightGoal, $$WeightGoalsTableReferences),
+    WeightGoal,
+    PrefetchHooks Function({bool catId})> {
+  $$WeightGoalsTableTableManager(_$AppDatabase db, $WeightGoalsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$WeightGoalsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WeightGoalsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WeightGoalsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> syncedAt = const Value.absent(),
+            Value<int> version = const Value.absent(),
+            Value<String> catId = const Value.absent(),
+            Value<double> targetWeight = const Value.absent(),
+            Value<double> startWeight = const Value.absent(),
+            Value<DateTime> startDate = const Value.absent(),
+            Value<DateTime> targetDate = const Value.absent(),
+            Value<DateTime?> endDate = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<bool> isDeleted = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              WeightGoalsCompanion(
+            id: id,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            syncedAt: syncedAt,
+            version: version,
+            catId: catId,
+            targetWeight: targetWeight,
+            startWeight: startWeight,
+            startDate: startDate,
+            targetDate: targetDate,
+            endDate: endDate,
+            notes: notes,
+            isDeleted: isDeleted,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> syncedAt = const Value.absent(),
+            Value<int> version = const Value.absent(),
+            required String catId,
+            required double targetWeight,
+            required double startWeight,
+            required DateTime startDate,
+            required DateTime targetDate,
+            Value<DateTime?> endDate = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<bool> isDeleted = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              WeightGoalsCompanion.insert(
+            id: id,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            syncedAt: syncedAt,
+            version: version,
+            catId: catId,
+            targetWeight: targetWeight,
+            startWeight: startWeight,
+            startDate: startDate,
+            targetDate: targetDate,
+            endDate: endDate,
+            notes: notes,
+            isDeleted: isDeleted,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$WeightGoalsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({catId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (catId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.catId,
+                    referencedTable:
+                        $$WeightGoalsTableReferences._catIdTable(db),
+                    referencedColumn:
+                        $$WeightGoalsTableReferences._catIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$WeightGoalsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $WeightGoalsTable,
+    WeightGoal,
+    $$WeightGoalsTableFilterComposer,
+    $$WeightGoalsTableOrderingComposer,
+    $$WeightGoalsTableAnnotationComposer,
+    $$WeightGoalsTableCreateCompanionBuilder,
+    $$WeightGoalsTableUpdateCompanionBuilder,
+    (WeightGoal, $$WeightGoalsTableReferences),
+    WeightGoal,
+    PrefetchHooks Function({bool catId})>;
 typedef $$SyncQueueTableCreateCompanionBuilder = SyncQueueCompanion Function({
   Value<int> id,
   required String entityType,
@@ -8046,6 +9160,8 @@ class $AppDatabaseManager {
       $$SchedulesTableTableManager(_db, _db.schedules);
   $$WeightLogsTableTableManager get weightLogs =>
       $$WeightLogsTableTableManager(_db, _db.weightLogs);
+  $$WeightGoalsTableTableManager get weightGoals =>
+      $$WeightGoalsTableTableManager(_db, _db.weightGoals);
   $$SyncQueueTableTableManager get syncQueue =>
       $$SyncQueueTableTableManager(_db, _db.syncQueue);
 }

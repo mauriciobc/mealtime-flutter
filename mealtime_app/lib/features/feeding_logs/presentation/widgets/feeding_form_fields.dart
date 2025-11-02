@@ -34,7 +34,8 @@ class FeedingFormFields extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(
+              Flexible(
+                flex: 2,
                 child: _buildPortionField(context),
               ),
               const SizedBox(width: 8),

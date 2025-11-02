@@ -8,7 +8,13 @@ class GetTodayFeedingLogs {
 
   GetTodayFeedingLogs(this.repository);
 
-  Future<Either<Failure, List<FeedingLog>>> call({String? householdId}) async {
-    return await repository.getTodayFeedingLogs(householdId: householdId);
+  Future<Either<Failure, List<FeedingLog>>> call({
+    String? householdId,
+    bool forceRemote = false,
+  }) async {
+    return await repository.getTodayFeedingLogs(
+      householdId: householdId,
+      forceRemote: forceRemote,
+    );
   }
 }

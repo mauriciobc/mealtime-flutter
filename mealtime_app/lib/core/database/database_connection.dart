@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 // Importações condicionais para suportar web e nativo
 import 'database_connection_stub.dart'

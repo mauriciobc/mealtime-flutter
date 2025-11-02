@@ -2,12 +2,20 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
-import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
+import 'dart:developer' as developer;
 import 'package:mealtime_app/features/schedules/domain/entities/schedule.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 
+/// Callback para quando uma notificação é tocada
+typedef NotificationTappedCallback = void Function(
+  NotificationResponse response,
+);
+
 /// Serviço de notificações locais
 /// Gerencia o agendamento e exibição de notificações de refeições
+/// Usa flutter_local_notifications para notificações locais
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -17,6 +25,12 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _isInitialized = false;
+  NotificationTappedCallback? _onNotificationTapped;
+
+  /// Configura o callback para quando uma notificação é tocada
+  void setNotificationTappedCallback(NotificationTappedCallback? callback) {
+    _onNotificationTapped = callback;
+  }
 
   /// Inicializa o serviço de notificações
   Future<bool> initialize() async {
@@ -38,9 +52,15 @@ class NotificationService {
         requestSoundPermission: true,
       );
 
-      const initializationSettings = InitializationSettings(
+      // Configuração para Linux (se aplicável)
+      final linuxInitializationSettings = LinuxInitializationSettings(
+        defaultActionName: 'Abrir notificação',
+      );
+
+      final initializationSettings = InitializationSettings(
         android: androidInitializationSettings,
         iOS: iosInitializationSettings,
+        linux: linuxInitializationSettings,
       );
 
       // Solicitar permissões
@@ -49,7 +69,7 @@ class NotificationService {
       // Inicializar plugin
       final bool? initialized = await _notifications.initialize(
         initializationSettings,
-        onDidReceiveNotificationResponse: _onNotificationTapped,
+        onDidReceiveNotificationResponse: _handleNotificationTapped,
       );
 
       _isInitialized = initialized ?? false;
@@ -57,20 +77,77 @@ class NotificationService {
       if (_isInitialized) {
         // Configurar canal para Android
         await _setupAndroidChannel();
+        developer.log(
+          'NotificationService inicializado com sucesso',
+          name: 'NotificationService',
+        );
+      } else {
+        developer.log(
+          'Falha ao inicializar NotificationService',
+          name: 'NotificationService',
+        );
       }
 
       return _isInitialized;
-    } catch (e) {
-      print('[NotificationService] Erro ao inicializar: $e');
+    } catch (e, stackTrace) {
+      developer.log(
+        'Erro ao inicializar: $e',
+        name: 'NotificationService',
+        error: e,
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }
 
+  /// Manipula quando uma notificação é tocada
+  void _handleNotificationTapped(NotificationResponse response) {
+    developer.log(
+      'Notificação tocada: ${response.payload}',
+      name: 'NotificationService',
+    );
+    _onNotificationTapped?.call(response);
+  }
+
   /// Solicita permissões necessárias para notificações
   Future<void> _requestPermissions() async {
-    // Android 13+ precisa de permissão POST_NOTIFICATIONS
-    if (await Permission.notification.isDenied) {
-      await Permission.notification.request();
+    // permission_handler não suporta Linux/Windows/macOS desktop
+    // Apenas Android e iOS precisam de permissões explícitas
+    if (kIsWeb) {
+      developer.log(
+        'Web não suporta permission_handler',
+        name: 'NotificationService',
+      );
+      return;
+    }
+
+    // Verificar se está em plataforma mobile (Android/iOS)
+    final isMobile = Platform.isAndroid || Platform.isIOS;
+    if (!isMobile) {
+      developer.log(
+        'Plataforma ${Platform.operatingSystem} não requer permission_handler',
+        name: 'NotificationService',
+      );
+      return;
+    }
+
+    try {
+      // Android 13+ precisa de permissão POST_NOTIFICATIONS
+      if (await Permission.notification.isDenied) {
+        final status = await Permission.notification.request();
+        developer.log(
+          'Permissão de notificação solicitada: ${status.toString()}',
+          name: 'NotificationService',
+        );
+      }
+    } catch (e, stackTrace) {
+      developer.log(
+        'Erro ao solicitar permissões: $e',
+        name: 'NotificationService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      // Continuar mesmo se falhar - algumas plataformas não precisam de permissões
     }
   }
 
@@ -91,15 +168,6 @@ class NotificationService {
         ?.createNotificationChannel(androidChannel);
   }
 
-  /// Callback quando uma notificação é tocada
-  void _onNotificationTapped(NotificationResponse response) {
-    // Aqui você pode implementar navegação ou outras ações
-    // quando o usuário toca na notificação
-    print(
-        '[NotificationService] Notificação tocada: ${response.payload}',
-    );
-  }
-
   /// Agenda uma notificação de refeição baseada em um schedule
   Future<void> scheduleFeedingNotification({
     required Schedule schedule,
@@ -107,12 +175,18 @@ class NotificationService {
     DateTime? specificDate,
   }) async {
     if (!_isInitialized) {
-      print('[NotificationService] Serviço não inicializado');
+      developer.log(
+        'Serviço não inicializado',
+        name: 'NotificationService',
+      );
       return;
     }
 
     if (!schedule.enabled) {
-      print('[NotificationService] Schedule desabilitado, ignorando');
+      developer.log(
+        'Schedule desabilitado, ignorando',
+        name: 'NotificationService',
+      );
       return;
     }
 
@@ -128,13 +202,19 @@ class NotificationService {
         case ScheduleType.interval:
           // Para intervalos, não agendamos notificações específicas
           // pois são baseadas em eventos (ex: última refeição)
-          print(
-              '[NotificationService] Schedule de intervalo não suporta agendamento direto',
+          developer.log(
+            'Schedule de intervalo não suporta agendamento direto',
+            name: 'NotificationService',
           );
           break;
       }
-    } catch (e) {
-      print('[NotificationService] Erro ao agendar notificação: $e');
+    } catch (e, stackTrace) {
+      developer.log(
+        'Erro ao agendar notificação: $e',
+        name: 'NotificationService',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -177,9 +257,9 @@ class NotificationService {
         await _scheduleNotification(
           id: _generateNotificationId(schedule.id, timeString, date),
           title: 'Hora da refeição! 🐱',
-          body: 'É hora de alimentar ${cat.name}',
+          body: 'É hora de alimentar $cat.name',
           scheduledDate: scheduledDate,
-          payload: '${schedule.id}|${cat.id}|${timeString}',
+          payload: '${schedule.id}|${cat.id}|$timeString',
         );
       }
     }
@@ -253,8 +333,6 @@ class NotificationService {
       scheduledDate,
       notificationDetails,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       payload: payload,
     );
   }
@@ -279,9 +357,33 @@ class NotificationService {
     await cancelAllNotifications();
   }
 
+  /// Cancela uma notificação específica por ID
+  Future<void> cancelNotification(int id) async {
+    await _notifications.cancel(id);
+  }
+
   /// Cancela todas as notificações agendadas
   Future<void> cancelAllNotifications() async {
     await _notifications.cancelAll();
+  }
+
+  /// Obtém lista de notificações pendentes
+  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
+    return await _notifications.pendingNotificationRequests();
+  }
+
+  /// Obtém lista de notificações ativas (suportado em Android 6.0+, iOS 10.0+, macOS 10.14+)
+  Future<List<ActiveNotification>> getActiveNotifications() async {
+    try {
+      return await _notifications.getActiveNotifications();
+    } catch (e) {
+      developer.log(
+        'Erro ao obter notificações ativas: $e',
+        name: 'NotificationService',
+        error: e,
+      );
+      return [];
+    }
   }
 
   /// Agenda notificações para todos os schedules ativos de uma lista
@@ -301,8 +403,9 @@ class NotificationService {
 
       final cat = catsMap[schedule.catId];
       if (cat == null) {
-        print(
-            '[NotificationService] Gato não encontrado para schedule ${schedule.id}',
+        developer.log(
+          'Gato não encontrado para schedule ${schedule.id}',
+          name: 'NotificationService',
         );
         continue;
       }
@@ -316,12 +419,101 @@ class NotificationService {
 
   /// Verifica se as notificações estão habilitadas
   Future<bool> areNotificationsEnabled() async {
-    return await Permission.notification.isGranted;
+    // permission_handler não suporta Linux/Windows/macOS desktop
+    if (kIsWeb) {
+      return true; // Assumir habilitado na web
+    }
+
+    final isMobile = Platform.isAndroid || Platform.isIOS;
+    if (!isMobile) {
+      // Em desktop (Linux/Windows/macOS), assumir que está habilitado
+      // pois não há sistema de permissões explícito
+      return true;
+    }
+
+    try {
+      return await Permission.notification.isGranted;
+    } catch (e, stackTrace) {
+      developer.log(
+        'Erro ao verificar permissões: $e',
+        name: 'NotificationService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      // Se falhar, assumir que está habilitado para não bloquear o fluxo
+      return true;
+    }
   }
 
   /// Abre as configurações do app para o usuário habilitar notificações
   Future<void> openNotificationSettings() async {
-    await openAppSettings();
+    // permission_handler não suporta Linux/Windows/macOS desktop
+    if (kIsWeb) {
+      developer.log(
+        'Web não suporta abertura de configurações',
+        name: 'NotificationService',
+      );
+      return;
+    }
+
+    final isMobile = Platform.isAndroid || Platform.isIOS;
+    if (!isMobile) {
+      developer.log(
+        'Plataforma ${Platform.operatingSystem} não suporta abertura de configurações',
+        name: 'NotificationService',
+      );
+      return;
+    }
+
+    try {
+      await openAppSettings();
+    } catch (e, stackTrace) {
+      developer.log(
+        'Erro ao abrir configurações: $e',
+        name: 'NotificationService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  /// Mostra uma notificação imediata
+  Future<void> show({
+    required int id,
+    required String title,
+    required String body,
+    NotificationDetails? notificationDetails,
+    String? payload,
+  }) async {
+    if (!_isInitialized) {
+      developer.log(
+        'Serviço não inicializado',
+        name: 'NotificationService',
+      );
+      return;
+    }
+
+    final details = notificationDetails ??
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'mealtime_feeding_reminders',
+            'Lembretes de Alimentação',
+            channelDescription:
+                'Notificações de lembretes de refeições dos gatos',
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(),
+        );
+
+    await _notifications.show(id, title, body, details, payload: payload);
+  }
+
+  /// Verifica se o serviço está inicializado
+  bool get isInitialized => _isInitialized;
+
+  /// Obtém detalhes sobre se o app foi lançado via notificação
+  Future<NotificationAppLaunchDetails?> getNotificationAppLaunchDetails() async {
+    return await _notifications.getNotificationAppLaunchDetails();
   }
 }
-

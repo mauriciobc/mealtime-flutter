@@ -19,6 +19,8 @@ class MainNavigationBar extends StatelessWidget {
                location.startsWith('/edit-cat') ||
                location.startsWith('/create-cat')) {
       return 1;
+    } else if (location == '/weight') {
+      return 2;
     } else if (location == '/statistics') {
       return 3;
     } else {
@@ -73,10 +75,7 @@ class MainNavigationBar extends StatelessWidget {
             context.go(AppRouter.cats);
             break;
           case 2:
-            // TODO: Implementar página de peso
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Peso - Em breve!')),
-            );
+            context.go(AppRouter.weight);
             break;
           case 3:
             context.go(AppRouter.statistics);

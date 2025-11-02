@@ -3,6 +3,40 @@
 part of 'goals_api_service.dart';
 
 // **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+GoalModel _$GoalModelFromJson(Map<String, dynamic> json) => GoalModel(
+      id: json['id'] as String,
+      catId: json['cat_id'] as String,
+      targetWeight: GoalModel._weightFromJson(json['target_weight']),
+      targetDate: DateTime.parse(json['target_date'] as String),
+      notes: json['notes'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      goalName: json['goal_name'] as String?,
+      startWeight: GoalModel._nullableWeightFromJson(json['start_weight']),
+      unit: json['unit'] as String?,
+      status: json['status'] as String?,
+      updatedAt: json['updated_at'] == null
+          ? null
+          : DateTime.parse(json['updated_at'] as String),
+    );
+
+Map<String, dynamic> _$GoalModelToJson(GoalModel instance) => <String, dynamic>{
+      'id': instance.id,
+      'cat_id': instance.catId,
+      'target_weight': instance.targetWeight,
+      'target_date': instance.targetDate.toIso8601String(),
+      'notes': instance.notes,
+      'created_at': instance.createdAt.toIso8601String(),
+      'goal_name': instance.goalName,
+      'start_weight': instance.startWeight,
+      'unit': instance.unit,
+      'status': instance.status,
+      'updated_at': instance.updatedAt?.toIso8601String(),
+    };
+
+// **************************************************************************
 // RetrofitGenerator
 // **************************************************************************
 
@@ -13,7 +47,9 @@ class _GoalsApiService implements GoalsApiService {
     this._dio, {
     this.baseUrl,
     this.errorLogger,
-  });
+  }) {
+    baseUrl ??= 'https://mealtime.app.br/api/v2';
+  }
 
   final Dio _dio;
 

@@ -19,9 +19,12 @@ import 'package:mealtime_app/features/homes/presentation/pages/homes_list_page.d
 import 'package:mealtime_app/features/homes/presentation/pages/create_home_page.dart';
 import 'package:mealtime_app/features/homes/presentation/pages/home_detail_page.dart';
 import 'package:mealtime_app/features/statistics/presentation/pages/statistics_page.dart';
+import 'package:mealtime_app/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:mealtime_app/features/weight/presentation/pages/weight_page.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 class AppRouter {
+  // Router configurado com todas as rotas incluindo /notifications
   static final GoRouter _router = GoRouter(
     initialLocation: '/splash',
     routes: [
@@ -156,6 +159,21 @@ class AppRouter {
             path: '/statistics',
             builder: (context, state) => const StatisticsPage(),
           ),
+          GoRoute(
+            path: '/weight',
+            builder: (context, state) => const WeightPage(),
+          ),
+          GoRoute(
+            path: '/notifications',
+            builder: (context, state) {
+              // Obter callback da página home se disponível
+              final extra = state.extra as Map<String, dynamic>?;
+              final onUnreadCountChanged = extra?['onUnreadCountChanged'] as VoidCallback?;
+              return NotificationsPage(
+                onUnreadCountChanged: onUnreadCountChanged,
+              );
+            },
+          ),
         ],
       ),
     ],
@@ -176,6 +194,8 @@ class AppRouter {
   static const String editHome = '/homes';
   static const String homeDetail = '/homes';
   static const String statistics = '/statistics';
+  static const String weight = '/weight';
+  static const String notifications = '/notifications';
 
   static GoRouter get router => _router;
 }
