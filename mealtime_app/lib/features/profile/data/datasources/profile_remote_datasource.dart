@@ -34,6 +34,10 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         );
       }
 
+      if (apiResponse.data == null) {
+        throw ServerException('Perfil retornou vazio');
+      }
+
       return apiResponse.data!.toEntity();
     } catch (e) {
       if (e is ServerException) rethrow;
@@ -58,6 +62,10 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         );
       }
 
+      if (apiResponse.data == null) {
+        throw ServerException('Perfil retornou vazio após atualização');
+      }
+
       return apiResponse.data!.toEntity();
     } catch (e) {
       if (e is ServerException) rethrow;
@@ -69,6 +77,14 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   Future<String> uploadAvatar(String filePath) async {
     try {
       final file = File(filePath);
+      
+      // Verificar se o arquivo existe antes de tentar ler
+      if (!await file.exists()) {
+        throw NotFoundException(
+          'Arquivo não encontrado: $filePath',
+        );
+      }
+      
       final filename = path.basename(file.path);
       
       final formData = FormData.fromMap({
@@ -96,6 +112,12 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
       final uploadResponse = UploadResponse.fromJson(apiResponse.data!);
       return uploadResponse.url;
+    } on NotFoundException {
+      rethrow;
+    } on FileSystemException catch (e) {
+      throw ServerException(
+        'Erro de sistema de arquivos ao fazer upload: ${e.message}',
+      );
     } catch (e, st) {
       if (e is ServerException) rethrow;
       throw ServerException(
@@ -115,10 +137,30 @@ class UploadResponse {
     this.filename,
   });
 
-  factory UploadResponse.fromJson(Map<String, dynamic> json) =>
-      UploadResponse(
-        url: json['url'] as String,
-        filename: json['filename'] as String?,
+  factory UploadResponse.fromJson(Map<String, dynamic> json) {
+    // Validar que o campo 'url' existe e é uma String
+    if (!json.containsKey('url')) {
+      throw ServerException(
+        'Resposta de upload inválida: campo "url" não encontrado',
       );
+    }
+    
+    if (json['url'] == null) {
+      throw ServerException(
+        'Resposta de upload inválida: campo "url" é null',
+      );
+    }
+    
+    if (json['url'] is! String) {
+      throw ServerException(
+        'Resposta de upload inválida: campo "url" não é uma String',
+      );
+    }
+    
+    return UploadResponse(
+      url: json['url'] as String,
+      filename: json['filename'] as String?,
+    );
+  }
 }
 
