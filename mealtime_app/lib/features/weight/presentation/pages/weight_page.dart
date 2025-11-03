@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/core/constants/m3_animation.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart' as cat_entity;
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
@@ -407,18 +408,7 @@ class _WeightPageState extends State<WeightPage> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 32,
-                    backgroundImage: cat.imageUrl != null
-                        ? NetworkImage(cat.imageUrl!)
-                        : null,
-                    onBackgroundImageError: (exception, stackTrace) {
-                      // Ignorar erro silenciosamente
-                    },
-                    child: cat.imageUrl == null
-                        ? Text(cat.name[0].toUpperCase())
-                        : null,
-                  ),
+                  _buildCatAvatar(context, cat),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -709,6 +699,62 @@ class _WeightPageState extends State<WeightPage> {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCatAvatar(BuildContext context, cat_entity.Cat cat) {
+    final imageUrl = cat.imageUrl;
+    final hasValidImageUrl = imageUrl != null &&
+        imageUrl.isNotEmpty &&
+        imageUrl.trim().isNotEmpty &&
+        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
+
+    if (hasValidImageUrl) {
+      final trimmedUrl = imageUrl.trim();
+      return RepaintBoundary(
+        key: ValueKey('cat-avatar-${cat.id}'),
+        child: SizedBox(
+          width: 64,
+          height: 64,
+          child: ClipOval(
+            child: CachedNetworkImage(
+              imageUrl: trimmedUrl,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                width: 64,
+                height: 64,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                width: 64,
+                height: 64,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  Icons.pets,
+                  size: 32,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return CircleAvatar(
+      key: ValueKey('cat-avatar-fallback-${cat.id}'),
+      radius: 32,
+      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+      child: Text(
+        cat.name[0].toUpperCase(),
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
       ),
     );
   }

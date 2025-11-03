@@ -84,8 +84,8 @@ class WeightTrendChart extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Período',
@@ -93,6 +93,7 @@ class WeightTrendChart extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
+                const SizedBox(height: 8),
                 SegmentedButton<int>(
                   segments: const [
                     ButtonSegment(value: 30, label: Text('30 dias')),

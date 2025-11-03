@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
 
 /// Barra de navegação principal que permanece visível em todas as páginas
@@ -44,23 +45,39 @@ class MainNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return NavigationBar(
       selectedIndex: _getSelectedIndex(context),
-      destinations: const [
-        NavigationDestination(
+      destinations: [
+        const NavigationDestination(
           icon: Icon(Icons.home_outlined),
           selectedIcon: Icon(Icons.home),
           label: 'Início',
         ),
         NavigationDestination(
-          icon: Icon(Icons.pets_outlined),
-          selectedIcon: Icon(Icons.pets),
+          icon: SvgPicture.asset(
+            'assets/images/cat-outline.svg',
+            width: 24,
+            height: 24,
+            colorFilter: ColorFilter.mode(
+              Theme.of(context).colorScheme.onSurface,
+              BlendMode.srcIn,
+            ),
+          ),
+          selectedIcon: SvgPicture.asset(
+            'assets/images/cat-bold.svg',
+            width: 24,
+            height: 24,
+            colorFilter: ColorFilter.mode(
+              Theme.of(context).colorScheme.onSurface,
+              BlendMode.srcIn,
+            ),
+          ),
           label: 'Gatos',
         ),
-        NavigationDestination(
+        const NavigationDestination(
           icon: Icon(Icons.monitor_weight_outlined),
           selectedIcon: Icon(Icons.monitor_weight),
           label: 'Peso',
         ),
-        NavigationDestination(
+        const NavigationDestination(
           icon: Icon(Icons.bar_chart_outlined),
           selectedIcon: Icon(Icons.bar_chart),
           label: 'Estatísticas',

@@ -68,9 +68,11 @@ class _CatSelectionFilterState extends State<CatSelectionFilter>
         // --- O Avatar ---
         // Adicionamos padding para dar espaço para a borda ondulante desenhar ao redor.
         // Padding reduzido de 10.0 para 5.0 para diminuir espaço entre avatares.
-        Padding(
-          padding: const EdgeInsets.all(5.0), // Espaço para a borda
-          child: _buildCatAvatar(context, cat, colorScheme),
+        RepaintBoundary(
+          child: Padding(
+            padding: const EdgeInsets.all(5.0), // Espaço para a borda
+            child: _buildCatAvatar(context, cat, colorScheme),
+          ),
         ),
 
         // --- O Estado Selecionado (Borda Ondulante) ---
@@ -115,20 +117,51 @@ class _CatSelectionFilterState extends State<CatSelectionFilter>
 
     if (hasValidImageUrl) {
       final trimmedUrl = imageUrl.trim();
-      return CircleAvatar(
-        radius: 32,
-        backgroundColor: colorScheme.surfaceContainerHighest,
-        backgroundImage: CachedNetworkImageProvider(trimmedUrl),
+      return RepaintBoundary(
+        key: ValueKey('cat-avatar-${cat.id}'),
+        child: SizedBox(
+          width: 64,
+          height: 64,
+          child: ClipOval(
+            child: CachedNetworkImage(
+              imageUrl: trimmedUrl,
+              fit: BoxFit.cover,
+              width: 64,
+              height: 64,
+              placeholder: (context, url) => Container(
+                width: 64,
+                height: 64,
+                color: colorScheme.surfaceContainerHighest,
+                child: const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                width: 64,
+                height: 64,
+                color: colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  Icons.pets,
+                  size: 32,
+                  color: colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
+        ),
       );
     }
 
-    return CircleAvatar(
-      radius: 32,
-      backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-      child: Icon(
-        Icons.pets,
-        size: 32,
-        color: colorScheme.primary,
+    return RepaintBoundary(
+      child: CircleAvatar(
+        key: ValueKey('cat-avatar-fallback-${cat.id}'),
+        radius: 32,
+        backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+        child: Icon(
+          Icons.pets,
+          size: 32,
+          color: colorScheme.primary,
+        ),
       ),
     );
   }
@@ -146,25 +179,28 @@ class _CatSelectionFilterState extends State<CatSelectionFilter>
           final Cat cat = widget.cats[index];
           final bool isSelected = _selectedId == cat.id;
 
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                // Alternar seleção:
-                // Se tocar novamente, desselecionar. Caso contrário, selecionar.
-                if (_selectedId == cat.id) {
-                  _selectedId = null;
-                  _animationController.stop();
-                  _animationController.reset();
-                } else {
-                  _selectedId = cat.id;
-                  _animationController.repeat(); // Iniciar animação ondulante
-                }
-              });
+          return RepaintBoundary(
+            key: ValueKey('cat-selection-item-${cat.id}'),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  // Alternar seleção:
+                  // Se tocar novamente, desselecionar. Caso contrário, selecionar.
+                  if (_selectedId == cat.id) {
+                    _selectedId = null;
+                    _animationController.stop();
+                    _animationController.reset();
+                  } else {
+                    _selectedId = cat.id;
+                    _animationController.repeat(); // Iniciar animação ondulante
+                  }
+                });
 
-              // Notificar o widget pai
-              widget.onSelected(_selectedId);
-            },
-            child: _buildAvatar(context, cat, isSelected),
+                // Notificar o widget pai
+                widget.onSelected(_selectedId);
+              },
+              child: _buildAvatar(context, cat, isSelected),
+            ),
           );
         },
       ),
