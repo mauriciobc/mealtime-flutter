@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:icon_button_m3e/icon_button_m3e.dart';
 
 /// Widget de card de gato para exibir no grid de gatos do household
 class HouseholdCatCard extends StatelessWidget {
@@ -80,20 +81,24 @@ class HouseholdCatCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   if (onEdit != null)
-                    IconButton(
+                    IconButtonM3E(
                       onPressed: onEdit,
-                      icon: const Icon(Icons.edit),
-                      iconSize: 20,
+                      icon: Icon(
+                        Icons.edit,
+                        size: 20,
+                        color: theme.colorScheme.primary,
+                      ),
                       tooltip: 'Editar ${cat.name}',
-                      color: theme.colorScheme.primary,
                     ),
                   if (onDelete != null)
-                    IconButton(
+                    IconButtonM3E(
                       onPressed: onDelete,
-                      icon: const Icon(Icons.delete),
-                      iconSize: 20,
+                      icon: Icon(
+                        Icons.delete,
+                        size: 20,
+                        color: theme.colorScheme.error,
+                      ),
                       tooltip: 'Excluir ${cat.name}',
-                      color: theme.colorScheme.error,
                     ),
                 ],
               ),

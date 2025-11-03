@@ -13,6 +13,8 @@ import 'package:mealtime_app/features/weight/presentation/widgets/add_weight_dia
 import 'package:mealtime_app/features/weight/presentation/widgets/create_goal_dialog.dart';
 import 'package:mealtime_app/features/weight/presentation/widgets/weight_trend_chart.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:fab_m3e/fab_m3e.dart';
+import 'package:progress_indicator_m3e/progress_indicator_m3e.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart' as shared;
 import 'package:mealtime_app/shared/widgets/cat_selection_filter.dart';
 
@@ -549,13 +551,11 @@ class _WeightPageState extends State<WeightPage> {
                 const SizedBox(height: 16),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
+                  child: LinearProgressIndicatorM3E(
                     value: animatedProgress,
-                    minHeight: 8,
-                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Theme.of(context).colorScheme.primary,
-                    ),
+                    size: LinearProgressM3ESize.m,
+                    activeColor: Theme.of(context).colorScheme.primary,
+                    trackColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -726,7 +726,7 @@ class _WeightPageState extends State<WeightPage> {
                 height: 64,
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicatorM3E(size: CircularProgressM3ESize.s),
                 ),
               ),
               errorWidget: (context, url, error) => Container(

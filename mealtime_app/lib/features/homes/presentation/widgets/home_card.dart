@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:icon_button_m3e/icon_button_m3e.dart';
 import 'package:mealtime_app/features/homes/domain/entities/home.dart';
 
 class HomeCard extends StatelessWidget {
@@ -139,26 +140,26 @@ class HomeCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   if (onEdit != null)
-                    IconButton(
+                    IconButtonM3E(
                       onPressed: onEdit,
-                      icon: const Icon(Icons.edit),
-                      iconSize: 20,
+                      icon: const Icon(Icons.edit, size: 20),
                       tooltip: 'Editar',
                     ),
                   if (onSetActive != null && !home.isActive)
-                    IconButton(
+                    IconButtonM3E(
                       onPressed: onSetActive,
-                      icon: const Icon(Icons.home),
-                      iconSize: 20,
+                      icon: const Icon(Icons.home, size: 20),
                       tooltip: 'Definir como Ativa',
                     ),
                   if (onDelete != null)
-                    IconButton(
+                    IconButtonM3E(
                       onPressed: onDelete,
-                      icon: const Icon(Icons.delete),
-                      iconSize: 20,
+                      icon: Icon(
+                        Icons.delete,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                       tooltip: 'Excluir',
-                      color: Theme.of(context).colorScheme.error,
                     ),
                 ],
               ),

@@ -9,6 +9,7 @@ import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart'
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_event.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_state.dart';
 import 'package:uuid/uuid.dart';
+import 'package:progress_indicator_m3e/progress_indicator_m3e.dart';
 
 class CreateGoalDialog extends StatefulWidget {
   final Cat selectedCat;
@@ -380,7 +381,7 @@ class _CreateGoalDialogState extends State<CreateGoalDialog> {
               ? const SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicatorM3E(size: CircularProgressM3ESize.s),
                 )
               : const Text('Criar Meta'),
         ),

@@ -8,6 +8,8 @@ import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/features/cats/presentation/widgets/cat_card.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
+import 'package:icon_button_m3e/icon_button_m3e.dart';
+import 'package:fab_m3e/fab_m3e.dart';
 
 class CatsListPage extends StatefulWidget {
   const CatsListPage({super.key});
@@ -33,7 +35,7 @@ class _CatsListPageState extends State<CatsListPage> {
       appBar: AppBar(
         title: const Text('Meus Gatos'),
         actions: [
-          IconButton(
+          IconButtonM3E(
             onPressed: () {
               context.read<CatsBloc>().add(const RefreshCats());
             },
@@ -127,11 +129,11 @@ class _CatsListPageState extends State<CatsListPage> {
           return const LoadingWidget();
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FabM3E(
+        icon: const Icon(Icons.add),
         onPressed: () {
           context.push(AppRouter.createCat);
         },
-        child: const Icon(Icons.add),
       ),
     );
   }

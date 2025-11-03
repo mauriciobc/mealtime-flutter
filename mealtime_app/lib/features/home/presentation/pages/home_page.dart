@@ -24,6 +24,9 @@ import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_log
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/widgets/feeding_bottom_sheet.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:icon_button_m3e/icon_button_m3e.dart';
+import 'package:fab_m3e/fab_m3e.dart';
+import 'package:progress_indicator_m3e/progress_indicator_m3e.dart';
 
 /// Resultado do processamento de dados do gráfico
 class ChartDataResult {
@@ -370,10 +373,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         ),
                       ),
                     ),
-                    floatingActionButton: FloatingActionButton(
+                    floatingActionButton: FabM3E(
+                      icon: const Icon(Icons.add),
                       onPressed: _showFeedingBottomSheet,
                       tooltip: 'Registrar Alimentação',
-                      child: const Icon(Icons.add),
                     ),
                     floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
                   ),
@@ -412,7 +415,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  IconButton(
+                  IconButtonM3E(
                     icon: Icon(
                       Icons.notifications_outlined,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -1591,11 +1594,9 @@ class _UserAvatarButton extends ConsumerWidget {
                     child: SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).colorScheme.onSecondary,
-                        ),
+                      child: CircularProgressIndicatorM3E(
+                        size: CircularProgressM3ESize.s,
+                        activeColor: Theme.of(context).colorScheme.onSecondary,
                       ),
                     ),
                   ),
@@ -1634,11 +1635,9 @@ class _UserAvatarButton extends ConsumerWidget {
           child: SizedBox(
             width: 16,
             height: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).colorScheme.onSecondary,
-              ),
+            child: CircularProgressIndicatorM3E(
+              size: CircularProgressM3ESize.s,
+              activeColor: Theme.of(context).colorScheme.onSecondary,
             ),
           ),
         ),

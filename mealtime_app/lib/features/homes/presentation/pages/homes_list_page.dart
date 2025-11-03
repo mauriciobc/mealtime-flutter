@@ -5,6 +5,8 @@ import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/homes/presentation/widgets/home_card.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:icon_button_m3e/icon_button_m3e.dart';
+import 'package:fab_m3e/fab_m3e.dart';
 
 class HomesListPage extends StatefulWidget {
   const HomesListPage({super.key});
@@ -27,7 +29,7 @@ class _HomesListPageState extends State<HomesListPage> {
       appBar: AppBar(
         title: const Text('Minhas Residências'),
         actions: [
-          IconButton(
+          IconButtonM3E(
             onPressed: () => context.push('/homes/create'),
             icon: const Icon(Icons.add),
             tooltip: 'Adicionar Residência',
@@ -53,10 +55,10 @@ class _HomesListPageState extends State<HomesListPage> {
           return const LoadingWidget();
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FabM3E(
+        icon: const Icon(Icons.add),
         onPressed: () => context.push('/homes/create'),
         tooltip: 'Adicionar Residência',
-        child: const Icon(Icons.add),
       ),
     );
   }

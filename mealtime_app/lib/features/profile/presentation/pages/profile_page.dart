@@ -9,6 +9,7 @@ import 'package:mealtime_app/features/profile/presentation/widgets/profile_avata
 import 'package:mealtime_app/features/profile/presentation/widgets/profile_tabs_widget.dart';
 import 'package:mealtime_app/features/profile/presentation/widgets/profile_edit_dialog.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:icon_button_m3e/icon_button_m3e.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -32,12 +33,12 @@ class ProfilePage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Perfil'),
         actions: [
-          IconButton(
+          IconButtonM3E(
             onPressed: () => _showEditDialog(context, ref, user.id, profileAsync),
             icon: const Icon(Icons.edit),
             tooltip: 'Editar perfil',
           ),
-          IconButton(
+          IconButtonM3E(
             onPressed: () => _handleLogout(context, ref),
             icon: const Icon(Icons.logout),
             tooltip: 'Sair',

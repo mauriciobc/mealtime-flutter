@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:icon_button_m3e/icon_button_m3e.dart';
 
 class AvatarWidget extends StatefulWidget {
   final String? imageUrl;
@@ -54,7 +55,7 @@ class _AvatarWidgetState extends State<AvatarWidget> {
                     width: 2,
                   ),
                 ),
-                child: IconButton(
+                child: IconButtonM3E(
                   icon: _isLoading
                       ? Material3LoadingIndicator(size: 16.0)
                       : Icon(

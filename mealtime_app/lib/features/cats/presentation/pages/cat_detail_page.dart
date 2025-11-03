@@ -7,6 +7,7 @@ import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
+import 'package:progress_indicator_m3e/progress_indicator_m3e.dart';
 
 class CatDetailPage extends StatefulWidget {
   final String catId;
@@ -377,18 +378,16 @@ class _CatDetailPageState extends State<CatDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LinearProgressIndicator(
+        LinearProgressIndicatorM3E(
           value: progress.clamp(0.0, 1.5),
-          backgroundColor: Theme.of(
+          trackColor: Theme.of(
             context,
           ).colorScheme.surfaceContainerHighest,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            isOverweight
-                ? Theme.of(context).colorScheme.tertiary
-                : isUnderweight
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.secondary,
-          ),
+          activeColor: isOverweight
+              ? Theme.of(context).colorScheme.tertiary
+              : isUnderweight
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.secondary,
         ),
         const SizedBox(height: 8),
         Text(

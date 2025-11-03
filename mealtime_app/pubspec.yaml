@@ -52,6 +52,10 @@ dependencies:
   google_fonts: ^6.1.0
   material_charts: ^0.0.39
   loading_indicator_m3e: ^0.1.1
+  icon_button_m3e: ^0.2.1
+  fab_m3e: ^0.1.1
+  progress_indicator_m3e: ^0.1.1
+  m3e_collection: ^0.3.5
   
   # Utils
   intl: ^0.20.2

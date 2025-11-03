@@ -5,6 +5,7 @@ import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
 import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:icon_button_m3e/icon_button_m3e.dart';
 
 class ProfileAvatarWidget extends ConsumerStatefulWidget {
   final String? imageUrl;
@@ -58,7 +59,7 @@ class _ProfileAvatarWidgetState extends ConsumerState<ProfileAvatarWidget> {
                     width: 2,
                   ),
                 ),
-                child: IconButton(
+                child: IconButtonM3E(
                   icon: _isLoading
                       ? Material3LoadingIndicator(size: 16.0)
                       : Icon(

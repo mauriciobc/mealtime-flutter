@@ -4,6 +4,7 @@ import 'package:mealtime_app/core/supabase/supabase_config.dart';
 import 'package:mealtime_app/features/notifications/domain/entities/notification.dart'
     as notification_entity;
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:icon_button_m3e/icon_button_m3e.dart';
 
 class NotificationsPage extends StatefulWidget {
   /// Callback opcional chamado quando o contador de notificações não lidas muda
@@ -268,7 +269,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       appBar: AppBar(
         title: const Text('Notificações'),
         actions: [
-          IconButton(
+          IconButtonM3E(
             icon: const Icon(Icons.refresh),
             onPressed: _loadNotifications,
             tooltip: 'Atualizar',
@@ -521,7 +522,7 @@ class _NotificationItem extends StatelessWidget {
                 ),
               ),
             // Botão de deletar
-            IconButton(
+            IconButtonM3E(
               icon: Icon(
                 Icons.delete_outline,
                 color: Theme.of(context).colorScheme.error,
@@ -529,11 +530,6 @@ class _NotificationItem extends StatelessWidget {
               ),
               onPressed: onDelete,
               tooltip: 'Deletar notificação',
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 32,
-                minHeight: 32,
-              ),
             ),
           ],
         ),

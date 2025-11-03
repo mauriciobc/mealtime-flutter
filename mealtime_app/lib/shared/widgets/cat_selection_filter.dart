@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
+import 'package:progress_indicator_m3e/progress_indicator_m3e.dart';
 
 /// Widget de seleção de gatos estilo "Avatar Filter" com animação ondulante (wobbly)
 /// Material Design 3.
@@ -133,7 +134,7 @@ class _CatSelectionFilterState extends State<CatSelectionFilter>
                 height: 64,
                 color: colorScheme.surfaceContainerHighest,
                 child: const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicatorM3E(size: CircularProgressM3ESize.s),
                 ),
               ),
               errorWidget: (context, url, error) => Container(

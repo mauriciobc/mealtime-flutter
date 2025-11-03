@@ -6,6 +6,7 @@ import 'package:mealtime_app/features/auth/presentation/pages/login_page.dart';
 import 'package:mealtime_app/shared/widgets/avatar_widget.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/main.dart';
+import 'package:icon_button_m3e/icon_button_m3e.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -208,7 +209,7 @@ class _AccountPageState extends State<AccountPage> {
       appBar: AppBar(
         title: const Text('Perfil'),
         actions: [
-          IconButton(
+          IconButtonM3E(
             onPressed: _signOut,
             icon: const Icon(Icons.logout),
             tooltip: 'Sair',
