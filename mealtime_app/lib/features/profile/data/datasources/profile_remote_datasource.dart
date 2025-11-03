@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:path/path.dart' as path;
 import 'package:mealtime_app/core/errors/exceptions.dart';
 import 'package:mealtime_app/core/constants/api_constants.dart';
 import 'package:mealtime_app/core/models/api_response.dart';
@@ -35,6 +36,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
       return apiResponse.data!.toEntity();
     } catch (e) {
+      if (e is ServerException) rethrow;
       throw ServerException('Erro ao buscar perfil: ${e.toString()}');
     }
   }
@@ -58,6 +60,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
       return apiResponse.data!.toEntity();
     } catch (e) {
+      if (e is ServerException) rethrow;
       throw ServerException('Erro ao atualizar perfil: ${e.toString()}');
     }
   }
@@ -66,7 +69,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   Future<String> uploadAvatar(String filePath) async {
     try {
       final file = File(filePath);
-      final filename = file.path.split('/').last;
+      final filename = path.basename(file.path);
       
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(
@@ -93,8 +96,11 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
       final uploadResponse = UploadResponse.fromJson(apiResponse.data!);
       return uploadResponse.url;
-    } catch (e) {
-      throw ServerException('Erro ao fazer upload: ${e.toString()}');
+    } catch (e, st) {
+      if (e is ServerException) rethrow;
+      throw ServerException(
+        'Erro ao fazer upload: ${e.toString()}\nStack trace: $st',
+      );
     }
   }
 }

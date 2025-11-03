@@ -1,6 +1,9 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
+import 'package:mealtime_app/features/profile/domain/entities/profile.dart';
 import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
 import 'package:mealtime_app/features/profile/presentation/widgets/profile_avatar_widget.dart';
 import 'package:mealtime_app/features/profile/presentation/widgets/profile_tabs_widget.dart';
@@ -135,14 +138,15 @@ class ProfilePage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     String userId,
-    AsyncValue profileAsync,
+    AsyncValue<Profile?> profileAsync,
   ) {
-    if (profileAsync.value == null) return;
+    final profile = profileAsync.value;
+    if (profile == null) return;
 
     showDialog(
       context: context,
       builder: (dialogContext) => ProfileEditDialog(
-        profile: profileAsync.value!,
+        profile: profile,
       ),
     ).then((updatedProfile) async {
       if (updatedProfile != null) {
@@ -180,10 +184,74 @@ class ProfilePage extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () async {
-              Navigator.of(dialogContext).pop();
-              await SupabaseConfig.client.auth.signOut();
-              if (context.mounted) {
-                Navigator.of(context).pushReplacementNamed('/login');
+              try {
+                await SupabaseConfig.client.auth.signOut();
+                // Só fecha o diálogo e navega se o signOut for bem-sucedido
+                if (dialogContext.mounted) {
+                  Navigator.of(dialogContext).pop();
+                }
+                if (context.mounted) {
+                  Navigator.of(context).pushReplacementNamed('/login');
+                }
+              } catch (error, stackTrace) {
+                // Log do erro para debugging
+                developer.log(
+                  'Erro ao fazer logout',
+                  error: error,
+                  stackTrace: stackTrace,
+                  name: 'ProfilePage._handleLogout',
+                );
+
+                // Não fecha o diálogo em caso de erro
+                // Mostra mensagem de erro ao usuário
+                if (dialogContext.mounted) {
+                  // Mostra erro dentro do diálogo de confirmação
+                  showDialog(
+                    context: dialogContext,
+                    builder: (errorDialogContext) => AlertDialog(
+                      title: const Text('Erro ao fazer logout'),
+                      content: SelectableText.rich(
+                        TextSpan(
+                          text: 'Não foi possível fazer logout. ',
+                          style: TextStyle(
+                            color: Theme.of(errorDialogContext)
+                                .colorScheme
+                                .error,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: 'Tente novamente.',
+                              style: TextStyle(
+                                color: Theme.of(errorDialogContext)
+                                    .colorScheme
+                                    .onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(errorDialogContext).pop();
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                } else if (context.mounted) {
+                  // Se o diálogo de confirmação já foi fechado, mostra SnackBar
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Erro ao fazer logout: ${error.toString()}',
+                      ),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      duration: const Duration(seconds: 5),
+                    ),
+                  );
+                }
               }
             },
             child: const Text('Sair'),

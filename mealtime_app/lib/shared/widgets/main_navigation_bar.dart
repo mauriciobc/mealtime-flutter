@@ -43,6 +43,8 @@ class MainNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return NavigationBar(
       selectedIndex: _getSelectedIndex(context),
       destinations: [
@@ -52,22 +54,26 @@ class MainNavigationBar extends StatelessWidget {
           label: 'Início',
         ),
         NavigationDestination(
-          icon: SvgPicture.asset(
-            'assets/images/cat-outline.svg',
-            width: 24,
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).colorScheme.onSurface,
-              BlendMode.srcIn,
+          icon: ExcludeSemantics(
+            child: SvgPicture.asset(
+              'assets/images/cat-outline.svg',
+              width: 24,
+              height: 24,
+              colorFilter: ColorFilter.mode(
+                colorScheme.onSurface,
+                BlendMode.srcIn,
+              ),
             ),
           ),
-          selectedIcon: SvgPicture.asset(
-            'assets/images/cat-bold.svg',
-            width: 24,
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).colorScheme.onSurface,
-              BlendMode.srcIn,
+          selectedIcon: ExcludeSemantics(
+            child: SvgPicture.asset(
+              'assets/images/cat-bold.svg',
+              width: 24,
+              height: 24,
+              colorFilter: ColorFilter.mode(
+                colorScheme.onSurface,
+                BlendMode.srcIn,
+              ),
             ),
           ),
           label: 'Gatos',

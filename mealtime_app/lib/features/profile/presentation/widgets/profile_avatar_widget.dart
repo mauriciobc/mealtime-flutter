@@ -89,7 +89,9 @@ class _ProfileAvatarWidgetState extends ConsumerState<ProfileAvatarWidget> {
 
   Widget _buildPlaceholder() {
     final user = SupabaseConfig.client.auth.currentUser;
-    final initial = user?.email?.substring(0, 1).toUpperCase() ?? 'U';
+    final initial = (user?.email?.trim().isNotEmpty == true)
+        ? user!.email!.trim().substring(0, 1).toUpperCase()
+        : 'U';
     
     return Container(
       color: Theme.of(context).colorScheme.surfaceContainerHighest,

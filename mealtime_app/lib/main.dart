@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -179,12 +180,14 @@ void main() async {
     final exception = details.exception;
     final stack = details.stack;
     
-    // Limitar logs de AssertionError relacionados a parentDataDirty
+    // Limitar logs de AssertionError relacionados a parentDataDirty e acessibilidade
     // pois esses são os que causam loops infinitos
     if (exception is AssertionError) {
       final message = exception.toString();
       if (message.contains('parentDataDirty') || 
-          message.contains('semantics')) {
+          message.contains('semantics') ||
+          message.contains('fl_view_accessible') ||
+          message.contains('child != nullptr')) {
         // Não logar repetidamente o mesmo erro
         // Apenas registrar uma vez para evitar spam
         return;
@@ -206,8 +209,28 @@ void main() async {
     return true; // Indica que o erro foi tratado
   };
 
-  // Inicializar locale para formatação de datas em português
-  await initializeDateFormatting('pt_BR', null);
+  // Inicializar formatos de data para locales suportados
+  // Isso garante que os símbolos de data estejam disponíveis mesmo
+  // se o locale do sistema mudar durante a execução
+  final supportedLocales = ['pt_BR', 'en_US', 'es_ES', 'fr_FR'];
+  for (final locale in supportedLocales) {
+    try {
+      await initializeDateFormatting(locale, null);
+    } catch (e) {
+      debugPrint('[Locale] Falha ao inicializar formato de data para $locale: $e');
+    }
+  }
+  
+  // Também inicializar o locale do sistema se ainda não foi inicializado
+  final systemLocale = PlatformDispatcher.instance.locale;
+  final systemLocaleString = systemLocale.toString();
+  if (!supportedLocales.contains(systemLocaleString)) {
+    try {
+      await initializeDateFormatting(systemLocaleString, null);
+    } catch (e) {
+      debugPrint('[Locale] Locale do sistema $systemLocaleString não suportado, usando pt_BR como fallback');
+    }
+  }
 
   // Inicializar Supabase
   await SupabaseConfig.initialize();
@@ -293,6 +316,17 @@ class MyApp extends StatelessWidget {
               darkTheme: _buildTheme(adjustedDarkScheme),
               themeMode: ThemeMode.system,
               routerConfig: AppRouter.router,
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('pt', 'BR'), // Português do Brasil
+                Locale('en', 'US'), // Inglês
+                Locale('es', 'ES'), // Espanhol
+                Locale('fr', 'FR'), // Francês
+              ],
             ),
           ),
         );

@@ -880,6 +880,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final now = DateTime.now();
     final int catsCount = cats.length;
     final bool useStackedChart = catsCount <= 5;
+    final locale = Localizations.localeOf(context);
     
     if (useStackedChart && catsCount > 0) {
       // Preparar dados para stacked bar chart
@@ -889,7 +890,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       for (int i = 6; i >= 0; i--) {
         final date = now.subtract(Duration(days: i));
         final dateKey = DateFormat('yyyy-MM-dd').format(date);
-        final dayLabel = DateFormat('E', 'pt_BR').format(date).substring(0, 3);
+        final dayLabel = DateFormat('E', locale.toString()).format(date).substring(0, 3);
         
         // Para cada gato, contar alimentações neste dia
         final List<StackedBarSegment> segments = [];
@@ -929,11 +930,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     } else {
       // Preparar dados para bar chart simples (mais de 5 gatos ou sem gatos)
       final List<BarChartData> barData = [];
-      
       for (int i = 6; i >= 0; i--) {
         final date = now.subtract(Duration(days: i));
         final dateKey = DateFormat('yyyy-MM-dd').format(date);
-        final dayLabel = DateFormat('E', 'pt_BR').format(date).substring(0, 3);
+        final dayLabel = DateFormat('E', locale.toString()).format(date).substring(0, 3);
         
         // Contar total de alimentações neste dia
         final dayFeedings = feedingLogs.where((log) {
@@ -1120,11 +1120,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget _buildDayLabels(BuildContext context) {
     final now = DateTime.now();
     final dayLabels = <String>[];
+    final locale = Localizations.localeOf(context);
     
     // Gerar labels dos últimos 7 dias
     for (int i = 6; i >= 0; i--) {
       final date = now.subtract(Duration(days: i));
-      final weekday = DateFormat('E', 'pt_BR').format(date).substring(0, 3);
+      final weekday = DateFormat('E', locale.toString()).format(date).substring(0, 3);
       dayLabels.add(weekday);
     }
 

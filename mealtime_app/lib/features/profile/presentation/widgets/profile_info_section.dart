@@ -12,7 +12,8 @@ class ProfileInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('dd/MM/yyyy', 'pt_BR');
+    final locale = Localizations.localeOf(context);
+    final dateFormat = DateFormat('dd/MM/yyyy', locale.toString());
     
     return Card(
       child: Padding(

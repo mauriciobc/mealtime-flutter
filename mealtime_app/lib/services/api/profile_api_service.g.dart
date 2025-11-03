@@ -64,6 +64,9 @@ class _ProfileApiService implements ProfileApiService {
     String idOrUsername,
     ProfileInputModel request,
   ) async {
+    if (request == null) {
+      throw ArgumentError.notNull('request');
+    }
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};

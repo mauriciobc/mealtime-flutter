@@ -17,19 +17,29 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
 
   @override
   Future<void> cacheProfile(domain.Profile profile) async {
-    final companion = ProfilesCompanion.insert(
-      id: profile.id,
-      username: drift.Value(profile.username),
-      fullName: drift.Value(profile.fullName),
-      email: drift.Value(profile.email),
-      avatarUrl: drift.Value(profile.avatarUrl),
-      timezone: drift.Value(profile.timezone),
-      createdAt: drift.Value(profile.createdAt),
-      updatedAt: drift.Value(profile.updatedAt),
-      syncedAt: drift.Value(DateTime.now()),
-      version: const drift.Value(1),
-    );
-    await database.into(database.profiles).insertOnConflictUpdate(companion);
+    await database.transaction(() async {
+      // Busca o perfil existente para obter a versão atual
+      final query = database.select(database.profiles)
+        ..where((p) => p.id.equals(profile.id));
+      final existing = await query.getSingleOrNull();
+
+      // Calcula a nova versão: incrementa a versão existente ou usa 1 se não existir
+      final newVersion = (existing?.version ?? 0) + 1;
+
+      final companion = ProfilesCompanion.insert(
+        id: profile.id,
+        username: drift.Value(profile.username),
+        fullName: drift.Value(profile.fullName),
+        email: drift.Value(profile.email),
+        avatarUrl: drift.Value(profile.avatarUrl),
+        timezone: drift.Value(profile.timezone),
+        createdAt: drift.Value(profile.createdAt),
+        updatedAt: drift.Value(profile.updatedAt),
+        syncedAt: drift.Value(DateTime.now()),
+        version: drift.Value(newVersion),
+      );
+      await database.into(database.profiles).insertOnConflictUpdate(companion);
+    });
   }
 
   @override

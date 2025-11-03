@@ -22,6 +22,10 @@ abstract class ProfileApiService {
 
   /// Atualiza perfil público
   /// Endpoint: PUT /profile/{idOrUsername} (completo: /api/v2/profile/{idOrUsername})
+  /// 
+  /// NOTA: O parâmetro `request` é não-nullable. Após regenerar o código com
+  /// build_runner, verificar se a validação de null foi preservada no arquivo .g.dart
+  /// na linha onde `request.toJson()` é chamado.
   @PUT('/profile/{idOrUsername}')
   Future<ApiResponse<ProfileModel>> updateProfile(
     @Path('idOrUsername') String idOrUsername,

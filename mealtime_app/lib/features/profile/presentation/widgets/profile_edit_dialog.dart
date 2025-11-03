@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mealtime_app/features/profile/domain/entities/profile.dart';
+import 'package:mealtime_app/features/profile/utils/timezone_helper.dart';
 
 class ProfileEditDialog extends StatefulWidget {
   final Profile profile;
@@ -17,17 +18,25 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
   late TextEditingController _usernameController;
   late TextEditingController _fullNameController;
   late TextEditingController _timezoneController;
+  String _currentTimezone = '';
+  TextEditingController? _autocompleteController;
+  VoidCallback? _autocompleteListener;
 
   @override
   void initState() {
     super.initState();
     _usernameController = TextEditingController(text: widget.profile.username);
     _fullNameController = TextEditingController(text: widget.profile.fullName);
-    _timezoneController = TextEditingController(text: widget.profile.timezone);
+    _currentTimezone = widget.profile.timezone ?? '';
+    _timezoneController = TextEditingController(text: _currentTimezone);
   }
 
   @override
   void dispose() {
+    // Remover listener do controller do Autocomplete se existir
+    if (_autocompleteController != null && _autocompleteListener != null) {
+      _autocompleteController!.removeListener(_autocompleteListener!);
+    }
     _usernameController.dispose();
     _fullNameController.dispose();
     _timezoneController.dispose();
@@ -66,13 +75,65 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
               textCapitalization: TextCapitalization.words,
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _timezoneController,
-              decoration: const InputDecoration(
-                labelText: 'Fuso horário',
-                prefixIcon: Icon(Icons.access_time),
-                hintText: 'Ex: America/Sao_Paulo',
-              ),
+            Autocomplete<String>(
+              initialValue: TextEditingValue(text: _currentTimezone),
+              optionsBuilder: (textEditingValue) {
+                final query = textEditingValue.text.trim();
+                if (query.isEmpty) {
+                  return TimezoneHelper.commonTimezones;
+                }
+                return TimezoneHelper.searchTimezones(query);
+              },
+              fieldViewBuilder: (
+                context,
+                textEditingController,
+                focusNode,
+                onFieldSubmitted,
+              ) {
+                // Armazenar referência ao controller e adicionar listener apenas uma vez
+                if (_autocompleteController != textEditingController) {
+                  // Remover listener anterior se existir
+                  if (_autocompleteController != null && 
+                      _autocompleteListener != null) {
+                    _autocompleteController!.removeListener(_autocompleteListener!);
+                  }
+                  
+                  _autocompleteController = textEditingController;
+                  
+                  // Criar e adicionar novo listener
+                  _autocompleteListener = () {
+                    final newValue = textEditingController.text;
+                    if (_currentTimezone != newValue) {
+                      setState(() {
+                        _currentTimezone = newValue;
+                        _timezoneController.text = newValue;
+                      });
+                    }
+                  };
+                  
+                  textEditingController.addListener(_autocompleteListener!);
+                }
+
+                return TextField(
+                  controller: textEditingController,
+                  focusNode: focusNode,
+                  onSubmitted: (value) => onFieldSubmitted(),
+                  decoration: const InputDecoration(
+                    labelText: 'Fuso horário',
+                    prefixIcon: Icon(Icons.access_time),
+                    hintText: 'Digite para buscar (ex: America/Sao_Paulo)',
+                    helperText: 'Use o formato IANA (ex: America/Sao_Paulo)',
+                  ),
+                  textCapitalization: TextCapitalization.none,
+                );
+              },
+              onSelected: (String selection) {
+                setState(() {
+                  _currentTimezone = selection;
+                  _timezoneController.text = selection;
+                });
+              },
+              displayStringForOption: (String option) => option,
             ),
             const SizedBox(height: 24),
             Row(
@@ -96,19 +157,63 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
   }
 
   void _save() {
+    // Trim e atribuir variáveis locais
+    final username = _usernameController.text.trim();
+    final fullName = _fullNameController.text.trim();
+    final timezone = _currentTimezone.trim();
+
+    // Validar username
+    if (username.isEmpty) {
+      _showError('Username é obrigatório');
+      return;
+    }
+
+    if (username.length < 3) {
+      _showError('Username deve ter pelo menos 3 caracteres');
+      return;
+    }
+
+    if (username.length > 30) {
+      _showError('Username deve ter no máximo 30 caracteres');
+      return;
+    }
+
+    // Validar caracteres permitidos para username (alfanumérico e underscore)
+    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username)) {
+      _showError(
+        'Username pode conter apenas letras, números e underscore',
+      );
+      return;
+    }
+
+    // Validar timezone se fornecido
+    if (timezone.isNotEmpty) {
+      if (!TimezoneHelper.isValidTimezone(timezone)) {
+        _showError(
+          'Timezone inválido. Use um identificador IANA válido '
+          '(ex: America/Sao_Paulo)',
+        );
+        return;
+      }
+    }
+
+    // Se todas as validações passaram, criar o perfil atualizado
     final updatedProfile = widget.profile.copyWith(
-      username: _usernameController.text.trim().isEmpty
-          ? null
-          : _usernameController.text.trim(),
-      fullName: _fullNameController.text.trim().isEmpty
-          ? null
-          : _fullNameController.text.trim(),
-      timezone: _timezoneController.text.trim().isEmpty
-          ? null
-          : _timezoneController.text.trim(),
+      username: username,
+      fullName: fullName.isEmpty ? null : fullName,
+      timezone: timezone.isEmpty ? null : timezone,
     );
 
     Navigator.of(context).pop(updatedProfile);
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
   }
 }
 

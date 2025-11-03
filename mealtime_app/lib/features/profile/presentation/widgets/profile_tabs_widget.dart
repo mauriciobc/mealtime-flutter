@@ -55,11 +55,11 @@ class ProfileTabsWidget extends StatelessWidget {
   }
 
   Widget _buildHomesTab(BuildContext context) {
-    // Carregar homes se não estiverem carregadas
+    // Carregar homes apenas quando estiver no estado inicial
     final homesState = context.watch<HomesBloc>().state;
     
-    if (homesState is! HomesLoaded && homesState is! HomesError) {
-      // Trigger load apenas uma vez
+    if (homesState is HomesInitial) {
+      // Trigger load apenas uma vez no primeiro build
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<HomesBloc>().add(LoadHomes());
       });
@@ -103,8 +103,15 @@ class ProfileTabsWidget extends StatelessWidget {
           return RefreshIndicator(
             onRefresh: () async {
               context.read<HomesBloc>().add(LoadHomes());
-              // Aguardar um pouco para garantir que o estado foi atualizado
-              await Future.delayed(const Duration(milliseconds: 500));
+              // Aguardar até o BLoC emitir um estado terminal (loaded ou error)
+              await context.read<HomesBloc>().stream
+                  .skip(1) // Pular HomesLoading inicial
+                  .where((s) => s is HomesLoaded || s is HomesError)
+                  .first
+                  .timeout(
+                    const Duration(seconds: 10),
+                    onTimeout: () => state,
+                  );
             },
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -125,11 +132,13 @@ class ProfileTabsWidget extends StatelessWidget {
   }
 
   Widget _buildCatsTab(BuildContext context) {
-    // Carregar cats se não estiverem carregados
+    // Carregar cats apenas quando não estiver carregando, carregado ou em erro
     final catsState = context.watch<CatsBloc>().state;
     
-    if (catsState is! CatsLoaded && catsState is! CatsError) {
-      // Trigger load apenas uma vez
+    if (catsState is! CatsLoaded && 
+        catsState is! CatsError && 
+        catsState is! CatsLoading) {
+      // Trigger load apenas uma vez no primeiro build
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<CatsBloc>().add(const LoadCats());
       });
@@ -173,8 +182,15 @@ class ProfileTabsWidget extends StatelessWidget {
           return RefreshIndicator(
             onRefresh: () async {
               context.read<CatsBloc>().add(const LoadCats());
-              // Aguardar um pouco para garantir que o estado foi atualizado
-              await Future.delayed(const Duration(milliseconds: 500));
+              // Aguardar até o BLoC emitir um estado terminal (loaded ou error)
+              await context.read<CatsBloc>().stream
+                  .skip(1) // Pular CatsLoading inicial
+                  .where((s) => s is CatsLoaded || s is CatsError)
+                  .first
+                  .timeout(
+                    const Duration(seconds: 10),
+                    onTimeout: () => state,
+                  );
             },
             child: ListView.builder(
               padding: const EdgeInsets.all(16),

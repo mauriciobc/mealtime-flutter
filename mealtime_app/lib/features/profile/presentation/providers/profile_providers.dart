@@ -63,8 +63,11 @@ class ProfileNotifier extends _$ProfileNotifier {
 
   /// Recarrega o perfil
   Future<void> refresh() async {
+    // Retorna antecipadamente se state.value for null para evitar chamada à API sem ID
+    if (state.value == null) return;
+    
     final useCase = ref.read(getProfileProvider);
-    final result = await useCase(GetProfileParams(idOrUsername: state.value?.id ?? ''));
+    final result = await useCase(GetProfileParams(idOrUsername: state.value!.id));
     result.fold(
       (failure) => state = AsyncValue.error(failure, StackTrace.current),
       (profile) => state = AsyncValue.data(profile),
@@ -100,7 +103,12 @@ class ProfileNotifier extends _$ProfileNotifier {
     
     return result.fold(
       (failure) => null,
-      (url) => url,
+      (url) {
+        if (state.value != null) {
+          state = AsyncValue.data(state.value!.copyWith(avatarUrl: url));
+        }
+        return url;
+      },
     );
   }
 }

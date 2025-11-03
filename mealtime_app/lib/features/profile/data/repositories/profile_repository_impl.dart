@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mealtime_app/core/errors/exceptions.dart';
@@ -11,6 +12,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource remoteDataSource;
   final ProfileLocalDataSource localDataSource;
 
+  // Rastreamento de sincronizações em andamento para evitar race conditions
+  final Map<String, Future<void>> _inFlightSyncs = {};
+  
+  // Timers para debounce de sincronizações
+  final Map<String, Timer> _debounceTimers = {};
+
   ProfileRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
@@ -22,7 +29,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       // 1. Tentar buscar do cache local primeiro
       final localProfile = await localDataSource.getCachedProfile(idOrUsername);
       if (localProfile != null) {
-        // Sincronizar em background
+        // Sincronizar em background com proteção contra race condition
         _syncWithRemote(idOrUsername);
         return Right(localProfile);
       }
@@ -41,15 +48,68 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   /// Sincroniza dados locais com remoto em background
+  /// Utiliza rastreamento de operações em andamento para evitar race conditions
+  /// e debounce para reduzir sincronizações duplicadas
   void _syncWithRemote(String idOrUsername) {
-    Future.microtask(() async {
+    // Cancelar timer de debounce anterior se existir
+    _debounceTimers[idOrUsername]?.cancel();
+
+    // Criar novo timer de debounce (300ms)
+    final timer = Timer(const Duration(milliseconds: 300), () {
+      _debounceTimers.remove(idOrUsername);
+      _performSync(idOrUsername);
+    });
+    _debounceTimers[idOrUsername] = timer;
+  }
+
+  /// Executa a sincronização real com proteção contra race condition
+  Future<void> _performSync(String idOrUsername) async {
+    // Verificar se já existe uma sincronização em andamento
+    if (_inFlightSyncs.containsKey(idOrUsername)) {
+      debugPrint(
+        '[ProfileRepository] Sincronização já em andamento para '
+        '$idOrUsername, reutilizando Future existente',
+      );
+      return _inFlightSyncs[idOrUsername];
+    }
+
+    // Criar nova sincronização
+    final syncFuture = Future.microtask(() async {
       try {
+        debugPrint(
+          '[ProfileRepository] Iniciando sincronização para '
+          '$idOrUsername',
+        );
         final remoteProfile = await remoteDataSource.getProfile(idOrUsername);
         await localDataSource.cacheProfile(remoteProfile);
-        debugPrint('[ProfileRepository] Sincronização em background concluída');
+        debugPrint(
+          '[ProfileRepository] Sincronização em background concluída para '
+          '$idOrUsername',
+        );
       } catch (e) {
-        debugPrint('[ProfileRepository] Erro na sincronização em background: $e');
+        debugPrint(
+          '[ProfileRepository] Erro na sincronização em background para '
+          '$idOrUsername: $e',
+        );
+        // Re-lançar erro para que possa ser tratado se necessário
+        rethrow;
+      } finally {
+        // Sempre remover da lista de sincronizações em andamento
+        _inFlightSyncs.remove(idOrUsername);
+        debugPrint(
+          '[ProfileRepository] Sincronização removida do rastreamento para '
+          '$idOrUsername',
+        );
       }
+    });
+
+    // Armazenar o Future no mapa antes de iniciar
+    _inFlightSyncs[idOrUsername] = syncFuture;
+
+    // Aguardar a conclusão (sem bloquear o método que chamou)
+    syncFuture.catchError((error) {
+      // Erro já foi logado no try-catch acima
+      // Apenas garantir que a entrada seja removida (já está no finally)
     });
   }
 

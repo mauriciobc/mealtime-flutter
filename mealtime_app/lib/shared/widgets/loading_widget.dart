@@ -80,9 +80,7 @@ class Material3LoadingIndicator extends StatelessWidget {
     // LoadingIndicatorM3E usa automaticamente as cores do ColorScheme
     // - Default: container usa secondaryContainer, indicador usa primary
     // - Contained: container usa primaryContainer, indicador usa onPrimaryContainer
-    return Semantics(
-      label: 'Carregando',
-      value: 'Carregando dados',
+    return ExcludeSemantics(
       child: SizedBox(
         width: size,
         height: size,

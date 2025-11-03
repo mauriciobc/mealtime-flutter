@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dartz/dartz.dart';
+import 'package:path/path.dart' as path;
 import 'package:mealtime_app/core/errors/failures.dart';
 
 abstract class SupabaseStorageDataSource {
@@ -21,7 +22,8 @@ class SupabaseStorageDataSourceImpl implements SupabaseStorageDataSource {
   ) async {
     try {
       final bytes = await imageFile.readAsBytes();
-      final fileExt = imageFile.path.split('.').last;
+      final ext = path.extension(imageFile.path);
+      final fileExt = ext.length > 1 ? ext.substring(1) : 'jpg';
       final fileName = '${DateTime.now().toIso8601String()}.$fileExt';
       final filePath = 'avatars/$userId/$fileName';
 
