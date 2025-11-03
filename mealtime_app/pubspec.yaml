@@ -88,10 +88,10 @@ flutter:
   assets:
     - assets/images/
     - assets/animations/
-    - assets/icons/
 
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icons/app_icon.png"
+  image_path: "assets/images/mealtime-symbol.png"
+  remove_alpha_ios: true
   min_sdk_android: 21

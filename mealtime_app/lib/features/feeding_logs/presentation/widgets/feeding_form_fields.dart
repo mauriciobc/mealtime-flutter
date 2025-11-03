@@ -29,23 +29,23 @@ class FeedingFormFields extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
       child: Column(
         children: [
           Row(
             children: [
               _buildPortionField(context),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               Expanded(
                 child: _buildStatusField(context),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               Expanded(
                 child: _buildFoodTypeField(context),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _buildNotesField(context),
         ],
       ),
@@ -54,15 +54,16 @@ class FeedingFormFields extends StatelessWidget {
 
   Widget _buildPortionField(BuildContext context) {
     return SizedBox(
-      width: 110,
+      width: 84.5,
       child: TextFormField(
         initialValue: data.portion.toStringAsFixed(0),
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           labelText: 'Porção (g)',
           suffixText: 'g',
-          border: const OutlineInputBorder(),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
+          border: OutlineInputBorder(),
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 8,
             vertical: 8,
           ),
         ),
@@ -84,12 +85,13 @@ class FeedingFormFields extends StatelessWidget {
   Widget _buildStatusField(BuildContext context) {
     return DropdownButtonFormField<String>(
       key: ValueKey('status_${data.status}'),
-      initialValue: data.status,
+      value: data.status,
       decoration: const InputDecoration(
         labelText: 'Status',
         border: OutlineInputBorder(),
+        isDense: true,
         contentPadding: EdgeInsets.symmetric(
-          horizontal: 12,
+          horizontal: 8,
           vertical: 8,
         ),
       ),
@@ -98,7 +100,8 @@ class FeedingFormFields extends StatelessWidget {
           value: status,
           child: Text(
             status,
-            style: const TextStyle(fontSize: 14),
+            style: const TextStyle(fontSize: 13),
+            overflow: TextOverflow.ellipsis,
           ),
         );
       }).toList(),
@@ -113,12 +116,13 @@ class FeedingFormFields extends StatelessWidget {
   Widget _buildFoodTypeField(BuildContext context) {
     return DropdownButtonFormField<String>(
       key: ValueKey('foodType_${data.foodType}'),
-      initialValue: data.foodType,
+      value: data.foodType,
       decoration: const InputDecoration(
         labelText: 'Tipo',
         border: OutlineInputBorder(),
+        isDense: true,
         contentPadding: EdgeInsets.symmetric(
-          horizontal: 12,
+          horizontal: 8,
           vertical: 8,
         ),
       ),
@@ -127,7 +131,8 @@ class FeedingFormFields extends StatelessWidget {
           value: type,
           child: Text(
             type,
-            style: const TextStyle(fontSize: 14),
+            style: const TextStyle(fontSize: 13),
+            overflow: TextOverflow.ellipsis,
           ),
         );
       }).toList(),
