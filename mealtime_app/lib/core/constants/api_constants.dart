@@ -40,6 +40,10 @@ class ApiConstants {
   // ✅ V2 - Goals endpoints
   static const String v2Goals = '/goals';
 
+  // ✅ V2 - Profile endpoints
+  static String v2Profile(String idOrUsername) => '/profile/$idOrUsername';
+  static const String v2Upload = '/upload';
+
   // ✅ V2 - Households endpoints
   static String v2HouseholdCats(String householdId) => '/households/$householdId/cats';
   static String v2HouseholdInvite(String householdId) => '/households/$householdId/invite';

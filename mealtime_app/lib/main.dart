@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -263,34 +264,36 @@ class MyApp extends StatelessWidget {
             ? _ensureThemeColorContrast(darkColorScheme)
             : _ensureThemeColorContrast(_defaultDarkColorScheme);
         
-        return MultiBlocProvider(
-          providers: [
-            BlocProvider<SimpleAuthBloc>(
-              create: (context) => sl<SimpleAuthBloc>(),
+        return ProviderScope(
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider<SimpleAuthBloc>(
+                create: (context) => sl<SimpleAuthBloc>(),
+              ),
+              BlocProvider<CatsBloc>(
+                create: (context) => sl<CatsBloc>(),
+              ),
+              BlocProvider<HomesBloc>(
+                create: (context) => sl<HomesBloc>(),
+              ),
+              BlocProvider<FeedingLogsBloc>(
+                create: (context) => sl<FeedingLogsBloc>(),
+              ),
+              BlocProvider<StatisticsBloc>(
+                create: (context) => sl<StatisticsBloc>(),
+              ),
+              BlocProvider<WeightBloc>(
+                create: (context) => sl<WeightBloc>(),
+              ),
+            ],
+            child: MaterialApp.router(
+              title: 'MealTime',
+              debugShowCheckedModeBanner: false,
+              theme: _buildTheme(adjustedLightScheme),
+              darkTheme: _buildTheme(adjustedDarkScheme),
+              themeMode: ThemeMode.system,
+              routerConfig: AppRouter.router,
             ),
-            BlocProvider<CatsBloc>(
-              create: (context) => sl<CatsBloc>(),
-            ),
-            BlocProvider<HomesBloc>(
-              create: (context) => sl<HomesBloc>(),
-            ),
-            BlocProvider<FeedingLogsBloc>(
-              create: (context) => sl<FeedingLogsBloc>(),
-            ),
-            BlocProvider<StatisticsBloc>(
-              create: (context) => sl<StatisticsBloc>(),
-            ),
-            BlocProvider<WeightBloc>(
-              create: (context) => sl<WeightBloc>(),
-            ),
-          ],
-          child: MaterialApp.router(
-            title: 'MealTime',
-            debugShowCheckedModeBanner: false,
-            theme: _buildTheme(adjustedLightScheme),
-            darkTheme: _buildTheme(adjustedDarkScheme),
-            themeMode: ThemeMode.system,
-            routerConfig: AppRouter.router,
           ),
         );
       },

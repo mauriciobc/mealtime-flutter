@@ -5,7 +5,7 @@ import 'package:mealtime_app/core/widgets/scaffold_with_nav.dart';
 import 'package:mealtime_app/features/auth/presentation/pages/splash_page.dart';
 import 'package:mealtime_app/features/auth/presentation/pages/login_page.dart';
 import 'package:mealtime_app/features/auth/presentation/pages/register_page.dart';
-import 'package:mealtime_app/features/auth/presentation/pages/account_page.dart';
+import 'package:mealtime_app/features/profile/presentation/pages/profile_page.dart';
 import 'package:mealtime_app/features/home/presentation/pages/home_page.dart';
 import 'package:mealtime_app/features/cats/presentation/pages/cats_list_page.dart';
 import 'package:mealtime_app/features/cats/presentation/pages/create_cat_page.dart';
@@ -53,7 +53,11 @@ class AppRouter {
           ),
           GoRoute(
             path: '/account',
-            builder: (context, state) => const AccountPage(),
+            builder: (context, state) => const ProfilePage(),
+          ),
+          GoRoute(
+            path: '/profile',
+            builder: (context, state) => const ProfilePage(),
           ),
           GoRoute(
             path: '/cats',
@@ -196,6 +200,8 @@ class AppRouter {
   static const String statistics = '/statistics';
   static const String weight = '/weight';
   static const String notifications = '/notifications';
+  static const String profile = '/profile';
+  static const String account = '/account';
 
   static GoRouter get router => _router;
 }

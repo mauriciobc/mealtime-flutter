@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:material_charts/material_charts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
+import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
 import 'package:mealtime_app/core/di/injection_container.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
@@ -462,11 +464,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     ),
                 ],
               ),
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: Theme.of(context).colorScheme.secondary,
-                child: Icon(Icons.person, color: Theme.of(context).colorScheme.onSecondary),
-              ),
+              _UserAvatarButton(),
             ],
           ),
         ],
@@ -1530,6 +1528,132 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         Icons.pets,
         size: 20,
         color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+}
+
+/// Widget para o avatar do usuário no header da home page
+class _UserAvatarButton extends ConsumerWidget {
+  const _UserAvatarButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = SupabaseConfig.client.auth.currentUser;
+    
+    if (user == null) {
+      return GestureDetector(
+        onTap: () {
+          context.push(AppRouter.profile);
+        },
+        child: CircleAvatar(
+          radius: 20,
+          backgroundColor: Theme.of(context).colorScheme.secondary,
+          child: Icon(
+            Icons.person,
+            color: Theme.of(context).colorScheme.onSecondary,
+          ),
+        ),
+      );
+    }
+
+    final profileAsync = ref.watch(currentUserProfileProvider);
+
+    return GestureDetector(
+      onTap: () {
+        context.push(AppRouter.profile);
+      },
+      child: profileAsync.when(
+        data: (profile) {
+          final avatarUrl = profile?.avatarUrl;
+          final initial = profile?.fullName?.substring(0, 1).toUpperCase() ??
+              user.email?.substring(0, 1).toUpperCase() ??
+              'U';
+
+          if (avatarUrl != null && avatarUrl.isNotEmpty) {
+            return Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Theme.of(context).colorScheme.secondary,
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+              ),
+              child: ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: avatarUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Center(
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.onSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    child: Text(
+                      initial,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return CircleAvatar(
+            radius: 20,
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            child: Text(
+              initial,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          );
+        },
+        loading: () => CircleAvatar(
+          radius: 20,
+          backgroundColor: Theme.of(context).colorScheme.secondary,
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).colorScheme.onSecondary,
+              ),
+            ),
+          ),
+        ),
+        error: (_, __) => GestureDetector(
+          onTap: () {
+            context.push(AppRouter.profile);
+          },
+          child: CircleAvatar(
+            radius: 20,
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            child: Icon(
+              Icons.person,
+              color: Theme.of(context).colorScheme.onSecondary,
+            ),
+          ),
+        ),
       ),
     );
   }
