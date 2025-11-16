@@ -78,6 +78,13 @@ class HourlyDistributionChart extends StatelessWidget {
                   );
                 }
 
+                // Calcular raio máximo para bordas completamente arredondadas
+                // barWidth = (chartArea.width / data.length) * (1 - barSpacing)
+                // maxRadius = barWidth / 2 (Flutter limita automaticamente)
+                final barSpacing = 0.3;
+                final barWidth = (chartWidth / validData.length) * (1 - barSpacing);
+                final maxCornerRadius = (barWidth / 2).clamp(4.0, 50.0);
+
                 return SizedBox(
                   height: chartHeight,
                   width: chartWidth,
@@ -90,7 +97,8 @@ class HourlyDistributionChart extends StatelessWidget {
                     style: BarChartStyle(
                       barColor: theme.colorScheme.tertiary,
                       backgroundColor: theme.colorScheme.surface,
-                      barSpacing: 0.3,
+                      barSpacing: barSpacing,
+                      cornerRadius: maxCornerRadius,
                       labelStyle: TextStyle(
                         color: theme.colorScheme.onSurfaceVariant,
                         fontSize: 8,

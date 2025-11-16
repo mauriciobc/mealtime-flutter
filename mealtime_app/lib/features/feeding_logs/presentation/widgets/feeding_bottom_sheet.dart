@@ -8,6 +8,8 @@ import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_log
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/widgets/cat_selection_item.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:mealtime_app/core/theme/text_theme_extensions.dart';
+import 'package:mealtime_app/core/theme/m3_shapes.dart';
 import 'package:uuid/uuid.dart';
 
 class FeedingFormData {
@@ -99,14 +101,13 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: M3Shapes.shapeSmall,
               ),
             ),
           ),
           Text(
             'Registrar Nova Alimentação',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+            style: Theme.of(context).textTheme.titleLargeEmphasized?.copyWith(
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
           ),
@@ -217,6 +218,7 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
                     const SizedBox(width: 8),
                     Text(
                       'Confirmar Alimentação (${_selectedCatIds.length})',
+                      style: Theme.of(context).textTheme.titleMediumEmphasized,
                     ),
                   ],
                 ),

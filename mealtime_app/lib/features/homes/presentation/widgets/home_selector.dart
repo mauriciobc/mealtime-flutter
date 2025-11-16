@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/homes/domain/entities/home.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
+import 'package:mealtime_app/core/theme/m3_shapes.dart';
 
 class HomeSelector extends StatelessWidget {
   final Home? selectedHome;
@@ -57,20 +59,20 @@ class HomeSelector extends StatelessWidget {
                     size: 16,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: M3SpacingToken.space8.value),
                   Expanded(
                     child: Text(home.name, overflow: TextOverflow.ellipsis),
                   ),
                   if (home.isActive) ...[
-                    const SizedBox(width: 8),
+                    SizedBox(width: M3SpacingToken.space8.value),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
+                      padding: const M3EdgeInsets.symmetric(
+                        horizontal: M3SpacingToken.space8,
+                        vertical: M3SpacingToken.space4,
                       ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: M3Shapes.shapeSmall,
                       ),
                       child: Text(
                         'ATIVA',
@@ -102,7 +104,7 @@ class HomeSelector extends StatelessWidget {
       children: [
         if (label != null) ...[
           Text(label!, style: Theme.of(context).textTheme.labelMedium),
-          const SizedBox(height: 8),
+          SizedBox(height: M3SpacingToken.space8.value),
         ],
         DropdownButtonFormField<String>(
           initialValue: null,
@@ -124,7 +126,7 @@ class HomeSelector extends StatelessWidget {
       children: [
         if (label != null) ...[
           Text(label!, style: Theme.of(context).textTheme.labelMedium),
-          const SizedBox(height: 8),
+          SizedBox(height: M3SpacingToken.space8.value),
         ],
         DropdownButtonFormField<String>(
           initialValue: null,

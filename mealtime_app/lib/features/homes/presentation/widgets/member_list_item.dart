@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:material_design/material_design.dart';
+import 'package:mealtime_app/core/theme/m3_shapes.dart';
 import 'package:mealtime_app/features/homes/data/models/household_model.dart';
 
 /// Widget para exibir um item de membro na lista de membros do household
@@ -22,14 +24,14 @@ class MemberListItem extends StatelessWidget {
     final isAdmin = member.role == 'ADMIN';
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: M3SpacingToken.space8.value),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
         child: Row(
           children: [
             // Avatar com inicial do nome
             _buildAvatar(context),
-            const SizedBox(width: 16),
+            SizedBox(width: M3SpacingToken.space16.value),
             
             // Nome e email
             Expanded(
@@ -44,7 +46,7 @@ class MemberListItem extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: M3SpacingToken.space4.value),
                   Text(
                     member.user.email,
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -55,7 +57,7 @@ class MemberListItem extends StatelessWidget {
               ),
             ),
             
-            const SizedBox(width: 12),
+            SizedBox(width: M3SpacingToken.space12.value),
             
             // Badge de role
             _buildRoleBadge(context, isAdmin),
@@ -74,12 +76,12 @@ class MemberListItem extends StatelessWidget {
                 },
                 itemBuilder: (context) => [
                   if (onPromote != null)
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'promote',
                       child: Row(
                         children: [
                           Icon(Icons.admin_panel_settings),
-                          SizedBox(width: 8),
+                          SizedBox(width: M3SpacingToken.space8.value),
                           Text('Promover a Admin'),
                         ],
                       ),
@@ -93,7 +95,7 @@ class MemberListItem extends StatelessWidget {
                             Icons.person_remove,
                             color: theme.colorScheme.error,
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: M3SpacingToken.space8.value),
                           Text(
                             'Remover',
                             style: TextStyle(
@@ -136,13 +138,13 @@ class MemberListItem extends StatelessWidget {
     
     if (isAdmin) {
       return Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 6,
+        padding: const M3EdgeInsets.symmetric(
+          horizontal: M3SpacingToken.space12,
+          vertical: M3SpacingToken.space8,
         ),
         decoration: BoxDecoration(
           color: theme.colorScheme.primary,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: M3Shapes.shapeLarge,
         ),
         child: Text(
           'Administrador',
@@ -154,13 +156,13 @@ class MemberListItem extends StatelessWidget {
       );
     } else {
       return Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 6,
+        padding: const M3EdgeInsets.symmetric(
+          horizontal: M3SpacingToken.space12,
+          vertical: M3SpacingToken.space8,
         ),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: M3Shapes.shapeLarge,
         ),
         child: Text(
           'Membro',

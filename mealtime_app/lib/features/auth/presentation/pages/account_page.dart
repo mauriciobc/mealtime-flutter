@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_design/material_design.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
 import 'package:mealtime_app/features/auth/data/models/user_profile.dart';
@@ -217,16 +218,19 @@ class _AccountPageState extends State<AccountPage> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+        padding: const M3EdgeInsets.symmetric(
+          vertical: M3SpacingToken.space16,
+          horizontal: M3SpacingToken.space12,
+        ),
         children: [
           // Avatar
           AvatarWidget(imageUrl: _avatarUrl, onUpload: _onUpload, size: 120),
-          const SizedBox(height: 24),
+          SizedBox(height: M3SpacingToken.space24.value),
 
           // Informações do usuário
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const M3EdgeInsets.all(M3SpacingToken.space16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -236,7 +240,7 @@ class _AccountPageState extends State<AccountPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: M3SpacingToken.space16.value),
 
                   TextFormField(
                     controller: _usernameController,
@@ -245,7 +249,7 @@ class _AccountPageState extends State<AccountPage> {
                       prefixIcon: Icon(Icons.person),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: M3SpacingToken.space16.value),
 
                   TextFormField(
                     controller: _websiteController,
@@ -259,7 +263,7 @@ class _AccountPageState extends State<AccountPage> {
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: M3SpacingToken.space24.value),
 
           // Botão de atualizar
           SizedBox(
@@ -272,12 +276,12 @@ class _AccountPageState extends State<AccountPage> {
                   : const Text('Atualizar Perfil'),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: M3SpacingToken.space16.value),
 
           // Informações da conta
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const M3EdgeInsets.all(M3SpacingToken.space16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -287,7 +291,7 @@ class _AccountPageState extends State<AccountPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: M3SpacingToken.space16.value),
 
                   ListTile(
                     leading: const Icon(Icons.badge),

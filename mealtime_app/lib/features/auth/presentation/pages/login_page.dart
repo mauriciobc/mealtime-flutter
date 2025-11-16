@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/main.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
@@ -49,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
         centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -66,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
                 );
               },
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: M3SpacingToken.space32.value),
 
             Text(
               'MealTime',
@@ -75,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: M3SpacingToken.space8.value),
 
             Text(
               'Gerenciamento de alimentação para gatos',
@@ -84,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 48),
+            SizedBox(height: M3SpacingToken.space48.value),
 
             // Formulário
             if (_isSignUp) ...[
@@ -96,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 keyboardType: TextInputType.name,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: M3SpacingToken.space16.value),
             ],
 
             TextField(
@@ -107,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               keyboardType: TextInputType.emailAddress,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
 
             TextField(
               controller: _passwordController,
@@ -117,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               obscureText: true,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
 
             // Botão principal
             BlocBuilder<SimpleAuthBloc, SimpleAuthState>(
@@ -134,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                 );
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
 
             // Toggle entre login e cadastro
             TextButton(
@@ -151,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
 
             if (!_isSignUp) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: M3SpacingToken.space16.value),
               TextButton(
                 onPressed: () {
                   // TODO: Implementar recuperação de senha

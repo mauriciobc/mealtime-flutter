@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 
 class HomeForm extends StatelessWidget {
@@ -35,7 +36,7 @@ class HomeForm extends StatelessWidget {
           },
           textInputAction: TextInputAction.next,
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: M3SpacingToken.space16.value),
         TextFormField(
           controller: descriptionController,
           decoration: InputDecoration(
@@ -47,7 +48,7 @@ class HomeForm extends StatelessWidget {
           textInputAction: TextInputAction.done,
           maxLines: 3,
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: M3SpacingToken.space16.value),
         Text(
           context.l10n.homes_requiredFields,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(

@@ -100,6 +100,13 @@ class DailyConsumptionChart extends StatelessWidget {
                     ? chartHeight.clamp(150.0, 500.0) 
                     : 200.0;
                 
+                // Calcular raio máximo para bordas completamente arredondadas
+                // barWidth = (chartArea.width / data.length) * (1 - barSpacing)
+                // maxRadius = barWidth / 2 (Flutter limita automaticamente)
+                final barSpacing = 0.3;
+                final barWidth = (safeWidth / validData.length) * (1 - barSpacing);
+                final maxCornerRadius = (barWidth / 2).clamp(4.0, 50.0);
+                
                 return SizedBox(
                   height: safeHeight,
                   width: safeWidth,
@@ -116,7 +123,8 @@ class DailyConsumptionChart extends StatelessWidget {
                           style: BarChartStyle(
                             barColor: theme.colorScheme.primary,
                             backgroundColor: theme.colorScheme.surface,
-                            barSpacing: 0.3,
+                            barSpacing: barSpacing,
+                            cornerRadius: maxCornerRadius,
                             labelStyle: TextStyle(
                               color: theme.colorScheme.onSurfaceVariant,
                               fontSize: shouldGroupByWeeks ? 8 : 9,

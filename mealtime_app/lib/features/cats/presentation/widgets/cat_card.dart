@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:material_design/material_design.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:mealtime_app/core/theme/m3_shapes.dart';
 
 class CatCard extends StatelessWidget {
   final Cat cat;
@@ -22,13 +24,13 @@ class CatCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: M3Shapes.shapeLarge,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const M3EdgeInsets.all(M3SpacingToken.space16),
           child: Row(
             children: [
               _buildCatAvatar(context),
-              const SizedBox(width: 16),
+              SizedBox(width: M3SpacingToken.space16.value),
               Expanded(child: _buildCatInfo(context)),
               _buildActionButtons(context),
             ],
@@ -106,7 +108,7 @@ class CatCard extends StatelessWidget {
             color: theme.colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: M3SpacingToken.space4.value),
         if (cat.breed != null) ...[
           Text(
             cat.breed!,
@@ -114,7 +116,7 @@ class CatCard extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: M3SpacingToken.space4.value),
         ],
         Row(
           children: [
@@ -123,7 +125,7 @@ class CatCard extends StatelessWidget {
               size: 16,
               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: M3SpacingToken.space4.value),
             Text(
               cat.ageDescription,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -131,7 +133,7 @@ class CatCard extends StatelessWidget {
               ),
             ),
             if (cat.gender != null) ...[
-              const SizedBox(width: 16),
+              SizedBox(width: M3SpacingToken.space16.value),
               Icon(
                 cat.gender == 'M' ? Icons.male : Icons.female,
                 size: 16,
@@ -139,7 +141,7 @@ class CatCard extends StatelessWidget {
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.tertiary,
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: M3SpacingToken.space4.value),
               Text(
                 cat.gender == 'M' ? 'Macho' : 'Fêmea',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -152,7 +154,7 @@ class CatCard extends StatelessWidget {
           ],
         ),
         if (cat.currentWeight != null) ...[
-          const SizedBox(height: 4),
+          SizedBox(height: M3SpacingToken.space4.value),
           Row(
             children: [
               Icon(
@@ -160,7 +162,7 @@ class CatCard extends StatelessWidget {
                 size: 16,
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: M3SpacingToken.space4.value),
               Text(
                 '${cat.currentWeight!.toStringAsFixed(1)} kg',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -194,7 +196,7 @@ class CatCard extends StatelessWidget {
           child: Row(
             children: [
               Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
-              const SizedBox(width: 8),
+              SizedBox(width: M3SpacingToken.space8.value),
               const Text('Editar'),
             ],
           ),
@@ -204,7 +206,7 @@ class CatCard extends StatelessWidget {
           child: Row(
             children: [
               Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-              const SizedBox(width: 8),
+              SizedBox(width: M3SpacingToken.space8.value),
               Text('Excluir', style: TextStyle(color: Theme.of(context).colorScheme.error)),
             ],
           ),

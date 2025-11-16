@@ -54,6 +54,7 @@ dependencies:
   fl_chart: ^1.1.1
   loading_indicator_m3e: ^0.1.1
   m3e_collection: ^0.3.7
+  material_design: ^0.28.1
   
   # Utils
   intl: ^0.20.2

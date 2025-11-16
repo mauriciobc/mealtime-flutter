@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:mealtime_app/core/constants/m3_animation.dart';
+import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/domain/entities/weight_entry.dart';
 import 'package:mealtime_app/features/weight/domain/entities/weight_goal.dart';
@@ -145,9 +145,9 @@ class _CreateGoalDialogState extends State<CreateGoalDialog> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   TweenAnimationBuilder<double>(
-                    duration: M3Animation.durationShort4, // 300ms M3
+                    duration: M3Motion.standard.duration,
                     tween: Tween(begin: 0.0, end: 1.0),
-                    curve: M3Animation.deceleratedCurve, // Entrada M3
+                    curve: M3Motion.standard.curve,
                     builder: (context, value, child) {
                       return Opacity(
                         opacity: value,

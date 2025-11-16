@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
@@ -111,14 +112,14 @@ class _CatsListPageState extends State<CatsListPage> {
                 Container(
                   color: const Color.fromRGBO(0, 0, 0, 0.3),
                   child: Center(
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Material3LoadingIndicator(size: 32.0),
-                            const SizedBox(height: 16),
+                      child: Card(
+                        child: Padding(
+                          padding: const M3EdgeInsets.all(M3SpacingToken.space16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Material3LoadingIndicator(size: 32.0),
+                              SizedBox(height: M3SpacingToken.space16.value),
                             Text(state.operation),
                           ],
                         ),
@@ -152,19 +153,19 @@ class _CatsListPageState extends State<CatsListPage> {
             size: 80,
             color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: M3SpacingToken.space16.value),
           Text(
             context.l10n.cats_emptyState,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: M3SpacingToken.space8.value),
           Text(
             context.l10n.cats_addFirstCat,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: M3SpacingToken.space24.value),
           ElevatedButton.icon(
             onPressed: () {
               context.push(AppRouter.createCat);
@@ -183,12 +184,12 @@ class _CatsListPageState extends State<CatsListPage> {
         context.read<CatsBloc>().add(const RefreshCats());
       },
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
         itemCount: cats.length,
         itemBuilder: (context, index) {
           final cat = cats[index];
           return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: EdgeInsets.only(bottom: M3SpacingToken.space12.value),
             child: CatCard(
               cat: cat,
               onTap: () {

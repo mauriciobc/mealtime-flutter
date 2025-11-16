@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_design/material_design.dart';
 import 'package:m3e_collection/m3e_collection.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
@@ -64,7 +65,7 @@ class _SplashPageState extends State<SplashPage> {
                   BlendMode.srcIn,
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: M3SpacingToken.space24.value),
               Text(
                 'MealTime',
                 style: TextStyle(
@@ -73,7 +74,7 @@ class _SplashPageState extends State<SplashPage> {
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: M3SpacingToken.space16.value),
               Text(
                 'Gerencie a alimentação dos seus gatos',
                 style: TextStyle(
@@ -81,7 +82,7 @@ class _SplashPageState extends State<SplashPage> {
                   color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
                 ),
               ),
-              const SizedBox(height: 48),
+              SizedBox(height: M3SpacingToken.space48.value),
               Material3LoadingIndicator(
                 variant: LoadingIndicatorM3EVariant.contained,
               ),

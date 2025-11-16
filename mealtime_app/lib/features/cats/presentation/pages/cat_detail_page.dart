@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_design/material_design.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
@@ -43,12 +44,12 @@ class _CatDetailPageState extends State<CatDetailPage> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'edit',
                 child: Row(
                   children: [
                     Icon(Icons.edit),
-                    SizedBox(width: 8),
+                    SizedBox(width: M3SpacingToken.space8.value),
                     Text('Editar'),
                   ],
                 ),
@@ -61,7 +62,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                       Icons.delete,
                       color: Theme.of(context).colorScheme.error,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: M3SpacingToken.space8.value),
                     Text(
                       'Excluir',
                       style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -120,16 +121,16 @@ class _CatDetailPageState extends State<CatDetailPage> {
 
   Widget _buildCatDetails(BuildContext context, dynamic cat) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const M3EdgeInsets.all(M3SpacingToken.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildCatHeader(context, cat),
-          const SizedBox(height: 24),
+          SizedBox(height: M3SpacingToken.space24.value),
           _buildCatInfo(context, cat),
-          const SizedBox(height: 24),
+          SizedBox(height: M3SpacingToken.space24.value),
           _buildWeightSection(context, cat),
-          const SizedBox(height: 24),
+          SizedBox(height: M3SpacingToken.space24.value),
           _buildDescriptionSection(context, cat),
         ],
       ),
@@ -192,11 +193,11 @@ class _CatDetailPageState extends State<CatDetailPage> {
     
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space20),
         child: Row(
           children: [
             avatarWidget,
-            const SizedBox(width: 20),
+            SizedBox(width: M3SpacingToken.space20.value),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,7 +209,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                     ),
                   ),
                   if (cat.breed != null) ...[
-                    const SizedBox(height: 4),
+                    SizedBox(height: M3SpacingToken.space4.value),
                     Text(
                       cat.breed!,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -218,7 +219,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 8),
+                  SizedBox(height: M3SpacingToken.space8.value),
                   Row(
                     children: [
                       Icon(
@@ -228,7 +229,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                           context,
                         ).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: M3SpacingToken.space4.value),
                       Text(
                         cat.ageDescription,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -238,7 +239,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                         ),
                       ),
                       if (cat.gender != null) ...[
-                        const SizedBox(width: 16),
+                        SizedBox(width: M3SpacingToken.space16.value),
                         Icon(
                           cat.gender == 'M' ? Icons.male : Icons.female,
                           size: 16,
@@ -246,7 +247,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                               ? Theme.of(context).colorScheme.primary
                               : Theme.of(context).colorScheme.tertiary,
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: M3SpacingToken.space4.value),
                         Text(
                           cat.gender == 'M' ? 'Macho' : 'Fêmea',
                           style: Theme.of(context).textTheme.bodyMedium
@@ -271,7 +272,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
   Widget _buildCatInfo(BuildContext context, dynamic cat) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -281,7 +282,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             _buildInfoRow(context, 'Nome', cat.name),
             if (cat.breed != null) _buildInfoRow(context, 'Raça', cat.breed!),
             if (cat.color != null) _buildInfoRow(context, 'Cor', cat.color!),
@@ -306,7 +307,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
   Widget _buildWeightSection(BuildContext context, dynamic cat) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -316,7 +317,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             if (cat.currentWeight != null) ...[
               _buildInfoRow(
                 context,
@@ -324,13 +325,13 @@ class _CatDetailPageState extends State<CatDetailPage> {
                 '${cat.currentWeight!.toStringAsFixed(1)} kg',
               ),
               if (cat.targetWeight != null) ...[
-                const SizedBox(height: 8),
+                SizedBox(height: M3SpacingToken.space8.value),
                 _buildInfoRow(
                   context,
                   'Peso Ideal',
                   '${cat.targetWeight!.toStringAsFixed(1)} kg',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: M3SpacingToken.space8.value),
                 _buildWeightProgress(context, cat),
               ],
             ] else ...[
@@ -343,7 +344,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                 ),
               ),
             ],
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -394,7 +395,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
               ? Theme.of(context).colorScheme.primary
               : Theme.of(context).colorScheme.secondary,
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: M3SpacingToken.space8.value),
         Text(
           _getWeightStatus(cat.currentWeight!, cat.targetWeight!),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -430,7 +431,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -440,7 +441,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             Text(
               cat.description!,
               style: Theme.of(context).textTheme.bodyMedium,
@@ -453,7 +454,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
 
   Widget _buildInfoRow(BuildContext context, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: M3SpacingToken.space8.value),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -488,7 +489,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('Atualizar peso de ${cat.name}'),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             TextField(
               controller: weightController,
               decoration: const InputDecoration(

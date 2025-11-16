@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:material_design/material_design.dart';
 import 'package:m3e_collection/m3e_collection.dart';
 import 'package:mealtime_app/features/homes/domain/entities/home.dart';
+import 'package:mealtime_app/core/theme/m3_shapes.dart';
 
 class HomeCard extends StatelessWidget {
   final Home home;
@@ -26,21 +28,21 @@ class HomeCard extends StatelessWidget {
       elevation: 2,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: M3Shapes.shapeMedium,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const M3EdgeInsets.all(M3SpacingToken.space16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const M3EdgeInsets.all(M3SpacingToken.space8),
                     decoration: BoxDecoration(
                       color: Theme.of(
                         context,
                       ).colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: M3Shapes.shapeSmall,
                     ),
                     child: Icon(
                       Icons.home,
@@ -48,7 +50,7 @@ class HomeCard extends StatelessWidget {
                       size: 24,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: M3SpacingToken.space12.value),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +61,7 @@ class HomeCard extends StatelessWidget {
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         if (home.address != null) ...[
-                          const SizedBox(height: 4),
+                          SizedBox(height: M3SpacingToken.space4.value),
                           Text(
                             home.address!,
                             style: Theme.of(context).textTheme.bodyMedium
@@ -77,13 +79,13 @@ class HomeCard extends StatelessWidget {
                   ),
                   if (home.isActive)
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                      padding: const M3EdgeInsets.symmetric(
+                        horizontal: M3SpacingToken.space8,
+                        vertical: M3SpacingToken.space4,
                       ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: M3Shapes.shapeMedium,
                       ),
                       child: Text(
                         'ATIVA',
@@ -96,7 +98,7 @@ class HomeCard extends StatelessWidget {
                 ],
               ),
               if (home.description != null) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: M3SpacingToken.space12.value),
                 Text(
                   home.description!,
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -104,7 +106,7 @@ class HomeCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
-              const SizedBox(height: 12),
+              SizedBox(height: M3SpacingToken.space12.value),
               // Contador de membros
               if (membersCount != null)
                 Row(
@@ -116,7 +118,7 @@ class HomeCard extends StatelessWidget {
                         context,
                       ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: M3SpacingToken.space4.value),
                     Text(
                       '$membersCount Membro${membersCount != 1 ? 's' : ''}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -127,7 +129,7 @@ class HomeCard extends StatelessWidget {
                     ),
                   ],
                 ),
-              if (membersCount != null) const SizedBox(height: 12),
+              if (membersCount != null) SizedBox(height: M3SpacingToken.space12.value),
               Row(
                 children: [
                   Text(

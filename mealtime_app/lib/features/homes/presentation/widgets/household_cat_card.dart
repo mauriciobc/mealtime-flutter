@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_design/material_design.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
@@ -37,7 +38,7 @@ class HouseholdCatCard extends StatelessWidget {
             
             // Informações do gato
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const M3EdgeInsets.all(M3SpacingToken.space12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -50,12 +51,12 @@ class HouseholdCatCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: M3SpacingToken.space8.value),
                   
                   // Informações (idade e peso)
                   _buildInfoChips(context),
                   
-                  const SizedBox(height: 8),
+                  SizedBox(height: M3SpacingToken.space8.value),
                   
                   // Status de alimentação
                   Text(
@@ -72,10 +73,10 @@ class HouseholdCatCard extends StatelessWidget {
             
             // Botões de ação
             Padding(
-              padding: const EdgeInsets.only(
-                left: 4,
-                right: 4,
-                bottom: 4,
+              padding: const M3EdgeInsets.only(
+                left: M3SpacingToken.space4,
+                right: M3SpacingToken.space4,
+                bottom: M3SpacingToken.space4,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -190,7 +191,7 @@ class HouseholdCatCard extends StatelessWidget {
           size: 16,
           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: M3SpacingToken.space4.value),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(

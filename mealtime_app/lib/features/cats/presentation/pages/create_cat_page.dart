@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
@@ -27,7 +28,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
         actions: [
           if (_isLoading)
             const Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: M3EdgeInsets.all(M3SpacingToken.space16),
               child: Material3LoadingIndicator(size: 20.0),
             ),
         ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_design/material_design.dart';
 import 'package:intl/intl.dart';
 import 'package:mealtime_app/core/di/injection_container.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
@@ -146,22 +147,22 @@ class _HomeDetailPageState extends State<HomeDetailPage>
             }
           },
           itemBuilder: (context) => [
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'edit',
               child: Row(
                 children: [
                   Icon(Icons.edit),
-                  SizedBox(width: 8),
+                  SizedBox(width: M3SpacingToken.space8.value),
                   Text('Editar'),
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'set_active',
               child: Row(
                 children: [
                   Icon(Icons.home),
-                  SizedBox(width: 8),
+                  SizedBox(width: M3SpacingToken.space8.value),
                   Text('Definir como Ativa'),
                 ],
               ),
@@ -174,7 +175,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
                     Icons.delete,
                     color: Theme.of(context).colorScheme.error,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: M3SpacingToken.space8.value),
                   Text(
                     'Excluir',
                     style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -220,7 +221,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
       child: members.isEmpty
           ? _buildEmptyMembersState(context)
           : ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const M3EdgeInsets.all(M3SpacingToken.space16),
               children: [
                 Text(
                   'Membros da Residência',
@@ -228,20 +229,20 @@ class _HomeDetailPageState extends State<HomeDetailPage>
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: M3SpacingToken.space16.value),
                 ...members.map((member) => MemberListItem(
                   member: member,
                   isCurrentUser: member.userId == _currentUserId,
                   onPromote: () => _promoteMember(member),
                   onRemove: () => _removeMember(member),
                 )),
-                const SizedBox(height: 16),
+                SizedBox(height: M3SpacingToken.space16.value),
                 OutlinedButton.icon(
                   onPressed: _inviteMember,
                   icon: const Icon(Icons.person_add),
                   label: const Text('Convidar Novo Membro'),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
+                    padding: const M3EdgeInsets.all(M3SpacingToken.space16),
                   ),
                 ),
               ],
@@ -261,12 +262,12 @@ class _HomeDetailPageState extends State<HomeDetailPage>
             size: 80,
             color: theme.colorScheme.primary.withValues(alpha: 0.5),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: M3SpacingToken.space16.value),
           Text(
             'Nenhum membro ainda',
             style: theme.textTheme.headlineSmall,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: M3SpacingToken.space8.value),
           Text(
             'Convide pessoas para participar desta residência',
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -274,7 +275,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: M3SpacingToken.space24.value),
           ElevatedButton.icon(
             onPressed: _inviteMember,
             icon: const Icon(Icons.person_add),
@@ -294,7 +295,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
       child: cats.isEmpty
           ? _buildEmptyCatsState(context)
           : ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const M3EdgeInsets.all(M3SpacingToken.space16),
               children: [
                 Text(
                   'Gatos na Residência',
@@ -302,14 +303,14 @@ class _HomeDetailPageState extends State<HomeDetailPage>
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: M3SpacingToken.space4.value),
                 Text(
                   'Gatos gerenciados nesta residência.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: M3SpacingToken.space16.value),
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -331,13 +332,13 @@ class _HomeDetailPageState extends State<HomeDetailPage>
                     );
                   },
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: M3SpacingToken.space16.value),
                 OutlinedButton.icon(
                   onPressed: _addCat,
                   icon: const Icon(Icons.add),
                   label: const Text('Adicionar Gato à Residência'),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
+                    padding: const M3EdgeInsets.all(M3SpacingToken.space16),
                   ),
                 ),
               ],
@@ -357,12 +358,12 @@ class _HomeDetailPageState extends State<HomeDetailPage>
             size: 80,
             color: theme.colorScheme.primary.withValues(alpha: 0.5),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: M3SpacingToken.space16.value),
           Text(
             'Nenhum gato cadastrado',
             style: theme.textTheme.headlineSmall,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: M3SpacingToken.space8.value),
           Text(
             'Adicione os gatos que moram nesta residência',
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -370,7 +371,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: M3SpacingToken.space24.value),
           ElevatedButton.icon(
             onPressed: _addCat,
             icon: const Icon(Icons.add),

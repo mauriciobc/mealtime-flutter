@@ -17,24 +17,52 @@ import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_log
 import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_bloc.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart';
 import 'package:mealtime_app/l10n/app_localizations.dart';
+import 'package:material_design/material_design.dart';
+import 'package:mealtime_app/core/theme/m3_shapes.dart';
 
 // Helper function to create a custom text theme with Outfit for headings and Atkinson Hyperlegible for body
+// Inclui estilos enfatizados para M3 Expressive
 TextTheme _createCustomTextTheme(ColorScheme colorScheme) {
   final baseTextTheme = GoogleFonts.atkinsonHyperlegibleTextTheme();
   
   // Use Outfit for headings
   final outfitHeadings = GoogleFonts.outfitTextTheme(baseTextTheme);
   
+  // Estilos base
+  final displayLarge = outfitHeadings.displayLarge?.copyWith(
+    fontFamily: GoogleFonts.outfit().fontFamily,
+  );
+  final headlineLarge = outfitHeadings.headlineLarge?.copyWith(
+    fontFamily: GoogleFonts.outfit().fontFamily,
+  );
+  final titleLarge = outfitHeadings.titleLarge?.copyWith(
+    fontFamily: GoogleFonts.outfit().fontFamily,
+  );
+  
   return baseTextTheme.copyWith(
-    displayLarge: outfitHeadings.displayLarge?.copyWith(fontFamily: GoogleFonts.outfit().fontFamily),
-    displayMedium: outfitHeadings.displayMedium?.copyWith(fontFamily: GoogleFonts.outfit().fontFamily),
-    displaySmall: outfitHeadings.displaySmall?.copyWith(fontFamily: GoogleFonts.outfit().fontFamily),
-    headlineLarge: outfitHeadings.headlineLarge?.copyWith(fontFamily: GoogleFonts.outfit().fontFamily),
-    headlineMedium: outfitHeadings.headlineMedium?.copyWith(fontFamily: GoogleFonts.outfit().fontFamily),
-    headlineSmall: outfitHeadings.headlineSmall?.copyWith(fontFamily: GoogleFonts.outfit().fontFamily),
-    titleLarge: outfitHeadings.titleLarge?.copyWith(fontFamily: GoogleFonts.outfit().fontFamily),
-    titleMedium: outfitHeadings.titleMedium?.copyWith(fontFamily: GoogleFonts.outfit().fontFamily),
-    titleSmall: outfitHeadings.titleSmall?.copyWith(fontFamily: GoogleFonts.outfit().fontFamily),
+    displayLarge: displayLarge,
+    displayMedium: outfitHeadings.displayMedium?.copyWith(
+      fontFamily: GoogleFonts.outfit().fontFamily,
+    ),
+    displaySmall: outfitHeadings.displaySmall?.copyWith(
+      fontFamily: GoogleFonts.outfit().fontFamily,
+    ),
+    headlineLarge: headlineLarge,
+    headlineMedium: outfitHeadings.headlineMedium?.copyWith(
+      fontFamily: GoogleFonts.outfit().fontFamily,
+    ),
+    headlineSmall: outfitHeadings.headlineSmall?.copyWith(
+      fontFamily: GoogleFonts.outfit().fontFamily,
+    ),
+    titleLarge: titleLarge,
+    titleMedium: outfitHeadings.titleMedium?.copyWith(
+      fontFamily: GoogleFonts.outfit().fontFamily,
+    ),
+    titleSmall: outfitHeadings.titleSmall?.copyWith(
+      fontFamily: GoogleFonts.outfit().fontFamily,
+    ),
+    // Estilos enfatizados para M3 Expressive
+    // Usando extension properties que serão adicionadas via extension
   );
 }
 
@@ -270,13 +298,60 @@ class MyApp extends StatelessWidget {
       colorScheme: colorScheme,
       textTheme: _createCustomTextTheme(colorScheme),
       splashFactory: InkSparkle.splashFactory,
+      // Configura transições de página com spring animations usando tokens M3
+      pageTransitionsTheme: PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+        },
+      ),
       // Configura Cards para usarem surfaceContainer (com contraste)
       // em vez de surface (mesma cor do background)
       cardTheme: CardThemeData(
         color: colorScheme.surfaceContainer,
         elevation: 0,
+        shape: M3Shapes.cardShape,
+      ),
+      // Configura botões com shapes expressivos
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: M3Shapes.shapeXLarge,
+          ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: M3Shapes.shapeXLarge,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: M3Shapes.shapeXLarge,
+          ),
+        ),
+      ),
+      // Configura inputs com shape médio
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: M3Shapes.shapeMedium,
+        ),
+        filled: true,
+        contentPadding: const M3EdgeInsets.symmetric(
+          horizontal: M3SpacingToken.space16,
+          vertical: M3SpacingToken.space16,
+        ),
+      ),
+      // Configura chips com shape pequeno
+      chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: M3Shapes.shapeSmall,
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/homes/domain/entities/home.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/homes/presentation/widgets/home_form.dart';
@@ -64,7 +65,7 @@ class _EditHomePageState extends State<EditHomePage> {
           }
         },
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const M3EdgeInsets.all(M3SpacingToken.space16),
           child: Form(
             key: _formKey,
             child: Column(
@@ -74,12 +75,12 @@ class _EditHomePageState extends State<EditHomePage> {
                   'Editar Residência',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: M3SpacingToken.space24.value),
                 HomeForm(
                   nameController: _nameController,
                   descriptionController: _descriptionController,
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: M3SpacingToken.space32.value),
                 ElevatedButton(
                   onPressed: _saveHome,
                   child: const Text('Salvar Alterações'),

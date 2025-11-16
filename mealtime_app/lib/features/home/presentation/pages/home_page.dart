@@ -6,7 +6,11 @@ import 'package:intl/intl.dart';
 import 'package:material_charts/material_charts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
+import 'package:mealtime_app/core/theme/text_theme_extensions.dart';
+import 'package:mealtime_app/core/theme/m3_shapes.dart';
+import 'package:mealtime_app/core/theme/m3_motion_helpers.dart';
 import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
 import 'package:mealtime_app/core/di/injection_container.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
@@ -356,17 +360,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             _buildHeader(context),
-                            const SizedBox(height: 24),
+                            SizedBox(height: M3SpacingToken.space24.value),
                             _buildSummaryCards(context),
-                            const SizedBox(height: 24),
+                            SizedBox(height: M3SpacingToken.space24.value),
                             _buildLastFeedingSection(context),
-                            const SizedBox(height: 24),
+                            SizedBox(height: M3SpacingToken.space24.value),
                             _buildFeedingsChartSection(context),
-                            const SizedBox(height: 24),
+                            SizedBox(height: M3SpacingToken.space24.value),
                             _buildRecentRecordsSection(context),
-                            const SizedBox(height: 24),
+                            SizedBox(height: M3SpacingToken.space24.value),
                             _buildMyCatsSection(context),
-                            const SizedBox(height: 80), // Espaço para a navegação inferior
+                            SizedBox(height: M3SpacingToken.space80.value), // Espaço para a navegação inferior
                           ],
                         ),
                       ),
@@ -397,14 +401,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Widget _buildHeader(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const M3EdgeInsets.symmetric(
+        horizontal: M3SpacingToken.space16,
+        vertical: M3SpacingToken.space8,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             'MealTime',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: Theme.of(context).textTheme.headlineMediumEmphasized?.copyWith(
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
@@ -439,7 +445,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       right: 0,
                       top: 0,
                       child: Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: const M3EdgeInsets.all(M3SpacingToken.space4),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.error,
                           shape: BoxShape.circle,
@@ -540,22 +546,54 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             }
             
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const M3EdgeInsets.symmetric(horizontal: M3SpacingToken.space16),
               child: Column(
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _buildSummaryCard('Total de Gatos', catsCount.toString())),
-                      const SizedBox(width: 12),
-                      Expanded(child: _buildSummaryCard('Hoje', todayCount.toString())),
+                      Expanded(
+                        child: _AnimatedSummaryCard(
+                          delay: 0,
+                          child: _buildSummaryCard(
+                            'Total de Gatos',
+                            catsCount.toString(),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: M3SpacingToken.space12.value),
+                      Expanded(
+                        child: _AnimatedSummaryCard(
+                          delay: 100,
+                          child: _buildSummaryCard(
+                            'Hoje',
+                            todayCount.toString(),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: M3SpacingToken.space12.value),
                   Row(
                     children: [
-                      Expanded(child: _buildSummaryCard('Porção Média', averagePortionText)),
-                      const SizedBox(width: 12),
-                      Expanded(child: _buildSummaryCard('Última Vez', lastFeedingTime)),
+                      Expanded(
+                        child: _AnimatedSummaryCard(
+                          delay: 200,
+                          child: _buildSummaryCard(
+                            'Porção Média',
+                            averagePortionText,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: M3SpacingToken.space12.value),
+                      Expanded(
+                        child: _AnimatedSummaryCard(
+                          delay: 300,
+                          child: _buildSummaryCard(
+                            'Última Vez',
+                            lastFeedingTime,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -569,10 +607,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Widget _buildSummaryCard(String title, String value) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const M3EdgeInsets.all(M3SpacingToken.space16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: M3Shapes.shapeMedium,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -584,7 +622,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: M3SpacingToken.space8.value),
           Text(
             value,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -660,33 +698,32 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             }
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const M3EdgeInsets.symmetric(horizontal: M3SpacingToken.space16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Última Alimentação',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: Theme.of(context).textTheme.titleLargeEmphasized?.copyWith(
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: M3SpacingToken.space12.value),
               Builder(
                 builder: (context) {
                   debugPrint('[HomePage] Building widget - lastFeeding: ${lastFeeding?.id ?? 'null'}, cat: ${cat?.name ?? 'null'}');
                   if (lastFeeding != null && cat != null) {
                     return Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const M3EdgeInsets.all(M3SpacingToken.space16),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surfaceContainer,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: M3Shapes.shapeMedium,
                       ),
                       child: Row(
                         children: [
                           _buildCatAvatar(context, cat),
-                          const SizedBox(width: 16),
+                          SizedBox(width: M3SpacingToken.space16.value),
                           Expanded(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -699,7 +736,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                SizedBox(height: M3SpacingToken.space4.value),
                                 Builder(
                                   builder: (context) {
                                     final currentUserId = SupabaseConfig.client.auth.currentUser?.id;
@@ -722,7 +759,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                                           ),
                                         ),
-                                        const SizedBox(height: 2),
+                                        SizedBox(height: M3SpacingToken.space4.value),
                                         Text(
                                           'Alimentado por $fedByText',
                                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -733,7 +770,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     );
                                   },
                                 ),
-                                const SizedBox(height: 4),
+                                SizedBox(height: M3SpacingToken.space4.value),
                                 Text(
                                   '${_formatTime(lastFeeding.fedAt)} · ${_formatDate(lastFeeding.fedAt)}',
                                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -748,10 +785,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     );
                   } else {
                     return Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const M3EdgeInsets.all(M3SpacingToken.space16),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surfaceContainer,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: M3Shapes.shapeMedium,
                       ),
                       child: Center(
                         child: Column(
@@ -762,7 +799,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                               size: 48,
                               color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: M3SpacingToken.space8.value),
                             Text(
                               'Nenhuma alimentação registrada',
                               textAlign: TextAlign.center,
@@ -818,35 +855,34 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             );
 
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const M3EdgeInsets.symmetric(horizontal: M3SpacingToken.space16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Alimentações',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    style: Theme.of(context).textTheme.titleLargeEmphasized?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: M3SpacingToken.space4.value),
                   Text(
                     'Últimos 7 dias',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: M3SpacingToken.space12.value),
                   Container(
                     constraints: const BoxConstraints(
                       minHeight: 200,
                       maxHeight: 200,
                     ),
-                    padding: const EdgeInsets.all(16),
+                    padding: const M3EdgeInsets.all(M3SpacingToken.space16),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: M3Shapes.shapeMedium,
                       border: Border.all(
                         color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                       ),
@@ -1076,6 +1112,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ? chartHeight 
               : 160.0;
 
+          // Calcular raio máximo para bordas completamente arredondadas
+          // barWidth = (chartArea.width / data.length) * (1 - barSpacing)
+          // maxRadius = barWidth / 2 (Flutter limita automaticamente)
+          final barSpacing = 0.3;
+          final barWidth = (safeWidth / validData.length) * (1 - barSpacing);
+          final maxCornerRadius = (barWidth / 2).clamp(4.0, 50.0);
+
           // Gráfico simples (mais de 5 gatos)
           // PERFORMANCE: Desabilitar grid e values para melhorar Raster
           return SizedBox(
@@ -1090,7 +1133,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               style: BarChartStyle(
                 barColor: colorScheme.primary,
                 backgroundColor: colorScheme.surface,
-                barSpacing: 0.3,
+                barSpacing: barSpacing,
+                cornerRadius: maxCornerRadius,
                 labelStyle: TextStyle(
                   color: colorScheme.onSurfaceVariant,
                   fontSize: 10,
@@ -1115,7 +1159,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1124,7 +1168,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               size: 64,
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             Text(
               'Nenhuma alimentação registrada',
               textAlign: TextAlign.center,
@@ -1133,7 +1177,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: M3SpacingToken.space8.value),
             Text(
               'Registre alimentações para ver o gráfico dos últimos 7 dias',
               textAlign: TextAlign.center,
@@ -1165,27 +1209,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         final recentFeedings = allFeedings.take(3).toList();
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const M3EdgeInsets.symmetric(horizontal: M3SpacingToken.space16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Registros Recentes',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: Theme.of(context).textTheme.titleLargeEmphasized?.copyWith(
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: M3SpacingToken.space12.value),
               if (recentFeedings.isNotEmpty)
                 ...recentFeedings.map((feeding) => _buildRecentRecordItem(feeding, key: ValueKey(feeding.id)))
               else
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const M3EdgeInsets.all(M3SpacingToken.space16),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: M3Shapes.shapeMedium,
                   ),
                   child: Center(
                     child: Text(
@@ -1222,11 +1265,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         }
         
         return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
+          margin: EdgeInsets.only(bottom: M3SpacingToken.space8.value),
+          padding: const M3EdgeInsets.all(M3SpacingToken.space12),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: M3Shapes.shapeMedium,
           ),
           child: Row(
             children: [
@@ -1237,7 +1280,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                       child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
                     ),
-              const SizedBox(width: 12),
+              SizedBox(width: M3SpacingToken.space12.value),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1295,27 +1338,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         }
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const M3EdgeInsets.symmetric(horizontal: M3SpacingToken.space16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Meus Gatos',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: Theme.of(context).textTheme.titleLargeEmphasized?.copyWith(
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: M3SpacingToken.space12.value),
               if (cats.isNotEmpty)
                 ...cats.map((cat) => _buildMyCatsItem(cat, key: ValueKey(cat.id)))
               else
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const M3EdgeInsets.all(M3SpacingToken.space16),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: M3Shapes.shapeMedium,
                   ),
                   child: Center(
                     child: Text(
@@ -1324,7 +1366,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     ),
                   ),
                 ),
-              const SizedBox(height: 8),
+              SizedBox(height: M3SpacingToken.space8.value),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -1344,16 +1386,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Widget _buildMyCatsItem(Cat cat, {Key? key}) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.only(bottom: M3SpacingToken.space8.value),
+      padding: const M3EdgeInsets.all(M3SpacingToken.space12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: M3Shapes.shapeMedium,
       ),
       child: Row(
         children: [
           _buildSmallCatAvatar(context, cat),
-          const SizedBox(width: 12),
+          SizedBox(width: M3SpacingToken.space12.value),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1662,6 +1704,65 @@ class _UserAvatarButton extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Widget que anima a entrada de cards de resumo com spring animation
+class _AnimatedSummaryCard extends StatefulWidget {
+  final Widget child;
+  final int delay;
+
+  const _AnimatedSummaryCard({
+    required this.child,
+    required this.delay,
+  });
+
+  @override
+  State<_AnimatedSummaryCard> createState() => _AnimatedSummaryCardState();
+}
+
+class _AnimatedSummaryCardState extends State<_AnimatedSummaryCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: M3MotionHelpers.standardDuration,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: M3MotionHelpers.standardCurve,
+    );
+    // Iniciar animação com delay
+    Future.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) {
+        _controller.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _animation,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.1),
+          end: Offset.zero,
+        ).animate(_animation),
+        child: widget.child,
       ),
     );
   }

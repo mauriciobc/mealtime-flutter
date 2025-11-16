@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/homes/presentation/widgets/home_card.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
@@ -72,19 +73,19 @@ class _HomesListPageState extends State<HomesListPage> {
             size: 80,
             color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: M3SpacingToken.space16.value),
           Text(
             'Nenhuma residência cadastrada',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: M3SpacingToken.space8.value),
           Text(
             'Adicione sua primeira residência para começar',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: M3SpacingToken.space24.value),
           ElevatedButton.icon(
             onPressed: () => context.push('/homes/create'),
             icon: const Icon(Icons.add),
@@ -101,7 +102,7 @@ class _HomesListPageState extends State<HomesListPage> {
         context.read<HomesBloc>().add(LoadHomes());
       },
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
         itemCount: homes.length,
         itemBuilder: (context, index) {
           final home = homes[index];
@@ -116,7 +117,7 @@ class _HomesListPageState extends State<HomesListPage> {
           }
           
           return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: EdgeInsets.only(bottom: M3SpacingToken.space12.value),
             child: HomeCard(
               home: home,
               membersCount: membersCount,

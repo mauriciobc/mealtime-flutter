@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
@@ -72,24 +73,24 @@ class _CatFormState extends State<CatForm> {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildNameField(),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             _buildBreedField(),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             _buildGenderField(),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             _buildColorField(),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             _buildBirthDateField(),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             _buildWeightFields(),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             _buildDescriptionField(),
-            const SizedBox(height: 24),
+            SizedBox(height: M3SpacingToken.space24.value),
             _buildSubmitButton(),
           ],
         ),
@@ -196,7 +197,7 @@ class _CatFormState extends State<CatForm> {
             },
           ),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: M3SpacingToken.space16.value),
         Expanded(
           child: TextFormField(
             controller: _targetWeightController,

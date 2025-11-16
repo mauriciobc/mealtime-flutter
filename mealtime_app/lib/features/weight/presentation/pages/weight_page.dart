@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:mealtime_app/core/constants/m3_animation.dart';
+import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart' as cat_entity;
+import 'package:mealtime_app/core/theme/m3_shapes.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
@@ -129,7 +130,7 @@ class _WeightPageState extends State<WeightPage> {
                   content: const Text('Selecione um gato primeiro'),
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: M3Shapes.shapeMedium,
                   ),
                   action: SnackBarAction(
                     label: 'OK',
@@ -172,11 +173,11 @@ class _WeightPageState extends State<WeightPage> {
           '${weightState.filteredWeightLogs.length}-'
           '${weightState.activeGoal?.id ?? 'none'}',
         ),
-        padding: const EdgeInsets.all(16),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
         children: <Widget>[
             // Header
             _buildHeader(weightState, cats),
-            const SizedBox(height: 24),
+            SizedBox(height: M3SpacingToken.space24.value),
             
             // Estado vazio quando não há gatos
             if (cats.isEmpty) ...[
@@ -186,13 +187,13 @@ class _WeightPageState extends State<WeightPage> {
             // Seletor de Gatos (se houver mais de um)
             if (cats.length > 1) ...[
               _buildCatSelector(weightState, cats),
-              const SizedBox(height: 24),
+              SizedBox(height: M3SpacingToken.space24.value),
             ],
 
             // Mostrar seletor quando há apenas 1 gato não selecionado
             if (cats.length == 1 && weightState.selectedCat == null) ...[
               _buildSingleCatSelector(weightState, cats.first),
-              const SizedBox(height: 24),
+              SizedBox(height: M3SpacingToken.space24.value),
             ],
 
             // Indicadores de Peso
@@ -200,20 +201,20 @@ class _WeightPageState extends State<WeightPage> {
               RepaintBoundary(
                 child: _buildWeightIndicators(weightState),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: M3SpacingToken.space24.value),
             ],
 
             // Progresso da Meta
             if (weightState.activeGoal != null) ...[
               RepaintBoundary(
                 child: AnimatedSwitcher(
-                  duration: M3Animation.durationShort3, // 250ms M3
-                  switchInCurve: M3Animation.deceleratedCurve,
-                  switchOutCurve: M3Animation.acceleratedCurve,
+                  duration: M3Motion.standard.duration,
+                  switchInCurve: M3Motion.standard.curve,
+                  switchOutCurve: M3Motion.standard.curve,
                   child: _buildProgressCard(weightState),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: M3SpacingToken.space24.value),
             ],
 
             // Gráfico de Tendência
@@ -233,7 +234,7 @@ class _WeightPageState extends State<WeightPage> {
                   },
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: M3SpacingToken.space24.value),
             ],
 
             // Histórico Recente
@@ -275,7 +276,7 @@ class _WeightPageState extends State<WeightPage> {
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 48),
+        padding: const M3EdgeInsets.symmetric(vertical: M3SpacingToken.space48),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -284,14 +285,14 @@ class _WeightPageState extends State<WeightPage> {
               size: 80,
               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: M3SpacingToken.space24.value),
             Text(
               'Nenhum gato cadastrado',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: M3SpacingToken.space8.value),
             Text(
               'Adicione um gato para começar a rastrear o peso',
               textAlign: TextAlign.center,
@@ -301,7 +302,7 @@ class _WeightPageState extends State<WeightPage> {
                         ),
                   ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: M3SpacingToken.space24.value),
             ElevatedButton.icon(
               onPressed: () {
                 // Navegar para a página de gatos
@@ -339,7 +340,7 @@ class _WeightPageState extends State<WeightPage> {
                     content: const Text('Selecione um gato primeiro'),
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: M3Shapes.shapeMedium,
                     ),
                     action: SnackBarAction(
                       label: 'OK',
@@ -384,9 +385,9 @@ class _WeightPageState extends State<WeightPage> {
 
   Widget _buildSingleCatSelector(WeightLoaded weightState, cat_entity.Cat cat) {
     return TweenAnimationBuilder<double>(
-      duration: M3Animation.durationShort2, // 200ms M3
+      duration: M3Motion.standard.duration,
       tween: Tween(begin: 0.0, end: 1.0),
-      curve: M3Animation.deceleratedCurve, // Entrada M3
+      curve: M3Motion.standard.curve,
       builder: (context, value, child) {
         return Opacity(
           opacity: value,
@@ -401,16 +402,16 @@ class _WeightPageState extends State<WeightPage> {
           context.read<WeightBloc>().add(SelectCat(cat.id));
         },
         child: AnimatedContainer(
-          duration: M3Animation.durationShort2, // 200ms M3
-          curve: M3Animation.standardCurve, // Standard easing M3
+          duration: M3Motion.standard.duration,
+          curve: M3Motion.standard.curve,
           child: Card(
             elevation: 2,
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const M3EdgeInsets.all(M3SpacingToken.space16),
               child: Row(
                 children: [
                   _buildCatAvatar(context, cat),
-                  const SizedBox(width: 16),
+                  SizedBox(width: M3SpacingToken.space16.value),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -421,7 +422,7 @@ class _WeightPageState extends State<WeightPage> {
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: M3SpacingToken.space4.value),
                         Text(
                           'Toque para ver os registros de peso',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -445,11 +446,20 @@ class _WeightPageState extends State<WeightPage> {
 
   Widget _buildWeightIndicators(WeightLoaded weightState) {
     return AnimatedSwitcher(
-      duration: M3Animation.durationShort4, // 300ms M3
-      switchInCurve: M3Animation.deceleratedCurve,
-      switchOutCurve: M3Animation.acceleratedCurve,
+      duration: M3Motion.standard.duration,
+      switchInCurve: M3Motion.standard.curve,
+      switchOutCurve: M3Motion.standard.curve,
       transitionBuilder: (child, animation) {
-        return M3Transitions.scaleTransition(child, animation);
+        return ScaleTransition(
+          scale: CurvedAnimation(
+            parent: animation,
+            curve: M3Motion.standard.curve,
+          ),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
       },
       child: Row(
         key: ValueKey(
@@ -466,7 +476,7 @@ class _WeightPageState extends State<WeightPage> {
               Theme.of(context).colorScheme.primary,
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: M3SpacingToken.space16.value),
           Expanded(
             child: _buildWeightCard(
               'Meta',
@@ -486,7 +496,7 @@ class _WeightPageState extends State<WeightPage> {
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -498,7 +508,7 @@ class _WeightPageState extends State<WeightPage> {
                         ),
                   ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: M3SpacingToken.space4.value),
             Text(
               value,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -519,14 +529,14 @@ class _WeightPageState extends State<WeightPage> {
     final safeProgress = progress.isFinite ? progress : 0.0;
     
     return TweenAnimationBuilder<double>(
-      duration: M3Animation.durationLong1, // 500ms M3 para animações complexas
+      duration: M3Motion.emphasized.duration,
       tween: Tween(begin: 0.0, end: safeProgress / 100),
-      curve: M3Animation.emphasizedCurve, // Emphasized para elementos importantes M3
+      curve: M3Motion.emphasized.curve,
       builder: (context, animatedProgress, child) {
         return Card(
           key: ValueKey('progress-card-${weightState.activeGoal?.id ?? 'none'}'),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const M3EdgeInsets.all(M3SpacingToken.space16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -547,9 +557,9 @@ class _WeightPageState extends State<WeightPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: M3SpacingToken.space16.value),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: M3Shapes.shapeSmall,
                   child: LinearProgressIndicatorM3E(
                     value: animatedProgress,
                     size: LinearProgressM3ESize.m,
@@ -557,9 +567,9 @@ class _WeightPageState extends State<WeightPage> {
                     trackColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: M3SpacingToken.space8.value),
                 AnimatedDefaultTextStyle(
-                  duration: M3Animation.durationShort2, // 200ms M3
+                  duration: M3Motion.standard.duration,
                   style: Theme.of(context).textTheme.bodyMedium ?? const TextStyle(),
                   child: Text(
                     '${(animatedProgress * 100).toStringAsFixed(0)}% completo',
@@ -578,7 +588,7 @@ class _WeightPageState extends State<WeightPage> {
     if (weightState.weightLogs.isEmpty) {
       return Card(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const M3EdgeInsets.all(M3SpacingToken.space32),
           child: Center(
             child: Column(
               children: [
@@ -589,12 +599,12 @@ class _WeightPageState extends State<WeightPage> {
                         alpha: 0.3,
                       ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: M3SpacingToken.space16.value),
                 Text(
                   'Nenhum registro de peso',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: M3SpacingToken.space8.value),
                 Text(
                   'Comece registrando o peso do seu gato',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -615,7 +625,7 @@ class _WeightPageState extends State<WeightPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const M3EdgeInsets.all(M3SpacingToken.space16),
             child: Text(
               'Histórico Recente',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -668,9 +678,9 @@ class _WeightPageState extends State<WeightPage> {
                 ),
                 trailing: variation != null
                     ? Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                        padding: const M3EdgeInsets.symmetric(
+                          horizontal: M3SpacingToken.space8,
+                          vertical: M3SpacingToken.space4,
                         ),
                         decoration: BoxDecoration(
                           color: variation > 0
@@ -678,7 +688,7 @@ class _WeightPageState extends State<WeightPage> {
                               : variation < 0
                                   ? Colors.red.withValues(alpha: 0.1)
                                   : Colors.grey.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: M3Shapes.shapeMedium,
                         ),
                         child: Text(
                           '${variation > 0 ? '+' : ''}${variation.toStringAsFixed(2)} kg',

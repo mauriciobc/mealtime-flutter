@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_design/material_design.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mealtime_app/core/database/app_database.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
@@ -106,12 +107,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
     final householdId = state.householdId ?? _householdId;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const M3EdgeInsets.all(M3SpacingToken.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const StatisticsHeader(),
-          const SizedBox(height: 16),
+          SizedBox(height: M3SpacingToken.space16.value),
           BlocBuilder<CatsBloc, CatsState>(
             builder: (context, catsState) {
               String? effectiveHouseholdId = householdId;
@@ -127,34 +128,34 @@ class _StatisticsPageState extends State<StatisticsPage> {
               );
             },
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: M3SpacingToken.space16.value),
           if (state.statistics.hasData) ...[
             StatisticsSummaryCards(statistics: state.statistics),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             _buildChartSafe(
               () => DailyConsumptionChart(
                 dailyConsumptions: state.statistics.dailyConsumptions,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             _buildChartSafe(
               () => CatDistributionChart(
                 catConsumptions: state.statistics.catConsumptions,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             _buildChartSafe(
               () => FoodTypeDistributionChart(
                 catConsumptions: state.statistics.catConsumptions,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             _buildChartSafe(
               () => HourlyDistributionChart(
                 hourlyFeedings: state.statistics.hourlyFeedings,
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: M3SpacingToken.space32.value),
           ] else
             _buildEmptyState(),
         ],
@@ -172,8 +173,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
           debugPrint('[StatisticsPage] Stack: $stackTrace');
           return Container(
             height: 200,
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            padding: const EdgeInsets.all(16),
+            margin: const M3EdgeInsets.symmetric(vertical: M3SpacingToken.space8),
+            padding: const M3EdgeInsets.all(M3SpacingToken.space16),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.errorContainer,
               borderRadius: BorderRadius.circular(8),
@@ -186,7 +187,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     Icons.error_outline,
                     color: Theme.of(context).colorScheme.onErrorContainer,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: M3SpacingToken.space8.value),
                   Text(
                     'Erro ao renderizar gráfico',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -207,7 +208,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
   Widget _buildEmptyState() {
     return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: const M3EdgeInsets.all(M3SpacingToken.space32),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -220,12 +221,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   .onSurfaceVariant
                   .withValues(alpha: 0.5),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             Text(
               'Nenhum dado disponível',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: M3SpacingToken.space8.value),
             Text(
               'Não há alimentações registradas no período selecionado.',
               textAlign: TextAlign.center,
@@ -242,7 +243,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
   Widget _buildErrorState(String message) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const M3EdgeInsets.all(M3SpacingToken.space32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
@@ -252,12 +253,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
               size: 64,
               color: Theme.of(context).colorScheme.error,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             Text(
               'Erro ao carregar estatísticas',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: M3SpacingToken.space8.value),
             Text(
               message,
               textAlign: TextAlign.center,
@@ -265,7 +266,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: M3SpacingToken.space24.value),
             ElevatedButton.icon(
               onPressed: () {
                 context.read<StatisticsBloc>().add(
