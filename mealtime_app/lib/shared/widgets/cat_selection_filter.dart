@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
-import 'package:progress_indicator_m3e/progress_indicator_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 
 /// Widget de seleção de gatos estilo "Avatar Filter" com animação ondulante (wobbly)
 /// Material Design 3.

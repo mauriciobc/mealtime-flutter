@@ -13,8 +13,7 @@ import 'package:mealtime_app/features/weight/presentation/widgets/add_weight_dia
 import 'package:mealtime_app/features/weight/presentation/widgets/create_goal_dialog.dart';
 import 'package:mealtime_app/features/weight/presentation/widgets/weight_trend_chart.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
-import 'package:fab_m3e/fab_m3e.dart';
-import 'package:progress_indicator_m3e/progress_indicator_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart' as shared;
 import 'package:mealtime_app/shared/widgets/cat_selection_filter.dart';
 

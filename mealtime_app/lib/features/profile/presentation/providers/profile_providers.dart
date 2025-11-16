@@ -26,10 +26,17 @@ ProfileRepository profileRepository(Ref ref) {
   final localDataSource = ProfileLocalDataSourceImpl(
     database: sl(),
   );
-  return ProfileRepositoryImpl(
+  final repository = ProfileRepositoryImpl(
     remoteDataSource: remoteDataSource,
     localDataSource: localDataSource,
   );
+
+  // Registrar callback para limpar recursos quando o provider for invalidado
+  ref.onDispose(() {
+    repository.dispose();
+  });
+
+  return repository;
 }
 
 // Use Cases Providers
@@ -105,7 +112,10 @@ class ProfileNotifier extends _$ProfileNotifier {
     if (state.value == null) return null;
     
     final useCase = ref.read(uploadAvatarProvider);
-    final result = await useCase(UploadAvatarParams(filePath: filePath));
+    final result = await useCase(UploadAvatarParams(
+      idOrUsername: state.value!.id,
+      filePath: filePath,
+    ));
     
     return result.fold(
       (failure) {

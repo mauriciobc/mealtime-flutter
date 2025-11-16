@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
-import 'package:mealtime_app/core/supabase/supabase_config.dart';
 import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:icon_button_m3e/icon_button_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 
 class ProfileAvatarWidget extends ConsumerStatefulWidget {
   final String? imageUrl;
@@ -89,10 +88,25 @@ class _ProfileAvatarWidgetState extends ConsumerState<ProfileAvatarWidget> {
   }
 
   Widget _buildPlaceholder() {
-    final user = SupabaseConfig.client.auth.currentUser;
-    final initial = (user?.email?.trim().isNotEmpty == true)
-        ? user!.email!.trim().substring(0, 1).toUpperCase()
-        : 'U';
+    final profileAsync = ref.watch(profileProvider(widget.userId));
+    
+    // Extrair inicial do perfil ou usar fallback
+    final initial = profileAsync.when(
+      data: (profile) {
+        // Priorizar fullName, depois email, depois 'U'
+        if (profile?.fullName != null && 
+            profile!.fullName!.trim().isNotEmpty) {
+          return profile.fullName!.trim().substring(0, 1).toUpperCase();
+        }
+        if (profile?.email != null && 
+            profile!.email!.trim().isNotEmpty) {
+          return profile.email!.trim().substring(0, 1).toUpperCase();
+        }
+        return 'U';
+      },
+      loading: () => 'U', // Fallback durante carregamento
+      error: (_, _) => 'U', // Fallback em caso de erro
+    );
     
     return Container(
       color: Theme.of(context).colorScheme.surfaceContainerHighest,

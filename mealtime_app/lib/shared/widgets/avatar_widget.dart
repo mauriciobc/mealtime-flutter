@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
-import 'package:icon_button_m3e/icon_button_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 
 class AvatarWidget extends StatefulWidget {
   final String? imageUrl;

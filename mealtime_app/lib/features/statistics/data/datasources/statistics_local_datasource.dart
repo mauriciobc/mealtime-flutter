@@ -272,40 +272,35 @@ class StatisticsLocalDataSourceImpl implements StatisticsLocalDataSource {
     Map<String, String> catsMap,
     double totalConsumption,
   ) {
-    // Usar chave composta: catId + foodType (ou apenas catId se foodType for null)
-    final Map<String, double> catAmounts = {};
-    final Map<String, String?> catFoodTypes = {};
+    // Usar CatFoodKey como chave composta para evitar problemas com underscores em catId
+    final Map<CatFoodKey, double> catAmounts = {};
 
     // Agrupar por gato e tipo de comida
     for (final log in logs) {
       if (log.amount != null) {
         final amountInGrams = _convertToGrams(log.amount!, log.unit ?? 'g');
-        // Criar chave única: catId + foodType (ou apenas catId)
-        final key = log.foodType != null 
-            ? '${log.catId}_${log.foodType}'
-            : log.catId;
+        // Criar chave composta usando CatFoodKey
+        final key = CatFoodKey(
+          catId: log.catId,
+          foodType: log.foodType,
+        );
         
         catAmounts[key] = (catAmounts[key] ?? 0) + amountInGrams;
-        // Armazenar o foodType para esta chave
-        if (log.foodType != null) {
-          catFoodTypes[key] = log.foodType;
-        }
       }
     }
 
     // Converter para lista com percentuais
     final catConsumptions = catAmounts.entries.map((entry) {
       final key = entry.key;
-      final catId = key.contains('_') ? key.split('_').first : key;
       final percentage = totalConsumption > 0
           ? (entry.value / totalConsumption) * 100
           : 0.0;
       return CatConsumption(
-        catId: catId,
-        catName: catsMap[catId] ?? 'Gato desconhecido',
+        catId: key.catId,
+        catName: catsMap[key.catId] ?? 'Gato desconhecido',
         amount: entry.value,
         percentage: percentage,
-        foodType: catFoodTypes[key],
+        foodType: key.foodType,
       );
     }).toList();
 

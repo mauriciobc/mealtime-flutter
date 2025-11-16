@@ -181,7 +181,7 @@ class _CatFormState extends State<CatForm> {
           child: TextFormField(
             controller: _currentWeightController,
             decoration: InputDecoration(
-              labelText: context.l10n.cats_currentWeightLabel,
+              labelText: context.l10n.cats_currentWeight,
               border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,
@@ -201,7 +201,7 @@ class _CatFormState extends State<CatForm> {
           child: TextFormField(
             controller: _targetWeightController,
             decoration: InputDecoration(
-              labelText: context.l10n.cats_targetWeightLabel,
+              labelText: context.l10n.cats_targetWeight,
               border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,

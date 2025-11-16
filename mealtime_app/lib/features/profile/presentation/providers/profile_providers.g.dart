@@ -54,7 +54,7 @@ final class ProfileRepositoryProvider
   }
 }
 
-String _$profileRepositoryHash() => r'fa0c9d19afd8f78367bf6510b6da5f4118540029';
+String _$profileRepositoryHash() => r'37f35c5ea0081b4f7886c48625f92ccc523f02b9';
 
 @ProviderFor(getProfile)
 const getProfileProvider = GetProfileProvider._();

@@ -4,7 +4,7 @@ import 'package:mealtime_app/core/supabase/supabase_config.dart';
 import 'package:mealtime_app/features/notifications/domain/entities/notification.dart'
     as notification_entity;
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
-import 'package:icon_button_m3e/icon_button_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 
 class NotificationsPage extends StatefulWidget {
   /// Callback opcional chamado quando o contador de notificações não lidas muda

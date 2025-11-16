@@ -1,5 +1,30 @@
 import 'package:equatable/equatable.dart';
 
+/// Chave composta para identificar consumo por gato e tipo de comida
+/// Evita problemas de parsing quando catId contém underscores
+class CatFoodKey extends Equatable {
+  final String catId;
+  final String? foodType;
+
+  const CatFoodKey({
+    required this.catId,
+    this.foodType,
+  });
+
+  @override
+  List<Object?> get props => [catId, foodType];
+
+  CatFoodKey copyWith({
+    String? catId,
+    String? foodType,
+  }) {
+    return CatFoodKey(
+      catId: catId ?? this.catId,
+      foodType: foodType ?? this.foodType,
+    );
+  }
+}
+
 /// Consumo diário de ração
 class DailyConsumption extends Equatable {
   final DateTime date;

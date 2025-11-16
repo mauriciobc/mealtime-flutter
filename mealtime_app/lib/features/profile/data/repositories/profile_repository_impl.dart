@@ -26,6 +26,24 @@ class ProfileRepositoryImpl implements ProfileRepository {
     required this.localDataSource,
   });
 
+  /// Libera recursos e cancela operações pendentes
+  /// Deve ser chamado quando o repositório não for mais necessário
+  void dispose() {
+    // Cancelar todos os timers de debounce
+    for (final timer in _debounceTimers.values) {
+      timer.cancel();
+    }
+    _debounceTimers.clear();
+
+    // Limpar rastreamento de sincronizações em andamento
+    _inFlightSyncs.clear();
+
+    // Limpar rastreamento de requisições em andamento
+    _inFlightFetches.clear();
+
+    debugPrint('[ProfileRepository] Recursos liberados');
+  }
+
   @override
   Future<Either<Failure, Profile>> getProfile(String idOrUsername) async {
     try {
@@ -118,6 +136,30 @@ class ProfileRepositoryImpl implements ProfileRepository {
     _debounceTimers[idOrUsername] = timer;
   }
 
+  /// Reporta erro para sistema de monitoramento
+  /// Pode ser estendido para integrar com Sentry, Firebase Crashlytics, etc.
+  void _reportError(
+    Object error,
+    StackTrace? stackTrace, {
+    String? context,
+  }) {
+    // Log local para debugging
+    debugPrint(
+      '[ProfileRepository] Erro reportado${context != null ? ' ($context)' : ''}: $error',
+    );
+    if (stackTrace != null) {
+      debugPrint('[ProfileRepository] Stack trace: $stackTrace');
+    }
+
+    // TODO: Integrar com serviço de monitoramento quando disponível
+    // Exemplo:
+    // errorTracker.recordError(error, stackTrace ?? StackTrace.current);
+    // ou
+    // Sentry.captureException(error, stackTrace: stackTrace);
+    // ou
+    // FirebaseCrashlytics.instance.recordError(error, stackTrace);
+  }
+
   /// Executa a sincronização real com proteção contra race condition
   Future<void> _performSync(String idOrUsername) async {
     // Verificar se já existe uma sincronização em andamento
@@ -142,13 +184,19 @@ class ProfileRepositoryImpl implements ProfileRepository {
           '[ProfileRepository] Sincronização em background concluída para '
           '$idOrUsername',
         );
-      } catch (e) {
+      } catch (e, stackTrace) {
         debugPrint(
           '[ProfileRepository] Erro na sincronização em background para '
           '$idOrUsername: $e',
         );
-        // Re-lançar erro para que possa ser tratado se necessário
-        rethrow;
+        // Reportar erro para sistema de monitoramento
+        _reportError(
+          e,
+          stackTrace,
+          context: 'background sync para $idOrUsername',
+        );
+        // Não re-lançar: erro é tratado silenciosamente em background
+        // mas reportado para observabilidade
       } finally {
         // Sempre remover da lista de sincronizações em andamento
         _inFlightSyncs.remove(idOrUsername);
@@ -163,9 +211,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
     _inFlightSyncs[idOrUsername] = syncFuture;
 
     // Aguardar a conclusão (sem bloquear o método que chamou)
-    syncFuture.catchError((error) {
-      // Erro já foi logado no try-catch acima
-      // Apenas garantir que a entrada seja removida (já está no finally)
+    syncFuture.catchError((error, stackTrace) {
+      // Garantir que erros não capturados também sejam reportados
+      _reportError(
+        error,
+        stackTrace,
+        context: 'background sync catchError para $idOrUsername',
+      );
     });
   }
 
@@ -195,9 +247,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, String>> uploadAvatar(String filePath) async {
+  Future<Either<Failure, String>> uploadAvatar(
+    String idOrUsername,
+    String filePath,
+  ) async {
     try {
-      final url = await remoteDataSource.uploadAvatar(filePath);
+      final url = await remoteDataSource.uploadAvatar(idOrUsername, filePath);
       return Right(url);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));

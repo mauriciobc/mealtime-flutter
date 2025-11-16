@@ -43,13 +43,21 @@ class CatDistributionChart extends StatelessWidget {
         .whereType<MapEntry<CatConsumption, double>>() // Remove nulls
         .toList();
 
+    // Validar dados finais antes de usar no gráfico e legenda
+    final validData = chartData.where((entry) {
+      return entry.value.isFinite && 
+          entry.value >= 0 && 
+          entry.value <= 100 &&
+          !entry.value.isNaN;
+    }).toList();
+
     // Se após filtragem não houver dados válidos, mostrar empty state
-    if (chartData.isEmpty) {
+    if (validData.isEmpty) {
       return _buildEmptyState(context);
     }
 
-    // Criar legenda com cores
-    final colors = _generateColors(theme, chartData.length);
+    // Criar legenda com cores baseado em validData
+    final colors = _generateColors(theme, validData.length);
 
     return Card(
       child: Padding(
@@ -80,28 +88,6 @@ class CatDistributionChart extends StatelessWidget {
                   chartSize = (availableWidth * 0.8).clamp(200.0, 300.0);
                 } else {
                   chartSize = 250.0; // Fallback seguro
-                }
-
-                // Validar dados finais antes de passar para o gráfico
-                final validData = chartData.where((entry) {
-                  return entry.value.isFinite && 
-                      entry.value >= 0 && 
-                      entry.value <= 100 &&
-                      !entry.value.isNaN;
-                }).toList();
-
-                if (validData.isEmpty) {
-                  return SizedBox(
-                    height: chartSize,
-                    child: Center(
-                      child: Text(
-                        'Dados inválidos',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.error,
-                        ),
-                      ),
-                    ),
-                  );
                 }
 
                 return SizedBox(
@@ -143,12 +129,10 @@ class CatDistributionChart extends StatelessWidget {
             Wrap(
               spacing: 16,
               runSpacing: 8,
-              children: chartData.asMap().entries.map((entry) {
+              children: validData.asMap().entries.map((entry) {
                 final index = entry.key;
                 final dataEntry = entry.value;
                 final consumption = dataEntry.key;
-                // Garantir que temos cor para este índice
-                final colorIndex = index < colors.length ? index : index % colors.length;
                 // Criar label com gato e tipo de comida
                 final label = consumption.foodType != null
                     ? '${consumption.catName} - ${consumption.foodType}'
@@ -160,7 +144,7 @@ class CatDistributionChart extends StatelessWidget {
                       width: 12,
                       height: 12,
                       decoration: BoxDecoration(
-                        color: colors[colorIndex],
+                        color: colors[index],
                         shape: BoxShape.circle,
                       ),
                     ),

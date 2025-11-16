@@ -53,9 +53,6 @@ dependencies:
   material_charts: ^0.0.39
   fl_chart: ^1.1.1
   loading_indicator_m3e: ^0.1.1
-  icon_button_m3e: ^0.2.1
-  fab_m3e: ^0.1.1
-  progress_indicator_m3e: ^0.1.1
   m3e_collection: ^0.3.7
   
   # Utils

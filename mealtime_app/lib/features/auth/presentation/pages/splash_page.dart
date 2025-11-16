@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 

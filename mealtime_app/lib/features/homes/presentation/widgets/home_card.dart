@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:icon_button_m3e/icon_button_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 import 'package:mealtime_app/features/homes/domain/entities/home.dart';
 
 class HomeCard extends StatelessWidget {

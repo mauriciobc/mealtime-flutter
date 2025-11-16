@@ -265,7 +265,7 @@ abstract class AppLocalizations {
   /// No description provided for @common_email.
   ///
   /// In pt_BR, this message translates to:
-  /// **'Email'**
+  /// **'E-mail'**
   String get common_email;
 
   /// No description provided for @common_password.
@@ -340,12 +340,6 @@ abstract class AppLocalizations {
   /// **'Notificações'**
   String get navigation_notifications;
 
-  /// No description provided for @auth_login.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Entrar'**
-  String get auth_login;
-
   /// No description provided for @auth_logout.
   ///
   /// In pt_BR, this message translates to:
@@ -397,13 +391,13 @@ abstract class AppLocalizations {
   /// No description provided for @auth_emailRequired.
   ///
   /// In pt_BR, this message translates to:
-  /// **'Email é obrigatório'**
+  /// **'E-mail é obrigatório'**
   String get auth_emailRequired;
 
   /// No description provided for @auth_emailInvalid.
   ///
   /// In pt_BR, this message translates to:
-  /// **'Email inválido'**
+  /// **'E-mail inválido'**
   String get auth_emailInvalid;
 
   /// No description provided for @auth_passwordRequired.
@@ -565,13 +559,13 @@ abstract class AppLocalizations {
   /// No description provided for @cats_currentWeight.
   ///
   /// In pt_BR, this message translates to:
-  /// **'Peso atual (kg)'**
+  /// **'Peso Atual (kg)'**
   String get cats_currentWeight;
 
   /// No description provided for @cats_targetWeight.
   ///
   /// In pt_BR, this message translates to:
-  /// **'Peso alvo (kg)'**
+  /// **'Peso Alvo (kg)'**
   String get cats_targetWeight;
 
   /// No description provided for @cats_updateWeight.
@@ -675,18 +669,6 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Selecione a data'**
   String get cats_selectDate;
-
-  /// No description provided for @cats_currentWeightLabel.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Peso Atual (kg)'**
-  String get cats_currentWeightLabel;
-
-  /// No description provided for @cats_targetWeightLabel.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Peso Ideal (kg)'**
-  String get cats_targetWeightLabel;
 
   /// No description provided for @cats_invalidWeight.
   ///

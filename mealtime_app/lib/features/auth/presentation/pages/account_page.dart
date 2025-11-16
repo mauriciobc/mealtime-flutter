@@ -6,7 +6,7 @@ import 'package:mealtime_app/features/auth/presentation/pages/login_page.dart';
 import 'package:mealtime_app/shared/widgets/avatar_widget.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/main.dart';
-import 'package:icon_button_m3e/icon_button_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});

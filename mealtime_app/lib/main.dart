@@ -17,7 +17,6 @@ import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_log
 import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_bloc.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart';
 import 'package:mealtime_app/l10n/app_localizations.dart';
-import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 
 // Helper function to create a custom text theme with Outfit for headings and Atkinson Hyperlegible for body
 TextTheme _createCustomTextTheme(ColorScheme colorScheme) {

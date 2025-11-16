@@ -11,7 +11,7 @@ import 'package:mealtime_app/services/api/profile_api_service.dart';
 abstract class ProfileRemoteDataSource {
   Future<Profile> getProfile(String idOrUsername);
   Future<Profile> updateProfile(String idOrUsername, Profile profile);
-  Future<String> uploadAvatar(String filePath);
+  Future<String> uploadAvatar(String idOrUsername, String filePath);
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -74,7 +74,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<String> uploadAvatar(String filePath) async {
+  Future<String> uploadAvatar(String idOrUsername, String filePath) async {
     try {
       final file = File(filePath);
       
@@ -94,8 +94,12 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         ),
       });
 
+      final uploadUrl = Uri.parse(ApiConstants.baseUrlV2)
+          .resolve(ApiConstants.v2Upload)
+          .toString();
+      
       final response = await dio.post(
-        ApiConstants.baseUrlV2 + ApiConstants.v2Upload,
+        uploadUrl,
         data: formData,
       );
 

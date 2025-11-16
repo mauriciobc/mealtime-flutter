@@ -8,7 +8,7 @@ import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart'
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_event.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_state.dart';
 import 'package:uuid/uuid.dart';
-import 'package:progress_indicator_m3e/progress_indicator_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 
 class AddWeightDialog extends StatefulWidget {
   final Cat? selectedCat;

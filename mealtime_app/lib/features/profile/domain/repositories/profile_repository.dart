@@ -12,7 +12,15 @@ abstract class ProfileRepository {
     Profile profile,
   );
 
-  /// Faz upload de avatar
-  Future<Either<Failure, String>> uploadAvatar(String filePath);
+  /// Faz upload de avatar para um usuário específico
+  /// 
+  /// [idOrUsername] - Identificador do usuário (ID ou username)
+  /// [filePath] - Caminho local do arquivo de imagem a ser enviado
+  /// 
+  /// Retorna a URL do avatar após o upload bem-sucedido
+  Future<Either<Failure, String>> uploadAvatar(
+    String idOrUsername,
+    String filePath,
+  );
 }
 

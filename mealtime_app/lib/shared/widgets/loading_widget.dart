@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 
 class LoadingWidget extends StatelessWidget {
   final String? message;

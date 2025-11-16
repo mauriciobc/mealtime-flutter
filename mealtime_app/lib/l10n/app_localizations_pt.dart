@@ -126,9 +126,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get navigation_notifications => 'Notificações';
 
   @override
-  String get auth_login => 'Entrar';
-
-  @override
   String get auth_logout => 'Sair';
 
   @override
@@ -237,10 +234,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cats_birthDate => 'Data de nascimento';
 
   @override
-  String get cats_currentWeight => 'Peso atual (kg)';
+  String get cats_currentWeight => 'Peso Atual (kg)';
 
   @override
-  String get cats_targetWeight => 'Peso alvo (kg)';
+  String get cats_targetWeight => 'Peso Alvo (kg)';
 
   @override
   String get cats_updateWeight => 'Atualizar Peso';
@@ -295,12 +292,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get cats_selectDate => 'Selecione a data';
-
-  @override
-  String get cats_currentWeightLabel => 'Peso Atual (kg)';
-
-  @override
-  String get cats_targetWeightLabel => 'Peso Ideal (kg)';
 
   @override
   String get cats_invalidWeight => 'Peso inválido';
@@ -468,7 +459,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get common_name => 'Nome';
 
   @override
-  String get common_email => 'Email';
+  String get common_email => 'E-mail';
 
   @override
   String get common_password => 'Senha';
@@ -507,9 +498,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get navigation_notifications => 'Notificações';
 
   @override
-  String get auth_login => 'Entrar';
-
-  @override
   String get auth_logout => 'Sair';
 
   @override
@@ -534,10 +522,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get auth_nameMinLength => 'Nome deve ter pelo menos 2 caracteres';
 
   @override
-  String get auth_emailRequired => 'Email é obrigatório';
+  String get auth_emailRequired => 'E-mail é obrigatório';
 
   @override
-  String get auth_emailInvalid => 'Email inválido';
+  String get auth_emailInvalid => 'E-mail inválido';
 
   @override
   String get auth_passwordRequired => 'Senha é obrigatória';
@@ -618,10 +606,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get cats_birthDate => 'Data de nascimento';
 
   @override
-  String get cats_currentWeight => 'Peso atual (kg)';
+  String get cats_currentWeight => 'Peso Atual (kg)';
 
   @override
-  String get cats_targetWeight => 'Peso alvo (kg)';
+  String get cats_targetWeight => 'Peso Alvo (kg)';
 
   @override
   String get cats_updateWeight => 'Atualizar Peso';
@@ -676,12 +664,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get cats_selectDate => 'Selecione a data';
-
-  @override
-  String get cats_currentWeightLabel => 'Peso Atual (kg)';
-
-  @override
-  String get cats_targetWeightLabel => 'Peso Ideal (kg)';
 
   @override
   String get cats_invalidWeight => 'Peso inválido';

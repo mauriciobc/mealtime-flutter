@@ -45,7 +45,7 @@ class Profile extends Equatable {
     Object? updatedAt = _absent,
   }) {
     return Profile(
-      id: this.id,
+      id: id,
       username: username == _absent ? this.username : username as String?,
       fullName: fullName == _absent ? this.fullName : fullName as String?,
       email: email == _absent ? this.email : email as String?,

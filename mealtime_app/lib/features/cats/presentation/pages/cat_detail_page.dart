@@ -7,7 +7,7 @@ import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
-import 'package:progress_indicator_m3e/progress_indicator_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 
 class CatDetailPage extends StatefulWidget {
   final String catId;

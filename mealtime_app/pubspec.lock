@@ -426,7 +426,7 @@ packages:
     source: hosted
     version: "0.1.2"
   fab_m3e:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: fab_m3e
       sha256: e4f5abfa3c8c092005449d56dcac45b85e2dbe9c32789d672c5ed71428e43b59
@@ -736,7 +736,7 @@ packages:
     source: hosted
     version: "4.1.2"
   icon_button_m3e:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: icon_button_m3e
       sha256: c4524d6141a468679821bbb635b833ac6831925d8a6ae4a4511430b0e4ab9c67
@@ -1229,7 +1229,7 @@ packages:
     source: hosted
     version: "5.0.5"
   progress_indicator_m3e:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: progress_indicator_m3e
       sha256: "1a2ca029d14427d31093552a0e916b453f58643b78ef805ce6f4669845ac8f70"

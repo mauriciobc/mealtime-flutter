@@ -2,6 +2,15 @@ import 'package:mealtime_app/core/database/app_database.dart';
 import 'package:mealtime_app/features/profile/domain/entities/profile.dart' as domain;
 import 'package:drift/drift.dart' as drift;
 
+/// Exceção lançada quando há conflito de versão durante atualização
+class ProfileVersionConflictException implements Exception {
+  final String message;
+  ProfileVersionConflictException(this.message);
+  
+  @override
+  String toString() => 'ProfileVersionConflictException: $message';
+}
+
 /// Data source local para cache de profile usando Drift
 /// Persiste dados localmente e permite acesso offline
 abstract class ProfileLocalDataSource {
@@ -12,34 +21,100 @@ abstract class ProfileLocalDataSource {
 
 class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
   final AppDatabase database;
+  static const int _maxRetries = 3;
 
   ProfileLocalDataSourceImpl({required this.database});
 
+  /// Compara dois perfis para determinar se os dados realmente mudaram
+  bool _hasDataChanged(domain.Profile incoming, Profile? existing) {
+    if (existing == null) return true;
+    
+    return incoming.username != existing.username ||
+        incoming.fullName != existing.fullName ||
+        incoming.email != existing.email ||
+        incoming.avatarUrl != existing.avatarUrl ||
+        incoming.timezone != existing.timezone ||
+        incoming.createdAt != existing.createdAt ||
+        incoming.updatedAt != existing.updatedAt;
+  }
+
   @override
   Future<void> cacheProfile(domain.Profile profile) async {
-    await database.transaction(() async {
+    int attempt = 0;
+    
+    while (attempt < _maxRetries) {
       // Busca o perfil existente para obter a versão atual
       final query = database.select(database.profiles)
         ..where((p) => p.id.equals(profile.id));
       final existing = await query.getSingleOrNull();
 
-      // Calcula a nova versão: incrementa a versão existente ou usa 1 se não existir
-      final newVersion = (existing?.version ?? 0) + 1;
+      // Se não existe, cria novo registro com versão 1
+      if (existing == null) {
+        final companion = ProfilesCompanion.insert(
+          id: profile.id,
+          username: drift.Value(profile.username),
+          fullName: drift.Value(profile.fullName),
+          email: drift.Value(profile.email),
+          avatarUrl: drift.Value(profile.avatarUrl),
+          timezone: drift.Value(profile.timezone),
+          createdAt: drift.Value(profile.createdAt),
+          updatedAt: drift.Value(profile.updatedAt),
+          syncedAt: drift.Value(DateTime.now()),
+          version: const drift.Value(1),
+        );
+        await database.into(database.profiles).insert(companion);
+        return;
+      }
 
-      final companion = ProfilesCompanion.insert(
-        id: profile.id,
-        username: drift.Value(profile.username),
-        fullName: drift.Value(profile.fullName),
-        email: drift.Value(profile.email),
-        avatarUrl: drift.Value(profile.avatarUrl),
-        timezone: drift.Value(profile.timezone),
-        createdAt: drift.Value(profile.createdAt),
-        updatedAt: drift.Value(profile.updatedAt),
-        syncedAt: drift.Value(DateTime.now()),
-        version: drift.Value(newVersion),
-      );
-      await database.into(database.profiles).insertOnConflictUpdate(companion);
-    });
+      // Verifica se os dados realmente mudaram
+      final dataChanged = _hasDataChanged(profile, existing);
+      
+      // Se não mudou, não precisa atualizar
+      if (!dataChanged) {
+        return;
+      }
+
+      // Calcula a nova versão apenas se os dados mudaram
+      final oldVersion = existing.version;
+      final newVersion = oldVersion + 1;
+
+      // Atualização condicional com optimistic locking
+      // WHERE version = oldVersion garante que só atualiza se a versão não mudou
+      final affectedRows = await (database.update(database.profiles)
+            ..where((p) => 
+                p.id.equals(profile.id) & 
+                p.version.equals(oldVersion)))
+          .write(ProfilesCompanion(
+            username: drift.Value(profile.username),
+            fullName: drift.Value(profile.fullName),
+            email: drift.Value(profile.email),
+            avatarUrl: drift.Value(profile.avatarUrl),
+            timezone: drift.Value(profile.timezone),
+            createdAt: drift.Value(profile.createdAt),
+            updatedAt: drift.Value(profile.updatedAt),
+            syncedAt: drift.Value(DateTime.now()),
+            version: drift.Value(newVersion),
+          ));
+
+      // Se atualizou com sucesso (affectedRows > 0), terminamos
+      if (affectedRows > 0) {
+        return;
+      }
+
+      // Se affectedRows == 0, houve conflito de versão (outro processo atualizou)
+      // Incrementa tentativa e retenta
+      attempt++;
+      
+      if (attempt >= _maxRetries) {
+        throw ProfileVersionConflictException(
+          'Falha ao atualizar perfil após $_maxRetries tentativas. '
+          'Conflito de versão detectado.',
+        );
+      }
+      
+      // Pequeno delay antes de retentar para reduzir contenção
+      await Future.delayed(Duration(milliseconds: 10 * attempt));
+    }
   }
 
   @override

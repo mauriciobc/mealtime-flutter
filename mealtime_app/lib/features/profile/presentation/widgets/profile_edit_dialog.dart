@@ -17,7 +17,6 @@ class ProfileEditDialog extends StatefulWidget {
 class _ProfileEditDialogState extends State<ProfileEditDialog> {
   late TextEditingController _usernameController;
   late TextEditingController _fullNameController;
-  late TextEditingController _timezoneController;
   String _currentTimezone = '';
   TextEditingController? _autocompleteController;
   VoidCallback? _autocompleteListener;
@@ -28,7 +27,6 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
     _usernameController = TextEditingController(text: widget.profile.username);
     _fullNameController = TextEditingController(text: widget.profile.fullName);
     _currentTimezone = widget.profile.timezone ?? '';
-    _timezoneController = TextEditingController(text: _currentTimezone);
   }
 
   @override
@@ -39,7 +37,6 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
     }
     _usernameController.dispose();
     _fullNameController.dispose();
-    _timezoneController.dispose();
     super.dispose();
   }
 
@@ -106,7 +103,6 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                     if (_currentTimezone != newValue) {
                       setState(() {
                         _currentTimezone = newValue;
-                        _timezoneController.text = newValue;
                       });
                     }
                   };
@@ -130,7 +126,6 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
               onSelected: (String selection) {
                 setState(() {
                   _currentTimezone = selection;
-                  _timezoneController.text = selection;
                 });
               },
               displayStringForOption: (String option) => option,

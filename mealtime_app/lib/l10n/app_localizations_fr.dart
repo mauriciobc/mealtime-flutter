@@ -126,9 +126,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navigation_notifications => 'Notifications';
 
   @override
-  String get auth_login => 'Se connecter';
-
-  @override
   String get auth_logout => 'Se déconnecter';
 
   @override
@@ -240,10 +237,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cats_birthDate => 'Date de naissance';
 
   @override
-  String get cats_currentWeight => 'Poids actuel (kg)';
+  String get cats_currentWeight => 'Poids Actuel (kg)';
 
   @override
-  String get cats_targetWeight => 'Poids cible (kg)';
+  String get cats_targetWeight => 'Poids Cible (kg)';
 
   @override
   String get cats_updateWeight => 'Mettre à jour le poids';
@@ -298,12 +295,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cats_selectDate => 'Sélectionner la date';
-
-  @override
-  String get cats_currentWeightLabel => 'Poids actuel (kg)';
-
-  @override
-  String get cats_targetWeightLabel => 'Poids idéal (kg)';
 
   @override
   String get cats_invalidWeight => 'Poids invalide';
@@ -511,9 +502,6 @@ class AppLocalizationsFrFr extends AppLocalizationsFr {
   String get navigation_notifications => 'Notifications';
 
   @override
-  String get auth_login => 'Se connecter';
-
-  @override
   String get auth_logout => 'Se déconnecter';
 
   @override
@@ -625,10 +613,10 @@ class AppLocalizationsFrFr extends AppLocalizationsFr {
   String get cats_birthDate => 'Date de naissance';
 
   @override
-  String get cats_currentWeight => 'Poids actuel (kg)';
+  String get cats_currentWeight => 'Poids Actuel (kg)';
 
   @override
-  String get cats_targetWeight => 'Poids cible (kg)';
+  String get cats_targetWeight => 'Poids Cible (kg)';
 
   @override
   String get cats_updateWeight => 'Mettre à jour le poids';
@@ -683,12 +671,6 @@ class AppLocalizationsFrFr extends AppLocalizationsFr {
 
   @override
   String get cats_selectDate => 'Sélectionner la date';
-
-  @override
-  String get cats_currentWeightLabel => 'Poids actuel (kg)';
-
-  @override
-  String get cats_targetWeightLabel => 'Poids idéal (kg)';
 
   @override
   String get cats_invalidWeight => 'Poids invalide';

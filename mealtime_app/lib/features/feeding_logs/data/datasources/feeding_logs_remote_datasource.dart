@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:mealtime_app/core/errors/exceptions.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 import 'package:mealtime_app/services/api/feeding_logs_api_service.dart';
@@ -103,7 +105,7 @@ class FeedingLogsRemoteDataSourceImpl implements FeedingLogsRemoteDataSource {
 
       // Desabilitar batch endpoint temporariamente - API tem estrutura diferente
       // TODO: Implementar batch endpoint quando API estiver pronta
-      print('[FeedingLogsRemoteDataSource] Criando ${requests.length} feedings em paralelo...');
+      log('[FeedingLogsRemoteDataSource] Criando ${requests.length} feedings em paralelo...');
       final results = await Future.wait(
         requests.map((request) async {
           try {
@@ -125,10 +127,10 @@ class FeedingLogsRemoteDataSourceImpl implements FeedingLogsRemoteDataSource {
 
       // Filtrar apenas resultados bem-sucedidos
       final successfulResults = results.whereType<FeedingLog>().toList();
-      print('[FeedingLogsRemoteDataSource] Feedings criados com sucesso: ${successfulResults.length}/${requests.length}');
+      log('[FeedingLogsRemoteDataSource] Feedings criados com sucesso: ${successfulResults.length}/${requests.length}');
       return successfulResults;
     } catch (e) {
-      print('[FeedingLogsRemoteDataSource] Erro ao criar feedings em lote: $e');
+      log('[FeedingLogsRemoteDataSource] Erro ao criar feedings em lote: $e');
       throw ServerException(
         'Erro ao registrar alimentações em lote: ${e.toString()}',
       );

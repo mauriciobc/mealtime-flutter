@@ -24,9 +24,7 @@ import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_log
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/widgets/feeding_bottom_sheet.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
-import 'package:icon_button_m3e/icon_button_m3e.dart';
-import 'package:fab_m3e/fab_m3e.dart';
-import 'package:progress_indicator_m3e/progress_indicator_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 
 /// Resultado do processamento de dados do gráfico
 class ChartDataResult {
@@ -1149,30 +1147,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
-  /// Constrói os labels dos dias da semana
-  Widget _buildDayLabels(BuildContext context) {
-    final now = DateTime.now();
-    final dayLabels = <String>[];
-    final locale = Localizations.localeOf(context);
-    
-    // Gerar labels dos últimos 7 dias
-    for (int i = 6; i >= 0; i--) {
-      final date = now.subtract(Duration(days: i));
-      final weekday = DateFormat('E', locale.toString()).format(date).substring(0, 3);
-      dayLabels.add(weekday);
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: dayLabels.map((label) => Text(
-        label,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      )).toList(),
-    );
-  }
-
   Widget _buildRecentRecordsSection(BuildContext context) {
     return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
       buildWhen: (previous, current) {
@@ -1675,7 +1649,7 @@ class _UserAvatarButton extends ConsumerWidget {
             ),
           ),
         ),
-        error: (_, __) => GestureDetector(
+        error: (_, _) => GestureDetector(
           onTap: () {
             context.push(AppRouter.profile);
           },

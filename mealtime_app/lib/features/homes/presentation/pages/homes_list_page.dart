@@ -5,8 +5,7 @@ import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/homes/presentation/widgets/home_card.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
-import 'package:icon_button_m3e/icon_button_m3e.dart';
-import 'package:fab_m3e/fab_m3e.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 
 class HomesListPage extends StatefulWidget {
   const HomesListPage({super.key});
