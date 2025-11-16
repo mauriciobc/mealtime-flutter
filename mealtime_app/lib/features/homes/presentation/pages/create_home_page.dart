@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/homes/presentation/widgets/home_form.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 
 class CreateHomePage extends StatefulWidget {
   const CreateHomePage({super.key});
@@ -27,9 +28,9 @@ class _CreateHomePageState extends State<CreateHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nova Residência'),
+        title: Text(context.l10n.homes_create),
         actions: [
-          TextButton(onPressed: _saveHome, child: const Text('Salvar')),
+          TextButton(onPressed: _saveHome, child: Text(context.l10n.common_save)),
         ],
       ),
       body: BlocListener<HomesBloc, HomesState>(
@@ -45,7 +46,7 @@ class _CreateHomePageState extends State<CreateHomePage> {
             // Home criada com sucesso
             context.pop();
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Residência criada com sucesso!')),
+              SnackBar(content: Text(context.l10n.homes_homeCreated)),
             );
           }
         },
@@ -57,7 +58,7 @@ class _CreateHomePageState extends State<CreateHomePage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Informações da Residência',
+                  context.l10n.homes_info,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 24),
@@ -68,7 +69,7 @@ class _CreateHomePageState extends State<CreateHomePage> {
                 const SizedBox(height: 32),
                 ElevatedButton(
                   onPressed: _saveHome,
-                  child: const Text('Criar Residência'),
+                  child: Text(context.l10n.homes_createHome),
                 ),
               ],
             ),

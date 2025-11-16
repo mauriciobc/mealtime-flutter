@@ -30,28 +30,32 @@ class CatConsumption extends Equatable {
   final String catName;
   final double amount; // em g
   final double percentage; // percentual do total
+  final String? foodType; // tipo de comida (ex: 'Ração Seca', 'Ração Úmida')
 
   const CatConsumption({
     required this.catId,
     required this.catName,
     required this.amount,
     required this.percentage,
+    this.foodType,
   });
 
   @override
-  List<Object?> get props => [catId, catName, amount, percentage];
+  List<Object?> get props => [catId, catName, amount, percentage, foodType];
 
   CatConsumption copyWith({
     String? catId,
     String? catName,
     double? amount,
     double? percentage,
+    String? foodType,
   }) {
     return CatConsumption(
       catId: catId ?? this.catId,
       catName: catName ?? this.catName,
       amount: amount ?? this.amount,
       percentage: percentage ?? this.percentage,
+      foodType: foodType ?? this.foodType,
     );
   }
 }

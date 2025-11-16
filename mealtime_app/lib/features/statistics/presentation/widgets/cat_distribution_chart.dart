@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:material_charts/material_charts.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:mealtime_app/features/statistics/domain/entities/statistics_data.dart';
 
-/// Gráfico de distribuição por gato
-/// Usa gráfico de barras horizontais já que material_charts não tem pie chart
+/// Gráfico de distribuição por gato usando gráfico de pizza (pie chart)
 class CatDistributionChart extends StatelessWidget {
   final List<CatConsumption> catConsumptions;
 
@@ -35,16 +34,13 @@ class CatDistributionChart extends StatelessWidget {
                 percentage > 100) {
               return null; // Filtrar valores inválidos
             }
-            return BarChartData(
-              label: consumption.catName,
-              value: percentage,
-            );
+            return MapEntry(consumption, percentage);
           } catch (e) {
             debugPrint('[CatDistributionChart] Erro ao processar consumo: $e');
             return null;
           }
         })
-        .whereType<BarChartData>() // Remove nulls
+        .whereType<MapEntry<CatConsumption, double>>() // Remove nulls
         .toList();
 
     // Se após filtragem não houver dados válidos, mostrar empty state
@@ -69,7 +65,7 @@ class CatDistributionChart extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Percentual do consumo total por gato.',
+              'Percentual do consumo total por gato e tipo de comida.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -79,25 +75,24 @@ class CatDistributionChart extends StatelessWidget {
               builder: (context, constraints) {
                 final availableWidth = constraints.maxWidth;
                 // Validar largura antes de usar
-                final double chartWidth;
+                final double chartSize;
                 if (availableWidth.isFinite && availableWidth > 0) {
-                  chartWidth = availableWidth.clamp(200.0, 800.0);
+                  chartSize = (availableWidth * 0.8).clamp(200.0, 300.0);
                 } else {
-                  chartWidth = 400.0; // Fallback seguro
+                  chartSize = 250.0; // Fallback seguro
                 }
-                final chartHeight = 200.0;
 
                 // Validar dados finais antes de passar para o gráfico
-                final validData = chartData.where((data) {
-                  return data.value.isFinite && 
-                      data.value >= 0 && 
-                      data.value <= 100 &&
-                      !data.value.isNaN;
+                final validData = chartData.where((entry) {
+                  return entry.value.isFinite && 
+                      entry.value >= 0 && 
+                      entry.value <= 100 &&
+                      !entry.value.isNaN;
                 }).toList();
 
                 if (validData.isEmpty) {
                   return SizedBox(
-                    height: chartHeight,
+                    height: chartSize,
                     child: Center(
                       child: Text(
                         'Dados inválidos',
@@ -110,26 +105,33 @@ class CatDistributionChart extends StatelessWidget {
                 }
 
                 return SizedBox(
-                  height: chartHeight,
-                  width: chartWidth,
-                  child: MaterialBarChart(
-                    data: validData,
-                    width: chartWidth,
-                    height: chartHeight,
-                    showGrid: false,  // ✅ Desabilitado para melhorar performance
-                    showValues: false,  // ✅ Desabilitado para melhorar performance
-                    style: BarChartStyle(
-                      barColor: theme.colorScheme.primary,
-                      backgroundColor: theme.colorScheme.surface,
-                      barSpacing: 0.3,
-                      labelStyle: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: 10,
-                      ),
-                      valueStyle: TextStyle(
-                        color: theme.colorScheme.onSurface,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
+                  height: chartSize,
+                  width: chartSize,
+                  child: PieChart(
+                    PieChartData(
+                      sections: validData.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final dataEntry = entry.value;
+                        final percentage = dataEntry.value;
+                        
+                        return PieChartSectionData(
+                          value: percentage,
+                          title: '${percentage.toStringAsFixed(1)}%',
+                          color: colors[index],
+                          radius: chartSize * 0.3,
+                          titleStyle: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: _getContrastColor(colors[index]),
+                          ),
+                        );
+                      }).toList(),
+                      sectionsSpace: 2,
+                      centerSpaceRadius: chartSize * 0.15,
+                      pieTouchData: PieTouchData(
+                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                          // Feedback visual ao tocar
+                        },
                       ),
                     ),
                   ),
@@ -141,9 +143,16 @@ class CatDistributionChart extends StatelessWidget {
             Wrap(
               spacing: 16,
               runSpacing: 8,
-              children: catConsumptions.asMap().entries.map((entry) {
+              children: chartData.asMap().entries.map((entry) {
                 final index = entry.key;
-                final consumption = entry.value;
+                final dataEntry = entry.value;
+                final consumption = dataEntry.key;
+                // Garantir que temos cor para este índice
+                final colorIndex = index < colors.length ? index : index % colors.length;
+                // Criar label com gato e tipo de comida
+                final label = consumption.foodType != null
+                    ? '${consumption.catName} - ${consumption.foodType}'
+                    : consumption.catName;
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -151,14 +160,17 @@ class CatDistributionChart extends StatelessWidget {
                       width: 12,
                       height: 12,
                       decoration: BoxDecoration(
-                        color: colors[index],
+                        color: colors[colorIndex],
                         shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      '${consumption.catName}: ${consumption.percentage.toStringAsFixed(1)}%',
+                    Flexible(
+                      child: Text(
+                        '$label: ${consumption.percentage.toStringAsFixed(1)}%',
                       style: theme.textTheme.bodySmall,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 );
@@ -188,6 +200,14 @@ class CatDistributionChart extends StatelessWidget {
     return colors.take(count).toList();
   }
 
+  /// Retorna cor de contraste (branco ou preto) baseada na luminância
+  Color _getContrastColor(Color color) {
+    // Calcular luminância relativa
+    final luminance = color.computeLuminance();
+    // Se a cor for clara, usar texto escuro; se for escura, usar texto claro
+    return luminance > 0.5 ? Colors.black : Colors.white;
+  }
+
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
@@ -204,7 +224,7 @@ class CatDistributionChart extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Percentual do consumo total por gato.',
+              'Percentual do consumo total por gato e tipo de comida.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

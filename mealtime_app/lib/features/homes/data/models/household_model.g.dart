@@ -21,8 +21,9 @@ HouseholdModel _$HouseholdModelFromJson(Map<String, dynamic> json) =>
           ?.map((e) => HouseholdMember.fromJson(e as Map<String, dynamic>))
           .toList(),
       householdMembers: (json['household_members'] as List<dynamic>?)
-          ?.map((e) =>
-              HouseholdMemberDetailed.fromJson(e as Map<String, dynamic>))
+          ?.map(
+            (e) => HouseholdMemberDetailed.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
       inviteCode: json['inviteCode'] as String?,
     );
@@ -37,8 +38,9 @@ Map<String, dynamic> _$HouseholdModelToJson(HouseholdModel instance) =>
       'updated_at': instance.updatedAt.toIso8601String(),
       'owner': instance.owner?.toJson(),
       'members': instance.members?.map((e) => e.toJson()).toList(),
-      'household_members':
-          instance.householdMembers?.map((e) => e.toJson()).toList(),
+      'household_members': instance.householdMembers
+          ?.map((e) => e.toJson())
+          .toList(),
       'inviteCode': instance.inviteCode,
     };
 
@@ -77,26 +79,26 @@ Map<String, dynamic> _$HouseholdMemberToJson(HouseholdMember instance) =>
     };
 
 HouseholdMemberDetailed _$HouseholdMemberDetailedFromJson(
-        Map<String, dynamic> json) =>
-    HouseholdMemberDetailed(
-      id: json['id'] as String,
-      householdId: json['household_id'] as String,
-      userId: json['user_id'] as String,
-      role: json['role'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      user: HouseholdUser.fromJson(json['user'] as Map<String, dynamic>),
-    );
+  Map<String, dynamic> json,
+) => HouseholdMemberDetailed(
+  id: json['id'] as String,
+  householdId: json['household_id'] as String,
+  userId: json['user_id'] as String,
+  role: json['role'] as String,
+  createdAt: DateTime.parse(json['created_at'] as String),
+  user: HouseholdUser.fromJson(json['user'] as Map<String, dynamic>),
+);
 
 Map<String, dynamic> _$HouseholdMemberDetailedToJson(
-        HouseholdMemberDetailed instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'household_id': instance.householdId,
-      'user_id': instance.userId,
-      'role': instance.role,
-      'created_at': instance.createdAt.toIso8601String(),
-      'user': instance.user.toJson(),
-    };
+  HouseholdMemberDetailed instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'household_id': instance.householdId,
+  'user_id': instance.userId,
+  'role': instance.role,
+  'created_at': instance.createdAt.toIso8601String(),
+  'user': instance.user.toJson(),
+};
 
 HouseholdUser _$HouseholdUserFromJson(Map<String, dynamic> json) =>
     HouseholdUser(

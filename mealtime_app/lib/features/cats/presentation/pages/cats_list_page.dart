@@ -8,8 +8,7 @@ import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/features/cats/presentation/widgets/cat_card.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
-import 'package:icon_button_m3e/icon_button_m3e.dart';
-import 'package:fab_m3e/fab_m3e.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 
 class CatsListPage extends StatefulWidget {
   const CatsListPage({super.key});
@@ -33,9 +32,9 @@ class _CatsListPageState extends State<CatsListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Meus Gatos'),
+        title: Text(context.l10n.cats_title),
         actions: [
-          IconButtonM3E(
+          IconButton(
             onPressed: () {
               context.read<CatsBloc>().add(const RefreshCats());
             },
@@ -55,7 +54,12 @@ class _CatsListPageState extends State<CatsListPage> {
           } else if (state is CatOperationSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text(
+                  state.message,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
                 backgroundColor: Theme.of(context).colorScheme.primary,
               ),
             );
@@ -129,11 +133,11 @@ class _CatsListPageState extends State<CatsListPage> {
           return const LoadingWidget();
         },
       ),
-      floatingActionButton: FabM3E(
-        icon: const Icon(Icons.add),
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           context.push(AppRouter.createCat);
         },
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -150,12 +154,12 @@ class _CatsListPageState extends State<CatsListPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Nenhum gato cadastrado',
+            context.l10n.cats_emptyState,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
-            'Adicione seu primeiro gato para começar!',
+            context.l10n.cats_addFirstCat,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
@@ -166,7 +170,7 @@ class _CatsListPageState extends State<CatsListPage> {
               context.push(AppRouter.createCat);
             },
             icon: const Icon(Icons.add),
-            label: const Text('Adicionar Gato'),
+            label: Text(context.l10n.cats_addCat),
           ),
         ],
       ),
@@ -207,12 +211,12 @@ class _CatsListPageState extends State<CatsListPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Excluir Gato'),
-        content: Text('Tem certeza que deseja excluir ${cat.name}?'),
+        title: Text(context.l10n.cats_deleteCat),
+        content: Text(context.l10n.cats_deleteConfirmation(cat.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.common_cancel),
           ),
           TextButton(
             onPressed: () {
@@ -222,7 +226,7 @@ class _CatsListPageState extends State<CatsListPage> {
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Excluir'),
+            child: Text(context.l10n.common_delete),
           ),
         ],
       ),

@@ -841,7 +841,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   ),
                   const SizedBox(height: 12),
                   Container(
-                    height: 200,
+                    constraints: const BoxConstraints(
+                      minHeight: 200,
+                      maxHeight: 200,
+                    ),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
@@ -854,8 +857,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         ? _buildChartWithErrorHandling(context, chartData)
                         : _buildEmptyChart(context),
                   ),
-                  const SizedBox(height: 8),
-                  _buildDayLabels(context),
                 ],
               ),
             );
@@ -982,16 +983,29 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget _buildChart(BuildContext context, ChartDataResult chartDataResult) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Obter largura disponível do constraints
+        // Obter largura e altura disponíveis do constraints
+        // constraints já considera o padding do Container pai
         final availableWidth = constraints.maxWidth;
+        final availableHeight = constraints.maxHeight;
+        
         // Garantir que chartWidth seja válido e não negativo/NaN/Infinity
         final double chartWidth;
         if (availableWidth.isFinite && availableWidth > 0) {
-          chartWidth = availableWidth.clamp(200.0, 800.0);
+          // Usar toda a largura disponível (já descontado o padding)
+          chartWidth = availableWidth;
         } else {
           chartWidth = 400.0; // Fallback seguro
         }
-        final chartHeight = 160.0;
+        
+        // Garantir que chartHeight seja válido e não negativo/NaN/Infinity
+        final double chartHeight;
+        if (availableHeight.isFinite && availableHeight > 0) {
+          // Usar toda a altura disponível (já descontado o padding)
+          chartHeight = availableHeight;
+        } else {
+          chartHeight = 160.0; // Fallback seguro
+        }
+        
         final colorScheme = Theme.of(context).colorScheme;
 
         if (chartDataResult.stackedData != null) {
@@ -1008,11 +1022,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           }
 
           // Validar width e height antes de usar
+          // Usar as dimensões disponíveis diretamente (já consideram padding)
           final safeWidth = chartWidth.isFinite && chartWidth > 0 
-              ? chartWidth.clamp(200.0, 1000.0) 
+              ? chartWidth 
               : 400.0;
           final safeHeight = chartHeight.isFinite && chartHeight > 0 
-              ? chartHeight.clamp(150.0, 500.0) 
+              ? chartHeight 
               : 160.0;
 
           // Gráfico empilhado (até 5 gatos)
@@ -1055,11 +1070,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           }
 
           // Validar width e height antes de usar
+          // Usar as dimensões disponíveis diretamente (já consideram padding)
           final safeWidth = chartWidth.isFinite && chartWidth > 0 
-              ? chartWidth.clamp(200.0, 1000.0) 
+              ? chartWidth 
               : 400.0;
           final safeHeight = chartHeight.isFinite && chartHeight > 0 
-              ? chartHeight.clamp(150.0, 500.0) 
+              ? chartHeight 
               : 160.0;
 
           // Gráfico simples (mais de 5 gatos)
@@ -1096,25 +1112,39 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   /// Widget para quando não há dados
   Widget _buildEmptyChart(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.bar_chart_outlined,
-            size: 48,
-            color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Nenhuma alimentação registrada',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 14,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.insights_outlined,
+              size: 64,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Text(
+              'Nenhuma alimentação registrada',
+              textAlign: TextAlign.center,
+              style: textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Registre alimentações para ver o gráfico dos últimos 7 dias',
+              textAlign: TextAlign.center,
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1570,8 +1600,12 @@ class _UserAvatarButton extends ConsumerWidget {
       child: profileAsync.when(
         data: (profile) {
           final avatarUrl = profile?.avatarUrl;
-          final initial = profile?.fullName?.substring(0, 1).toUpperCase() ??
-              user.email?.substring(0, 1).toUpperCase() ??
+          final initial = (profile?.fullName?.isNotEmpty == true
+                  ? profile!.fullName!.substring(0, 1).toUpperCase()
+                  : null) ??
+              (user.email?.isNotEmpty == true
+                  ? user.email!.substring(0, 1).toUpperCase()
+                  : null) ??
               'U';
 
           if (avatarUrl != null && avatarUrl.isNotEmpty) {

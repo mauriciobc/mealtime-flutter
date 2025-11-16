@@ -24,30 +24,30 @@ StatisticsDataModel _$StatisticsDataModelFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$StatisticsDataModelToJson(
-        StatisticsDataModel instance) =>
-    <String, dynamic>{
-      'totalFeedings': instance.totalFeedings,
-      'averagePortion': instance.averagePortion,
-      'activeCats': instance.activeCats,
-      'totalConsumption': instance.totalConsumption,
-      'dailyConsumptions': instance.dailyConsumptions,
-      'catConsumptions': instance.catConsumptions,
-      'hourlyFeedings': instance.hourlyFeedings,
-    };
+  StatisticsDataModel instance,
+) => <String, dynamic>{
+  'totalFeedings': instance.totalFeedings,
+  'averagePortion': instance.averagePortion,
+  'activeCats': instance.activeCats,
+  'totalConsumption': instance.totalConsumption,
+  'dailyConsumptions': instance.dailyConsumptions,
+  'catConsumptions': instance.catConsumptions,
+  'hourlyFeedings': instance.hourlyFeedings,
+};
 
 DailyConsumptionModel _$DailyConsumptionModelFromJson(
-        Map<String, dynamic> json) =>
-    DailyConsumptionModel(
-      date: DateTime.parse(json['date'] as String),
-      amount: (json['amount'] as num).toDouble(),
-    );
+  Map<String, dynamic> json,
+) => DailyConsumptionModel(
+  date: DateTime.parse(json['date'] as String),
+  amount: (json['amount'] as num).toDouble(),
+);
 
 Map<String, dynamic> _$DailyConsumptionModelToJson(
-        DailyConsumptionModel instance) =>
-    <String, dynamic>{
-      'date': instance.date.toIso8601String(),
-      'amount': instance.amount,
-    };
+  DailyConsumptionModel instance,
+) => <String, dynamic>{
+  'date': instance.date.toIso8601String(),
+  'amount': instance.amount,
+};
 
 CatConsumptionModel _$CatConsumptionModelFromJson(Map<String, dynamic> json) =>
     CatConsumptionModel(
@@ -55,16 +55,18 @@ CatConsumptionModel _$CatConsumptionModelFromJson(Map<String, dynamic> json) =>
       catName: json['catName'] as String,
       amount: (json['amount'] as num).toDouble(),
       percentage: (json['percentage'] as num).toDouble(),
+      foodType: json['foodType'] as String?,
     );
 
 Map<String, dynamic> _$CatConsumptionModelToJson(
-        CatConsumptionModel instance) =>
-    <String, dynamic>{
-      'catId': instance.catId,
-      'catName': instance.catName,
-      'amount': instance.amount,
-      'percentage': instance.percentage,
-    };
+  CatConsumptionModel instance,
+) => <String, dynamic>{
+  'catId': instance.catId,
+  'catName': instance.catName,
+  'amount': instance.amount,
+  'percentage': instance.percentage,
+  'foodType': instance.foodType,
+};
 
 HourlyFeedingModel _$HourlyFeedingModelFromJson(Map<String, dynamic> json) =>
     HourlyFeedingModel(
@@ -73,7 +75,4 @@ HourlyFeedingModel _$HourlyFeedingModelFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$HourlyFeedingModelToJson(HourlyFeedingModel instance) =>
-    <String, dynamic>{
-      'hour': instance.hour,
-      'count': instance.count,
-    };
+    <String, dynamic>{'hour': instance.hour, 'count': instance.count};

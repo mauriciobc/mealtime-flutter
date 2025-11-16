@@ -79,7 +79,12 @@ class _CreateGoalDialogState extends State<CreateGoalDialog> {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.message),
+              content: Text(
+                state.message,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(

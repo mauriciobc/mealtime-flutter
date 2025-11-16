@@ -7,6 +7,7 @@ import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/features/cats/presentation/widgets/cat_form.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 
 class CreateCatPage extends StatefulWidget {
   const CreateCatPage({super.key});
@@ -22,7 +23,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Adicionar Gato'),
+        title: Text(context.l10n.cats_addCat),
         actions: [
           if (_isLoading)
             const Padding(

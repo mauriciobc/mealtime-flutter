@@ -16,6 +16,8 @@ import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_bloc.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart';
+import 'package:mealtime_app/l10n/app_localizations.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 
 // Helper function to create a custom text theme with Outfit for headings and Atkinson Hyperlegible for body
 TextTheme _createCustomTextTheme(ColorScheme colorScheme) {
@@ -228,7 +230,13 @@ void main() async {
     try {
       await initializeDateFormatting(systemLocaleString, null);
     } catch (e) {
-      debugPrint('[Locale] Locale do sistema $systemLocaleString não suportado, usando pt_BR como fallback');
+      debugPrint('[Locale] Locale do sistema $systemLocaleString não suportado, tentando pt_BR como fallback');
+      try {
+        await initializeDateFormatting('pt_BR', null);
+        debugPrint('[Locale] Fallback para pt_BR inicializado com sucesso');
+      } catch (fallbackError) {
+        debugPrint('[Locale] Falha ao inicializar fallback pt_BR: $fallbackError');
+      }
     }
   }
 
@@ -317,6 +325,7 @@ class MyApp extends StatelessWidget {
               themeMode: ThemeMode.system,
               routerConfig: AppRouter.router,
               localizationsDelegates: const [
+                AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
                 GlobalCupertinoLocalizations.delegate,
@@ -337,12 +346,20 @@ class MyApp extends StatelessWidget {
 
 extension ContextExtension on BuildContext {
   void showSnackBar(String message, {bool isError = false}) {
+    final theme = Theme.of(this);
     ScaffoldMessenger.of(this).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(
+          message,
+          style: TextStyle(
+            color: isError
+                ? theme.colorScheme.onError
+                : theme.snackBarTheme.contentTextStyle?.color,
+          ),
+        ),
         backgroundColor: isError
-            ? Theme.of(this).colorScheme.error
-            : Theme.of(this).snackBarTheme.backgroundColor,
+            ? theme.colorScheme.error
+            : theme.snackBarTheme.backgroundColor,
       ),
     );
   }

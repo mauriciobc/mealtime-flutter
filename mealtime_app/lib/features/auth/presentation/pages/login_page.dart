@@ -54,10 +54,17 @@ class _LoginPageState extends State<LoginPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Logo ou ícone do app
-            Icon(
-              Icons.pets,
-              size: 80,
-              color: Theme.of(context).colorScheme.primary,
+            Image.asset(
+              'assets/images/mealtime-symbol.png',
+              width: 80,
+              height: 80,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(
+                  Icons.pets,
+                  size: 80,
+                  color: Theme.of(context).colorScheme.primary,
+                );
+              },
             ),
             const SizedBox(height: 32),
 
@@ -200,7 +207,12 @@ class _LoginPageState extends State<LoginPage> {
       // TODO: Implementar registro via AuthBloc
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Funcionalidade de cadastro em desenvolvimento'),
+          content: Text(
+            'Funcionalidade de cadastro em desenvolvimento',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+          ),
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         ),
       );

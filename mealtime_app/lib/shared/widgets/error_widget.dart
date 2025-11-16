@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 
 class CustomErrorWidget extends StatelessWidget {
   final String message;
@@ -21,7 +22,7 @@ class CustomErrorWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Ops! Algo deu errado',
+              context.l10n.error_generic,
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -37,7 +38,7 @@ class CustomErrorWidget extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Tentar Novamente'),
+                label: Text(context.l10n.error_tryAgain),
               ),
             ],
           ],

@@ -46,11 +46,42 @@ class UploadResponse {
     this.filename,
   });
 
-  factory UploadResponse.fromJson(Map<String, dynamic> json) =>
-      UploadResponse(
-        url: json['url'] as String,
-        filename: json['filename'] as String?,
+  factory UploadResponse.fromJson(Map<String, dynamic> json) {
+    // Validação do campo 'url'
+    if (!json.containsKey('url')) {
+      throw const FormatException(
+        "Invalid UploadResponse: missing 'url' field",
       );
+    }
+
+    final urlValue = json['url'];
+    if (urlValue is! String || urlValue.isEmpty) {
+      throw FormatException(
+        "Invalid UploadResponse: 'url' must be a non-empty String, "
+        "got ${urlValue.runtimeType}",
+      );
+    }
+
+    // Validação do campo 'filename' (opcional)
+    String? filename;
+    if (json.containsKey('filename')) {
+      final filenameValue = json['filename'];
+      if (filenameValue != null) {
+        if (filenameValue is! String) {
+          throw FormatException(
+            "Invalid UploadResponse: 'filename' must be a String or null, "
+            "got ${filenameValue.runtimeType}",
+          );
+        }
+        filename = filenameValue;
+      }
+    }
+
+    return UploadResponse(
+      url: urlValue,
+      filename: filename,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'url': url,

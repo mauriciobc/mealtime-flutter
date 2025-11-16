@@ -17,6 +17,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
   
   // Timers para debounce de sincronizações
   final Map<String, Timer> _debounceTimers = {};
+  
+  // Rastreamento de requisições iniciais em andamento para deduplicação
+  final Map<String, Future<Profile>> _inFlightFetches = {};
 
   ProfileRepositoryImpl({
     required this.remoteDataSource,
@@ -34,9 +37,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
         return Right(localProfile);
       }
 
-      // 2. Se não encontrar localmente, buscar da API
-      final remoteProfile = await remoteDataSource.getProfile(idOrUsername);
-      await localDataSource.cacheProfile(remoteProfile);
+      // 2. Se não encontrar localmente, buscar da API com deduplicação
+      final remoteProfile = await _getProfileWithDeduplication(
+        idOrUsername,
+      );
       return Right(remoteProfile);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
@@ -45,6 +49,58 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } catch (e) {
       return Left(ServerFailure('Erro inesperado: ${e.toString()}'));
     }
+  }
+  
+  /// Busca perfil remoto com deduplicação de requisições concorrentes
+  Future<Profile> _getProfileWithDeduplication(
+    String idOrUsername,
+  ) async {
+    // Verificar se já existe uma requisição em andamento
+    if (_inFlightFetches.containsKey(idOrUsername)) {
+      debugPrint(
+        '[ProfileRepository] Requisição já em andamento para '
+        '$idOrUsername, reutilizando Future existente',
+      );
+      return _inFlightFetches[idOrUsername]!;
+    }
+    
+    // Criar nova requisição
+    final fetchFuture = Future.microtask(() async {
+      try {
+        debugPrint(
+          '[ProfileRepository] Iniciando busca remota para '
+          '$idOrUsername',
+        );
+        final remoteProfile = await remoteDataSource.getProfile(
+          idOrUsername,
+        );
+        await localDataSource.cacheProfile(remoteProfile);
+        debugPrint(
+          '[ProfileRepository] Busca remota concluída para '
+          '$idOrUsername',
+        );
+        return remoteProfile;
+      } catch (e) {
+        debugPrint(
+          '[ProfileRepository] Erro na busca remota para '
+          '$idOrUsername: $e',
+        );
+        // Re-lançar erro para propagar aos chamadores
+        rethrow;
+      } finally {
+        // Sempre remover da lista de requisições em andamento
+        _inFlightFetches.remove(idOrUsername);
+        debugPrint(
+          '[ProfileRepository] Requisição removida do rastreamento para '
+          '$idOrUsername',
+        );
+      }
+    });
+    
+    // Armazenar o Future no mapa antes de iniciar
+    _inFlightFetches[idOrUsername] = fetchFuture;
+    
+    return fetchFuture;
   }
 
   /// Sincroniza dados locais com remoto em background
@@ -70,7 +126,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
         '[ProfileRepository] Sincronização já em andamento para '
         '$idOrUsername, reutilizando Future existente',
       );
-      return _inFlightSyncs[idOrUsername];
+      return _inFlightSyncs[idOrUsername]!;
     }
 
     // Criar nova sincronização

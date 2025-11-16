@@ -127,6 +127,11 @@ class FeedingLogsRepositoryImpl implements FeedingLogsRepository {
   ) async {
     try {
       final created = await remoteDataSource.createFeedingLogsBatch(feedingLogs);
+      // Salvar no cache local após criação
+      for (final feedingLog in created) {
+        await localDataSource.cacheFeedingLog(feedingLog);
+        await localDataSource.markAsSynced(feedingLog.id);
+      }
       return Right(created);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));

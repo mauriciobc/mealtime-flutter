@@ -16,10 +16,17 @@ class RegisterPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Logo e título
-              Icon(
-                Icons.pets,
-                size: 80,
-                color: Theme.of(context).colorScheme.primary,
+              Image.asset(
+                'assets/images/mealtime-symbol.png',
+                width: 80,
+                height: 80,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.pets,
+                    size: 80,
+                    color: Theme.of(context).colorScheme.primary,
+                  );
+                },
               ),
               const SizedBox(height: 24),
               Text(

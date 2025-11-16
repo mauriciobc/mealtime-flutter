@@ -12,6 +12,7 @@ import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_ev
 import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_state.dart';
 import 'package:mealtime_app/features/statistics/presentation/widgets/cat_distribution_chart.dart';
 import 'package:mealtime_app/features/statistics/presentation/widgets/daily_consumption_chart.dart';
+import 'package:mealtime_app/features/statistics/presentation/widgets/food_type_distribution_chart.dart';
 import 'package:mealtime_app/features/statistics/presentation/widgets/hourly_distribution_chart.dart';
 import 'package:mealtime_app/features/statistics/presentation/widgets/statistics_filters.dart';
 import 'package:mealtime_app/features/statistics/presentation/widgets/statistics_header.dart';
@@ -138,6 +139,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
             const SizedBox(height: 16),
             _buildChartSafe(
               () => CatDistributionChart(
+                catConsumptions: state.statistics.catConsumptions,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildChartSafe(
+              () => FoodTypeDistributionChart(
                 catConsumptions: state.statistics.catConsumptions,
               ),
             ),

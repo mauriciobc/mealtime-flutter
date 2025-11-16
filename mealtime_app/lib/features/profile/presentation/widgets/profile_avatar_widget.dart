@@ -125,12 +125,13 @@ class _ProfileAvatarWidgetState extends ConsumerState<ProfileAvatarWidget> {
     });
 
     try {
-      final notifier = ref.read(profileNotifierProvider(widget.userId).notifier);
+      final provider = profileProvider(widget.userId);
+      final notifier = ref.read(provider.notifier);
       final url = await notifier.uploadAvatar(imageFile.path);
 
       if (url != null && mounted) {
         // Atualizar perfil com nova URL do avatar
-        final currentProfile = ref.read(profileNotifierProvider(widget.userId));
+        final currentProfile = ref.read(profileProvider(widget.userId));
         if (currentProfile.value != null) {
           final updatedProfile = currentProfile.value!.copyWith(avatarUrl: url);
           await notifier.updateProfile(updatedProfile);

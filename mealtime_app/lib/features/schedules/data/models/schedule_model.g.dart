@@ -7,16 +7,10 @@ part of 'schedule_model.dart';
 // **************************************************************************
 
 CatBasicModel _$CatBasicModelFromJson(Map<String, dynamic> json) =>
-    CatBasicModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-    );
+    CatBasicModel(id: json['id'] as String, name: json['name'] as String);
 
 Map<String, dynamic> _$CatBasicModelToJson(CatBasicModel instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-    };
+    <String, dynamic>{'id': instance.id, 'name': instance.name};
 
 ScheduleModel _$ScheduleModelFromJson(Map<String, dynamic> json) =>
     ScheduleModel(

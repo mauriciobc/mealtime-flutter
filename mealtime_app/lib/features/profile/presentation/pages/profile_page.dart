@@ -10,6 +10,7 @@ import 'package:mealtime_app/features/profile/presentation/widgets/profile_tabs_
 import 'package:mealtime_app/features/profile/presentation/widgets/profile_edit_dialog.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:icon_button_m3e/icon_button_m3e.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -20,28 +21,28 @@ class ProfilePage extends ConsumerWidget {
     
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Perfil')),
-        body: const Center(
-          child: Text('Usuário não autenticado'),
+        appBar: AppBar(title: Text(context.l10n.profile_title)),
+        body: Center(
+          child: Text(context.l10n.auth_userNotAuthenticated),
         ),
       );
     }
 
-    final profileAsync = ref.watch(profileNotifierProvider(user.id));
+    final profileAsync = ref.watch(profileProvider(user.id));
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Perfil'),
+        title: Text(context.l10n.profile_title),
         actions: [
           IconButtonM3E(
             onPressed: () => _showEditDialog(context, ref, user.id, profileAsync),
             icon: const Icon(Icons.edit),
-            tooltip: 'Editar perfil',
+            tooltip: context.l10n.profile_editProfile,
           ),
           IconButtonM3E(
             onPressed: () => _handleLogout(context, ref),
             icon: const Icon(Icons.logout),
-            tooltip: 'Sair',
+            tooltip: context.l10n.auth_logout,
           ),
         ],
       ),
@@ -52,13 +53,14 @@ class ProfilePage extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Perfil não encontrado'),
+                  Text(context.l10n.profile_profileNotFound),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => ref
-                        .read(profileNotifierProvider(user.id).notifier)
-                        .refresh(),
-                    child: const Text('Recarregar'),
+                    onPressed: () {
+                      final provider = profileProvider(user.id);
+                      ref.read(provider.notifier).refresh();
+                    },
+                    child: Text(context.l10n.profile_reload),
                   ),
                 ],
               ),
@@ -67,7 +69,8 @@ class ProfilePage extends ConsumerWidget {
 
           return RefreshIndicator(
             onRefresh: () async {
-              await ref.read(profileNotifierProvider(user.id).notifier).refresh();
+              final provider = profileProvider(user.id);
+              await ref.read(provider.notifier).refresh();
             },
             child: CustomScrollView(
               slivers: [
@@ -84,7 +87,7 @@ class ProfilePage extends ConsumerWidget {
                       Text(
                         profile.fullName ??
                             profile.email?.split('@').first ??
-                            'Usuário',
+                            context.l10n.profile_user,
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       const SizedBox(height: 24),
@@ -110,7 +113,7 @@ class ProfilePage extends ConsumerWidget {
             children: [
               SelectableText.rich(
                 TextSpan(
-                  text: 'Erro ao carregar perfil: ',
+                  text: '${context.l10n.error_loading}: ',
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.error,
                   ),
@@ -123,10 +126,11 @@ class ProfilePage extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref
-                    .read(profileNotifierProvider(user.id).notifier)
-                    .refresh(),
-                child: const Text('Tentar novamente'),
+                onPressed: () {
+                  final provider = profileProvider(user.id);
+                  ref.read(provider.notifier).refresh();
+                },
+                child: Text(context.l10n.common_retry),
               ),
             ],
           ),
@@ -151,7 +155,8 @@ class ProfilePage extends ConsumerWidget {
       ),
     ).then((updatedProfile) async {
       if (updatedProfile != null) {
-        final notifier = ref.read(profileNotifierProvider(userId).notifier);
+        final provider = profileProvider(userId);
+        final notifier = ref.read(provider.notifier);
         final success = await notifier.updateProfile(updatedProfile);
 
         if (context.mounted) {
@@ -159,8 +164,8 @@ class ProfilePage extends ConsumerWidget {
             SnackBar(
               content: Text(
                 success
-                    ? 'Perfil atualizado com sucesso!'
-                    : 'Erro ao atualizar perfil',
+                    ? context.l10n.profile_profileUpdated
+                    : context.l10n.profile_errorUpdating,
               ),
               backgroundColor: success
                   ? null
@@ -176,12 +181,12 @@ class ProfilePage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Confirmar logout'),
-        content: const Text('Tem certeza que deseja sair?'),
+        title: Text(context.l10n.profile_confirmLogout),
+        content: Text(context.l10n.profile_logoutConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.common_cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -203,50 +208,27 @@ class ProfilePage extends ConsumerWidget {
                   name: 'ProfilePage._handleLogout',
                 );
 
-                // Não fecha o diálogo em caso de erro
-                // Mostra mensagem de erro ao usuário
+                // Primeiro fecha o diálogo de confirmação se ainda estiver montado
                 if (dialogContext.mounted) {
-                  // Mostra erro dentro do diálogo de confirmação
-                  showDialog(
-                    context: dialogContext,
-                    builder: (errorDialogContext) => AlertDialog(
-                      title: const Text('Erro ao fazer logout'),
+                  Navigator.of(dialogContext).pop();
+                }
+
+                // Depois mostra o erro usando o contexto externo
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
                       content: SelectableText.rich(
                         TextSpan(
-                          text: 'Não foi possível fazer logout. ',
+                          text: '${context.l10n.profile_logoutError}: ',
                           style: TextStyle(
-                            color: Theme.of(errorDialogContext)
-                                .colorScheme
-                                .error,
+                            color: Theme.of(context).colorScheme.onError,
                           ),
                           children: [
                             TextSpan(
-                              text: 'Tente novamente.',
-                              style: TextStyle(
-                                color: Theme.of(errorDialogContext)
-                                    .colorScheme
-                                    .onSurface,
-                              ),
+                              text: error.toString(),
                             ),
                           ],
                         ),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(errorDialogContext).pop();
-                          },
-                          child: const Text('OK'),
-                        ),
-                      ],
-                    ),
-                  );
-                } else if (context.mounted) {
-                  // Se o diálogo de confirmação já foi fechado, mostra SnackBar
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Erro ao fazer logout: ${error.toString()}',
                       ),
                       backgroundColor: Theme.of(context).colorScheme.error,
                       duration: const Duration(seconds: 5),
@@ -255,7 +237,7 @@ class ProfilePage extends ConsumerWidget {
                 }
               }
             },
-            child: const Text('Sair'),
+            child: Text(context.l10n.auth_logout),
           ),
         ],
       ),

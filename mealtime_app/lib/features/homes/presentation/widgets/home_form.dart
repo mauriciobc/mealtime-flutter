@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 
 class HomeForm extends StatelessWidget {
   final TextEditingController nameController;
@@ -17,18 +18,18 @@ class HomeForm extends StatelessWidget {
       children: [
         TextFormField(
           controller: nameController,
-          decoration: const InputDecoration(
-            labelText: 'Nome da Residência *',
-            hintText: 'Ex: Casa Principal, Apartamento, Sítio...',
-            prefixIcon: Icon(Icons.home),
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: context.l10n.homes_nameRequired,
+            hintText: context.l10n.homes_nameHint,
+            prefixIcon: const Icon(Icons.home),
+            border: const OutlineInputBorder(),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'O nome da residência é obrigatório';
+              return context.l10n.homes_nameRequiredError;
             }
             if (value.trim().length < 2) {
-              return 'O nome deve ter pelo menos 2 caracteres';
+              return context.l10n.homes_nameMinLength;
             }
             return null;
           },
@@ -37,18 +38,18 @@ class HomeForm extends StatelessWidget {
         const SizedBox(height: 16),
         TextFormField(
           controller: descriptionController,
-          decoration: const InputDecoration(
-            labelText: 'Descrição',
-            hintText: 'Informações adicionais sobre a residência...',
-            prefixIcon: Icon(Icons.description),
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: context.l10n.common_description,
+            hintText: context.l10n.homes_descriptionHint,
+            prefixIcon: const Icon(Icons.description),
+            border: const OutlineInputBorder(),
           ),
           textInputAction: TextInputAction.done,
           maxLines: 3,
         ),
         const SizedBox(height: 16),
         Text(
-          '* Campos obrigatórios',
+          context.l10n.homes_requiredFields,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),

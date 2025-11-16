@@ -16,7 +16,7 @@ part 'profile_providers.g.dart';
 
 // Repository Provider
 @Riverpod(keepAlive: true)
-ProfileRepository profileRepository(ProfileRepositoryRef ref) {
+ProfileRepository profileRepository(Ref ref) {
   final remoteDataSource = ProfileRemoteDataSourceImpl(
     apiService: ProfileApiService(
       sl<Dio>(instanceName: 'dioV2'),
@@ -34,17 +34,17 @@ ProfileRepository profileRepository(ProfileRepositoryRef ref) {
 
 // Use Cases Providers
 @riverpod
-GetProfile getProfile(GetProfileRef ref) {
+GetProfile getProfile(Ref ref) {
   return GetProfile(ref.watch(profileRepositoryProvider));
 }
 
 @riverpod
-UpdateProfile updateProfile(UpdateProfileRef ref) {
+UpdateProfile updateProfile(Ref ref) {
   return UpdateProfile(ref.watch(profileRepositoryProvider));
 }
 
 @riverpod
-UploadAvatar uploadAvatar(UploadAvatarRef ref) {
+UploadAvatar uploadAvatar(Ref ref) {
   return UploadAvatar(ref.watch(profileRepositoryProvider));
 }
 
@@ -56,7 +56,11 @@ class ProfileNotifier extends _$ProfileNotifier {
     final useCase = ref.watch(getProfileProvider);
     final result = await useCase(GetProfileParams(idOrUsername: idOrUsername));
     return result.fold(
-      (failure) => null,
+      (failure) {
+        throw Exception(
+          'Erro ao buscar perfil (${failure.runtimeType}): ${failure.message}',
+        );
+      },
       (profile) => profile,
     );
   }
@@ -98,15 +102,18 @@ class ProfileNotifier extends _$ProfileNotifier {
 
   /// Faz upload de avatar
   Future<String?> uploadAvatar(String filePath) async {
+    if (state.value == null) return null;
+    
     final useCase = ref.read(uploadAvatarProvider);
     final result = await useCase(UploadAvatarParams(filePath: filePath));
     
     return result.fold(
-      (failure) => null,
+      (failure) {
+        state = AsyncValue.error(failure, StackTrace.current);
+        return null;
+      },
       (url) {
-        if (state.value != null) {
-          state = AsyncValue.data(state.value!.copyWith(avatarUrl: url));
-        }
+        state = AsyncValue.data(state.value!.copyWith(avatarUrl: url));
         return url;
       },
     );
@@ -115,10 +122,10 @@ class ProfileNotifier extends _$ProfileNotifier {
 
 // Helper provider para obter perfil do usuário atual
 @riverpod
-Future<Profile?> currentUserProfile(CurrentUserProfileRef ref) async {
+Future<Profile?> currentUserProfile(Ref ref) async {
   final user = SupabaseConfig.client.auth.currentUser;
   if (user == null) return null;
   
-  return ref.watch(profileNotifierProvider(user.id).future);
+  return ref.watch(profileProvider(user.id).future);
 }
 

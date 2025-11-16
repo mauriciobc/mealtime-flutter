@@ -23,19 +23,19 @@ Map<String, dynamic> _$HouseholdModelToJson(HouseholdModel instance) =>
     };
 
 HouseholdMemberModel _$HouseholdMemberModelFromJson(
-        Map<String, dynamic> json) =>
-    HouseholdMemberModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      email: json['email'] as String,
-      role: json['role'] as String,
-    );
+  Map<String, dynamic> json,
+) => HouseholdMemberModel(
+  id: json['id'] as String,
+  name: json['name'] as String,
+  email: json['email'] as String,
+  role: json['role'] as String,
+);
 
 Map<String, dynamic> _$HouseholdMemberModelToJson(
-        HouseholdMemberModel instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'email': instance.email,
-      'role': instance.role,
-    };
+  HouseholdMemberModel instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'email': instance.email,
+  'role': instance.role,
+};

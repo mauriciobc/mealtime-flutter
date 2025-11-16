@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 
 class CatForm extends StatefulWidget {
   final Cat? initialCat;
@@ -99,14 +100,14 @@ class _CatFormState extends State<CatForm> {
   Widget _buildNameField() {
     return TextFormField(
       controller: _nameController,
-      decoration: const InputDecoration(
-        labelText: 'Nome *',
-        hintText: 'Digite o nome do gato',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        labelText: context.l10n.cats_name,
+        hintText: context.l10n.cats_nameHint,
+        border: const OutlineInputBorder(),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Nome é obrigatório';
+          return context.l10n.cats_nameRequired;
         }
         return null;
       },
@@ -116,10 +117,10 @@ class _CatFormState extends State<CatForm> {
   Widget _buildBreedField() {
     return TextFormField(
       controller: _breedController,
-      decoration: const InputDecoration(
-        labelText: 'Raça',
-        hintText: 'Ex: Persa, Siamês, SRD',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        labelText: context.l10n.cats_breed,
+        hintText: context.l10n.cats_breedHint,
+        border: const OutlineInputBorder(),
       ),
     );
   }
@@ -128,13 +129,13 @@ class _CatFormState extends State<CatForm> {
     return DropdownButtonFormField<String>(
       key: _genderFieldKey,
       initialValue: _selectedGender,
-      decoration: const InputDecoration(
-        labelText: 'Sexo',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        labelText: context.l10n.cats_gender,
+        border: const OutlineInputBorder(),
       ),
-      items: const [
-        DropdownMenuItem(value: 'M', child: Text('Macho')),
-        DropdownMenuItem(value: 'F', child: Text('Fêmea')),
+      items: [
+        DropdownMenuItem(value: 'M', child: Text(context.l10n.cats_genderMale)),
+        DropdownMenuItem(value: 'F', child: Text(context.l10n.cats_genderFemale)),
       ],
       onChanged: (value) {
         setState(() {
@@ -148,10 +149,10 @@ class _CatFormState extends State<CatForm> {
   Widget _buildColorField() {
     return TextFormField(
       controller: _colorController,
-      decoration: const InputDecoration(
-        labelText: 'Cor',
+      decoration: InputDecoration(
+        labelText: context.l10n.cats_color,
         hintText: 'Ex: Branco, Preto, Tigrado',
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
       ),
     );
   }
@@ -160,14 +161,14 @@ class _CatFormState extends State<CatForm> {
     return InkWell(
       onTap: _selectBirthDate,
       child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'Data de Nascimento *',
-          border: OutlineInputBorder(),
+        decoration: InputDecoration(
+          labelText: context.l10n.cats_birthDateRequired,
+          border: const OutlineInputBorder(),
         ),
         child: Text(
           _selectedBirthDate != null
               ? '${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}'
-              : 'Selecione a data',
+              : context.l10n.cats_selectDate,
         ),
       ),
     );
@@ -179,16 +180,16 @@ class _CatFormState extends State<CatForm> {
         Expanded(
           child: TextFormField(
             controller: _currentWeightController,
-            decoration: const InputDecoration(
-              labelText: 'Peso Atual (kg)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: context.l10n.cats_currentWeightLabel,
+              border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,
             validator: (value) {
               if (value != null && value.isNotEmpty) {
                 final weight = double.tryParse(value);
                 if (weight == null || weight <= 0) {
-                  return 'Peso inválido';
+                  return context.l10n.cats_invalidWeight;
                 }
               }
               return null;
@@ -199,16 +200,16 @@ class _CatFormState extends State<CatForm> {
         Expanded(
           child: TextFormField(
             controller: _targetWeightController,
-            decoration: const InputDecoration(
-              labelText: 'Peso Ideal (kg)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: context.l10n.cats_targetWeightLabel,
+              border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,
             validator: (value) {
               if (value != null && value.isNotEmpty) {
                 final weight = double.tryParse(value);
                 if (weight == null || weight <= 0) {
-                  return 'Peso inválido';
+                  return context.l10n.cats_invalidWeight;
                 }
               }
               return null;
@@ -222,10 +223,10 @@ class _CatFormState extends State<CatForm> {
   Widget _buildDescriptionField() {
     return TextFormField(
       controller: _descriptionController,
-      decoration: const InputDecoration(
-        labelText: 'Descrição',
-        hintText: 'Informações adicionais sobre o gato',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        labelText: context.l10n.common_description,
+        hintText: context.l10n.cats_descriptionHint,
+        border: const OutlineInputBorder(),
       ),
       maxLines: 3,
     );
@@ -236,7 +237,7 @@ class _CatFormState extends State<CatForm> {
       onPressed: widget.isLoading ? null : _submitForm,
       child: widget.isLoading
           ? const Material3LoadingIndicator(size: 20.0)
-          : Text(widget.initialCat != null ? 'Atualizar Gato' : 'Criar Gato'),
+          : Text(widget.initialCat != null ? context.l10n.cats_saveCat : context.l10n.cats_createCat),
     );
   }
 

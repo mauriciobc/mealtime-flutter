@@ -14,6 +14,7 @@ class FeedingLogs extends Table {
   TextColumn get catId => text().references(Cats, #id)();
   TextColumn get householdId => text().references(Households, #id)();
   TextColumn get mealType => text()(); // 'breakfast', 'lunch', 'dinner', 'snack'
+  TextColumn get foodType => text().nullable()(); // 'Ração Seca', 'Ração Úmida', 'Sachê', 'Petisco'
   RealColumn get amount => real().nullable()();
   TextColumn get unit => text().nullable()();
   TextColumn get notes => text().nullable()();

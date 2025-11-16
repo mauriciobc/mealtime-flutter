@@ -340,7 +340,7 @@ class TimezoneHelper {
     'Europe/Istanbul',
     'Europe/Jersey',
     'Europe/Kaliningrad',
-    'Europe/Kiev',
+    'Europe/Kyiv',
     'Europe/Kirov',
     'Europe/Lisbon',
     'Europe/Ljubljana',
@@ -449,7 +449,8 @@ class TimezoneHelper {
 
   /// Valida se uma string é um timezone IANA válido
   static bool isValidTimezone(String timezone) {
-    if (timezone.isEmpty) return true; // Opcional
+    // Rejeita strings vazias ou contendo apenas espaços em branco
+    if (timezone.trim().isEmpty) return false;
     
     // Verifica se está na lista de timezones válidos
     return _allTimezones.contains(timezone);

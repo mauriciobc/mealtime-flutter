@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+const Object _absent = Object();
+
 class Profile extends Equatable {
   final String id;
   final String? username;
@@ -34,24 +36,25 @@ class Profile extends Equatable {
       ];
 
   Profile copyWith({
-    String? id,
-    String? username,
-    String? fullName,
-    String? email,
-    String? avatarUrl,
-    String? timezone,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    Object? username = _absent,
+    Object? fullName = _absent,
+    Object? email = _absent,
+    Object? avatarUrl = _absent,
+    Object? timezone = _absent,
+    Object? createdAt = _absent,
+    Object? updatedAt = _absent,
   }) {
     return Profile(
-      id: id ?? this.id,
-      username: username ?? this.username,
-      fullName: fullName ?? this.fullName,
-      email: email ?? this.email,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      timezone: timezone ?? this.timezone,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      id: this.id,
+      username: username == _absent ? this.username : username as String?,
+      fullName: fullName == _absent ? this.fullName : fullName as String?,
+      email: email == _absent ? this.email : email as String?,
+      avatarUrl: avatarUrl == _absent ? this.avatarUrl : avatarUrl as String?,
+      timezone: timezone == _absent ? this.timezone : timezone as String?,
+      createdAt:
+          createdAt == _absent ? this.createdAt : createdAt as DateTime?,
+      updatedAt:
+          updatedAt == _absent ? this.updatedAt : updatedAt as DateTime?,
     );
   }
 }

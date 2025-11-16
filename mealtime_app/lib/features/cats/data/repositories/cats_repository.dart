@@ -17,7 +17,7 @@ class CatsRepository {
 }
 
 @Riverpod(keepAlive: true)
-CatsRepository catsRepository(CatsRepositoryRef ref) {
+CatsRepository catsRepository(Ref ref) {
   final db = ref.watch(appDatabaseProvider);
   return CatsRepository(db);
 }

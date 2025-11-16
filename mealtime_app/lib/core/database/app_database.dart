@@ -44,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(createDatabaseConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -91,6 +91,11 @@ class AppDatabase extends _$AppDatabase {
           // Migração da versão 2 para 3
           // Adicionar tabela de weight goals
           await m.createTable(weightGoals);
+        }
+        if (from < 4) {
+          // Migração da versão 3 para 4
+          // Adicionar campo food_type na tabela feeding_logs
+          await m.addColumn(feedingLogs, feedingLogs.foodType);
         }
       },
     );

@@ -27,8 +27,8 @@ Um aplicativo Flutter moderno que demonstra as capacidades expressivas do Materi
 ## 🚀 Como Executar
 
 ### Pré-requisitos
-- Flutter 3.8.1 ou superior
-- Dart 3.8.1 ou superior
+- Flutter 3.38.1 ou superior
+- Dart 3.10.0 ou superior
 
 ### Instalação
 ```bash

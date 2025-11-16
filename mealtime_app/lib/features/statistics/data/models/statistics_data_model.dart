@@ -96,12 +96,14 @@ class CatConsumptionModel {
   final String catName;
   final double amount;
   final double percentage;
+  final String? foodType;
 
   const CatConsumptionModel({
     required this.catId,
     required this.catName,
     required this.amount,
     required this.percentage,
+    this.foodType,
   });
 
   factory CatConsumptionModel.fromJson(Map<String, dynamic> json) =>
@@ -115,6 +117,7 @@ class CatConsumptionModel {
       catName: catName,
       amount: amount,
       percentage: percentage,
+      foodType: foodType,
     );
   }
 
@@ -124,6 +127,7 @@ class CatConsumptionModel {
       catName: entity.catName,
       amount: entity.amount,
       percentage: entity.percentage,
+      foodType: entity.foodType,
     );
   }
 }

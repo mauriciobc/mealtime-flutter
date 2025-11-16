@@ -78,7 +78,12 @@ class _CatDetailPageState extends State<CatDetailPage> {
           if (state is CatOperationSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text(
+                  state.message,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
                 backgroundColor: Theme.of(context).colorScheme.primary,
               ),
             );

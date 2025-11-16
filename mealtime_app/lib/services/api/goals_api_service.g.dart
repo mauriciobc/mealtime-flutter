@@ -7,47 +7,45 @@ part of 'goals_api_service.dart';
 // **************************************************************************
 
 GoalModel _$GoalModelFromJson(Map<String, dynamic> json) => GoalModel(
-      id: json['id'] as String,
-      catId: json['cat_id'] as String,
-      targetWeight: GoalModel._weightFromJson(json['target_weight']),
-      targetDate: DateTime.parse(json['target_date'] as String),
-      notes: json['notes'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      goalName: json['goal_name'] as String?,
-      startWeight: GoalModel._nullableWeightFromJson(json['start_weight']),
-      unit: json['unit'] as String?,
-      status: json['status'] as String?,
-      updatedAt: json['updated_at'] == null
-          ? null
-          : DateTime.parse(json['updated_at'] as String),
-    );
+  id: json['id'] as String,
+  catId: json['cat_id'] as String,
+  targetWeight: GoalModel._weightFromJson(json['target_weight']),
+  targetDate: DateTime.parse(json['target_date'] as String),
+  notes: json['notes'] as String?,
+  createdAt: DateTime.parse(json['created_at'] as String),
+  goalName: json['goal_name'] as String?,
+  startWeight: GoalModel._nullableWeightFromJson(json['start_weight']),
+  unit: json['unit'] as String?,
+  status: json['status'] as String?,
+  updatedAt: json['updated_at'] == null
+      ? null
+      : DateTime.parse(json['updated_at'] as String),
+);
 
 Map<String, dynamic> _$GoalModelToJson(GoalModel instance) => <String, dynamic>{
-      'id': instance.id,
-      'cat_id': instance.catId,
-      'target_weight': instance.targetWeight,
-      'target_date': instance.targetDate.toIso8601String(),
-      'notes': instance.notes,
-      'created_at': instance.createdAt.toIso8601String(),
-      'goal_name': instance.goalName,
-      'start_weight': instance.startWeight,
-      'unit': instance.unit,
-      'status': instance.status,
-      'updated_at': instance.updatedAt?.toIso8601String(),
-    };
+  'id': instance.id,
+  'cat_id': instance.catId,
+  'target_weight': instance.targetWeight,
+  'target_date': instance.targetDate.toIso8601String(),
+  'notes': instance.notes,
+  'created_at': instance.createdAt.toIso8601String(),
+  'goal_name': instance.goalName,
+  'start_weight': instance.startWeight,
+  'unit': instance.unit,
+  'status': instance.status,
+  'updated_at': instance.updatedAt?.toIso8601String(),
+};
+
+// dart format off
 
 // **************************************************************************
 // RetrofitGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element
+// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter,avoid_unused_constructor_parameters,unreachable_from_main
 
 class _GoalsApiService implements GoalsApiService {
-  _GoalsApiService(
-    this._dio, {
-    this.baseUrl,
-    this.errorLogger,
-  }) {
+  _GoalsApiService(this._dio, {this.baseUrl, this.errorLogger}) {
     baseUrl ??= 'https://mealtime.app.br/api/v2';
   }
 
@@ -70,22 +68,16 @@ class _GoalsApiService implements GoalsApiService {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<ApiResponse<List<GoalModel>>>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/goals',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
+    final _options = _setStreamType<ApiResponse<List<GoalModel>>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/goals',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
     late ApiResponse<List<GoalModel>> _value;
     try {
@@ -93,9 +85,10 @@ class _GoalsApiService implements GoalsApiService {
         _result.data!,
         (json) => json is List<dynamic>
             ? json
-                .map<GoalModel>(
-                    (i) => GoalModel.fromJson(i as Map<String, dynamic>))
-                .toList()
+                  .map<GoalModel>(
+                    (i) => GoalModel.fromJson(i as Map<String, dynamic>),
+                  )
+                  .toList()
             : List.empty(),
       );
     } on Object catch (e, s) {
@@ -112,22 +105,16 @@ class _GoalsApiService implements GoalsApiService {
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(request.toJson());
-    final _options = _setStreamType<ApiResponse<GoalModel>>(Options(
-      method: 'POST',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/goals',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
+    final _options = _setStreamType<ApiResponse<GoalModel>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/goals',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
     late ApiResponse<GoalModel> _value;
     try {
@@ -155,10 +142,7 @@ class _GoalsApiService implements GoalsApiService {
     return requestOptions;
   }
 
-  String _combineBaseUrls(
-    String dioBaseUrl,
-    String? baseUrl,
-  ) {
+  String _combineBaseUrls(String dioBaseUrl, String? baseUrl) {
     if (baseUrl == null || baseUrl.trim().isEmpty) {
       return dioBaseUrl;
     }
@@ -172,3 +156,5 @@ class _GoalsApiService implements GoalsApiService {
     return Uri.parse(dioBaseUrl).resolveUri(url).toString();
   }
 }
+
+// dart format on

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 
 /// Barra de navegação principal que permanece visível em todas as páginas
 /// autenticadas do aplicativo.
@@ -48,10 +49,10 @@ class MainNavigationBar extends StatelessWidget {
     return NavigationBar(
       selectedIndex: _getSelectedIndex(context),
       destinations: [
-        const NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'Início',
+        NavigationDestination(
+          icon: const Icon(Icons.home_outlined),
+          selectedIcon: const Icon(Icons.home),
+          label: context.l10n.navigation_home,
         ),
         NavigationDestination(
           icon: ExcludeSemantics(
@@ -76,17 +77,17 @@ class MainNavigationBar extends StatelessWidget {
               ),
             ),
           ),
-          label: 'Gatos',
+          label: context.l10n.navigation_cats,
         ),
-        const NavigationDestination(
-          icon: Icon(Icons.monitor_weight_outlined),
-          selectedIcon: Icon(Icons.monitor_weight),
-          label: 'Peso',
+        NavigationDestination(
+          icon: const Icon(Icons.monitor_weight_outlined),
+          selectedIcon: const Icon(Icons.monitor_weight),
+          label: context.l10n.navigation_weight,
         ),
-        const NavigationDestination(
-          icon: Icon(Icons.bar_chart_outlined),
-          selectedIcon: Icon(Icons.bar_chart),
-          label: 'Estatísticas',
+        NavigationDestination(
+          icon: const Icon(Icons.bar_chart_outlined),
+          selectedIcon: const Icon(Icons.bar_chart),
+          label: context.l10n.navigation_statistics,
         ),
       ],
       onDestinationSelected: (index) {

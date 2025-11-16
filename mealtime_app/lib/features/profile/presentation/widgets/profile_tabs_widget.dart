@@ -132,12 +132,10 @@ class ProfileTabsWidget extends StatelessWidget {
   }
 
   Widget _buildCatsTab(BuildContext context) {
-    // Carregar cats apenas quando não estiver carregando, carregado ou em erro
-    final catsState = context.watch<CatsBloc>().state;
+    // Carregar cats apenas quando estiver no estado inicial
+    final catsState = context.read<CatsBloc>().state;
     
-    if (catsState is! CatsLoaded && 
-        catsState is! CatsError && 
-        catsState is! CatsLoading) {
+    if (catsState is CatsInitial) {
       // Trigger load apenas uma vez no primeiro build
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<CatsBloc>().add(const LoadCats());
