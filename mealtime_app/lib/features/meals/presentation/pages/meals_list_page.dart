@@ -68,26 +68,12 @@ class _MealsListPageState extends State<MealsListPage> {
               return _buildEmptyState();
             }
 
-            return RefreshIndicator(
-              onRefresh: () async {
-                _loadMeals();
-              },
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: state.meals.length,
-                itemBuilder: (context, index) {
-                  final meal = state.meals[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: MealCard(
-                      meal: meal,
-                      onTap: () => _navigateToMealDetail(meal),
-                      onComplete: () => _completeMeal(meal),
-                      onSkip: () => _skipMeal(meal),
-                    ),
-                  );
-                },
-              ),
+            return _MealList(
+              meals: state.meals,
+              onRefresh: _loadMeals,
+              onMealTap: _navigateToMealDetail,
+              onCompleteMeal: _completeMeal,
+              onSkipMeal: _skipMeal,
             );
           }
 
@@ -95,26 +81,12 @@ class _MealsListPageState extends State<MealsListPage> {
             return Stack(
               children: [
                 if (state.meals.isNotEmpty)
-                  RefreshIndicator(
-                    onRefresh: () async {
-                      _loadMeals();
-                    },
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: state.meals.length,
-                      itemBuilder: (context, index) {
-                        final meal = state.meals[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: MealCard(
-                            meal: meal,
-                            onTap: () => _navigateToMealDetail(meal),
-                            onComplete: () => _completeMeal(meal),
-                            onSkip: () => _skipMeal(meal),
-                          ),
-                        );
-                      },
-                    ),
+                  _MealList(
+                    meals: state.meals,
+                    onRefresh: _loadMeals,
+                    onMealTap: _navigateToMealDetail,
+                    onCompleteMeal: _completeMeal,
+                    onSkipMeal: _skipMeal,
                   )
                 else
                   _buildEmptyState(),
@@ -222,6 +194,49 @@ class _MealsListPageState extends State<MealsListPage> {
         onSkip: (reason) {
           context.read<MealsBloc>().add(
             SkipMeal(mealId: meal.id, reason: reason),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _MealList extends StatelessWidget {
+  final List<Meal> meals;
+  final VoidCallback onRefresh;
+  final Function(Meal) onMealTap;
+  final Function(Meal) onCompleteMeal;
+  final Function(Meal) onSkipMeal;
+
+  const _MealList({
+    required this.meals,
+    required this.onRefresh,
+    required this.onMealTap,
+    required this.onCompleteMeal,
+    required this.onSkipMeal,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // This widget encapsulates the list rendering. By extracting it, we can avoid
+    // rebuilding the list unnecessarily when the parent widget's state changes
+    // in ways that don't affect the list itself (e.g., showing a dialog).
+    // This improves performance by reducing the number of widget rebuilds.
+    return RefreshIndicator(
+      onRefresh: () async => onRefresh(),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: meals.length,
+        itemBuilder: (context, index) {
+          final meal = meals[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: MealCard(
+              meal: meal,
+              onTap: () => onMealTap(meal),
+              onComplete: () => onCompleteMeal(meal),
+              onSkip: () => onSkipMeal(meal),
+            ),
           );
         },
       ),
