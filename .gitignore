@@ -1,0 +1,11 @@
+# Screen recordings and large video files
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Other large files
+*.zip
+*.tar.gz
+*.rar
+
