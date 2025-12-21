@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:material_design/material_design.dart';
+import 'package:mealtime_app/core/theme/m3_shapes.dart';
+import 'package:mealtime_app/core/utils/haptics_service.dart';
 import 'package:mealtime_app/features/profile/domain/entities/profile.dart';
 import 'package:mealtime_app/features/profile/utils/timezone_helper.dart';
 
-class ProfileEditDialog extends StatefulWidget {
+class ProfileEditBottomSheet extends StatefulWidget {
   final Profile profile;
 
-  const ProfileEditDialog({
+  const ProfileEditBottomSheet({
     super.key,
     required this.profile,
   });
 
   @override
-  State<ProfileEditDialog> createState() => _ProfileEditDialogState();
+  State<ProfileEditBottomSheet> createState() => _ProfileEditBottomSheetState();
 }
 
-class _ProfileEditDialogState extends State<ProfileEditDialog> {
+class _ProfileEditBottomSheetState extends State<ProfileEditBottomSheet> {
   late TextEditingController _usernameController;
   late TextEditingController _fullNameController;
   String _currentTimezone = '';
@@ -42,36 +45,45 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: M3SpacingToken.space24.value,
+        right: M3SpacingToken.space24.value,
+        top: M3SpacingToken.space24.value,
+      ),
+      child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               'Editar Perfil',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: M3SpacingToken.space24.value),
             TextField(
               controller: _usernameController,
               decoration: const InputDecoration(
                 labelText: 'Username',
                 prefixIcon: Icon(Icons.alternate_email),
+                border: OutlineInputBorder(),
               ),
               textCapitalization: TextCapitalization.none,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             TextField(
               controller: _fullNameController,
               decoration: const InputDecoration(
                 labelText: 'Nome completo',
                 prefixIcon: Icon(Icons.person),
+                border: OutlineInputBorder(),
               ),
               textCapitalization: TextCapitalization.words,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: M3SpacingToken.space16.value),
             Autocomplete<String>(
               initialValue: TextEditingValue(text: _currentTimezone),
               optionsBuilder: (textEditingValue) {
@@ -119,32 +131,39 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                     prefixIcon: Icon(Icons.access_time),
                     hintText: 'Digite para buscar (ex: America/Sao_Paulo)',
                     helperText: 'Use o formato IANA (ex: America/Sao_Paulo)',
+                    border: OutlineInputBorder(),
                   ),
                   textCapitalization: TextCapitalization.none,
                 );
               },
               onSelected: (String selection) {
+                HapticsService.selectionClick();
                 setState(() {
                   _currentTimezone = selection;
                 });
               },
               displayStringForOption: (String option) => option,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: M3SpacingToken.space24.value),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancelar'),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancelar'),
+                  ),
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _save,
-                  child: const Text('Salvar'),
+                SizedBox(width: M3SpacingToken.space16.value),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: _save,
+                    child: const Text('Salvar'),
+                  ),
                 ),
               ],
             ),
+            SizedBox(height: M3SpacingToken.space24.value),
           ],
         ),
       ),
@@ -152,6 +171,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
   }
 
   void _save() {
+    HapticsService.lightImpact();
     // Trim e atribuir variáveis locais
     final username = _usernameController.text.trim();
     final fullName = _fullNameController.text.trim();
@@ -203,10 +223,15 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
   }
 
   void _showError(String message) {
+    HapticsService.error();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: M3Shapes.shapeMedium,
+        ),
       ),
     );
   }

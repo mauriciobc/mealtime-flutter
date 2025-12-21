@@ -12,7 +12,7 @@ extension TextThemeEmphasized on TextTheme {
     return base.copyWith(
       fontSize: (base.fontSize ?? 57) * 1.15, // 15% maior
       fontWeight: FontWeight.w800,
-      letterSpacing: (base.letterSpacing ?? -0.25) * 0.8,
+      letterSpacing: (base.letterSpacing ?? 0) * 0.8,
     );
   }
 
@@ -67,7 +67,7 @@ extension TextThemeEmphasized on TextTheme {
     return base.copyWith(
       fontSize: (base.fontSize ?? 16) * 1.1, // 10% maior
       fontWeight: FontWeight.w600,
-      letterSpacing: (base.letterSpacing ?? 0.5) * 0.9,
+      letterSpacing: (base.letterSpacing ?? 0.15) * 0.9,
     );
   }
 }

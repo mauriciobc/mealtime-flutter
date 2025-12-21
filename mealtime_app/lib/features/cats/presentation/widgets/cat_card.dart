@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
+import 'package:mealtime_app/shared/widgets/bouncing_widget.dart';
 
 class CatCard extends StatelessWidget {
   final Cat cat;
@@ -21,19 +22,21 @@ class CatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: M3Shapes.shapeLarge,
-        child: Padding(
-          padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-          child: Row(
-            children: [
-              _buildCatAvatar(context),
-              SizedBox(width: M3SpacingToken.space16.value),
-              Expanded(child: _buildCatInfo(context)),
-              _buildActionButtons(context),
-            ],
+    return BouncingWidget(
+      child: Card(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: M3Shapes.shapeLarge,
+          child: Padding(
+            padding: const M3EdgeInsets.all(M3SpacingToken.space16),
+            child: Row(
+              children: [
+                _buildCatAvatar(context),
+                SizedBox(width: M3SpacingToken.space16.value),
+                Expanded(child: _buildCatInfo(context)),
+                _buildActionButtons(context),
+              ],
+            ),
           ),
         ),
       ),
@@ -50,10 +53,12 @@ class CatCard extends StatelessWidget {
         imageUrl.trim().isNotEmpty &&
         (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
     
+    Widget avatarContent;
+    
     if (hasValidImageUrl) {
       final trimmedUrl = imageUrl.trim();
       
-      return SizedBox(
+      avatarContent = SizedBox(
         width: 60,
         height: 60,
         child: ClipOval(
@@ -83,16 +88,22 @@ class CatCard extends StatelessWidget {
           ),
         ),
       );
+    } else {
+      avatarContent = CircleAvatar(
+        radius: 30,
+        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+        child: Icon(
+          Icons.pets,
+          size: 30,
+          color: theme.colorScheme.primary,
+        ),
+      );
     }
-    
-    return CircleAvatar(
-      radius: 30,
-      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-      child: Icon(
-        Icons.pets,
-        size: 30,
-        color: theme.colorScheme.primary,
-      ),
+
+    // Wrap with Hero for seamless transition
+    return Hero(
+      tag: 'cat_avatar_${cat.id}',
+      child: avatarContent,
     );
   }
 

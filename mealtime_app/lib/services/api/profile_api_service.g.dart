@@ -21,43 +21,6 @@ class _ProfileApiService implements ProfileApiService {
 
   final ParseErrorLogger? errorLogger;
 
-  /// Sanitiza RequestOptions removendo PII antes de logar
-  /// Substitui IDs/usernames no path por placeholders e remove headers sensíveis
-  RequestOptions _sanitizeRequestOptions(RequestOptions options) {
-    // Criar cópia do path para sanitizar
-    String sanitizedPath = options.path;
-    
-    // Substituir /profile/{idOrUsername} por /profile/{idOrUsername}
-    // usando regex para capturar qualquer valor após /profile/
-    sanitizedPath = sanitizedPath.replaceAll(
-      RegExp(r'/profile/[^/]+'),
-      '/profile/{idOrUsername}',
-    );
-    
-    // Criar cópia dos headers e sanitizar campos sensíveis
-    final sanitizedHeaders = Map<String, dynamic>.from(options.headers);
-    final sensitiveHeaders = [
-      'authorization',
-      'Authorization',
-      'x-api-key',
-      'X-API-Key',
-      'cookie',
-      'Cookie',
-    ];
-    
-    for (final header in sensitiveHeaders) {
-      if (sanitizedHeaders.containsKey(header)) {
-        sanitizedHeaders[header] = '[REDACTED]';
-      }
-    }
-    
-    // Criar nova cópia do RequestOptions com dados sanitizados
-    return options.copyWith(
-      path: sanitizedPath,
-      headers: sanitizedHeaders,
-    );
-  }
-
   @override
   Future<ApiResponse<ProfileModel>> getProfile(String idOrUsername) async {
     final _extra = <String, dynamic>{};
@@ -82,7 +45,7 @@ class _ProfileApiService implements ProfileApiService {
         (json) => ProfileModel.fromJson(json as Map<String, dynamic>),
       );
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _sanitizeRequestOptions(_options));
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -116,7 +79,7 @@ class _ProfileApiService implements ProfileApiService {
         (json) => ProfileModel.fromJson(json as Map<String, dynamic>),
       );
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _sanitizeRequestOptions(_options));
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;

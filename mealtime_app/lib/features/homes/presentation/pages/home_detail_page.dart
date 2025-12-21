@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:material_design/material_design.dart';
 import 'package:intl/intl.dart';
 import 'package:mealtime_app/core/di/injection_container.dart';
+import 'package:mealtime_app/core/theme/m3_shapes.dart';
+import 'package:mealtime_app/core/utils/haptics_service.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/homes/data/models/household_model.dart';
 import 'package:mealtime_app/features/homes/domain/entities/home.dart';
@@ -136,13 +138,14 @@ class _HomeDetailPageState extends State<HomeDetailPage>
           onSelected: (value) {
             switch (value) {
               case 'edit':
+                HapticsService.lightImpact();
                 context.push('/homes/${widget.home.id}/edit');
                 break;
               case 'set_active':
                 _setActiveHome(context);
                 break;
               case 'delete':
-                _showDeleteDialog(context);
+                _showDeleteBottomSheet(context);
                 break;
             }
           },
@@ -234,7 +237,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
                   member: member,
                   isCurrentUser: member.userId == _currentUserId,
                   onPromote: () => _promoteMember(member),
-                  onRemove: () => _removeMember(member),
+                  onRemove: () => _removeMemberBottomSheet(member),
                 )),
                 SizedBox(height: M3SpacingToken.space16.value),
                 OutlinedButton.icon(
@@ -327,7 +330,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
                       cat: cat,
                       onTap: () => context.push('/cats/${cat.id}'),
                       onEdit: () => context.push('/cats/${cat.id}/edit'),
-                      onDelete: () => _deleteCat(cat),
+                      onDelete: () => _deleteCatBottomSheet(cat),
                       lastFeedingStatus: 'Nunca alimentado',
                     );
                   },
@@ -383,6 +386,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
   }
 
   void _setActiveHome(BuildContext context) {
+    HapticsService.selectionClick();
     context.read<HomesBloc>().add(SetActiveHomeEvent(widget.home.id));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -392,36 +396,80 @@ class _HomeDetailPageState extends State<HomeDetailPage>
     );
   }
 
-  void _showDeleteDialog(BuildContext context) {
-    showDialog(
+  void _showDeleteBottomSheet(BuildContext context) {
+    HapticsService.mediumImpact();
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Excluir Residência'),
-        content: Text(
-          'Tem certeza que deseja excluir a residência "${widget.home.name}"?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<HomesBloc>().add(DeleteHomeEvent(widget.home.id));
-              context.pop();
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return SafeArea(
+          child: Padding(
+            padding: const M3EdgeInsets.all(M3SpacingToken.space24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.warning_rounded,
+                  size: 64,
+                  color: theme.colorScheme.error,
+                ),
+                SizedBox(height: M3SpacingToken.space16.value),
+                Text(
+                  'Excluir Residência',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                SizedBox(height: M3SpacingToken.space8.value),
+                Text(
+                  'Tem certeza que deseja excluir a residência "${widget.home.name}"?',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                SizedBox(height: M3SpacingToken.space24.value),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    SizedBox(width: M3SpacingToken.space16.value),
+                    Expanded(
+                      child: FilledButton.tonal(
+                        onPressed: () {
+                          HapticsService.heavyImpact();
+                          Navigator.of(context).pop();
+                          context.read<HomesBloc>().add(DeleteHomeEvent(widget.home.id));
+                          context.pop();
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: theme.colorScheme.errorContainer,
+                          foregroundColor: theme.colorScheme.onErrorContainer,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: M3Shapes.shapeXLarge,
+                          ),
+                        ),
+                        child: const Text('Excluir'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            child: const Text('Excluir'),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   void _inviteMember() {
+    HapticsService.mediumImpact();
     // TODO: Implementar funcionalidade de convite
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -431,6 +479,7 @@ class _HomeDetailPageState extends State<HomeDetailPage>
   }
 
   void _promoteMember(HouseholdMemberDetailed member) {
+    HapticsService.mediumImpact();
     // TODO: Implementar promoção de membro
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -439,73 +488,160 @@ class _HomeDetailPageState extends State<HomeDetailPage>
     );
   }
 
-  void _removeMember(HouseholdMemberDetailed member) {
-    showDialog(
+  void _removeMemberBottomSheet(HouseholdMemberDetailed member) {
+    HapticsService.mediumImpact();
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remover Membro'),
-        content: Text(
-          'Tem certeza que deseja remover ${member.user.fullName} desta residência?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Implementar remoção de membro
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Remoção de membros - Em desenvolvimento'),
+      builder: (context) {
+        final theme = Theme.of(context);
+        return SafeArea(
+          child: Padding(
+            padding: const M3EdgeInsets.all(M3SpacingToken.space24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.person_remove_rounded,
+                  size: 64,
+                  color: theme.colorScheme.error,
                 ),
-              );
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
+                SizedBox(height: M3SpacingToken.space16.value),
+                Text(
+                  'Remover Membro',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                SizedBox(height: M3SpacingToken.space8.value),
+                Text(
+                  'Tem certeza que deseja remover ${member.user.fullName} desta residência?',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                SizedBox(height: M3SpacingToken.space24.value),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    SizedBox(width: M3SpacingToken.space16.value),
+                    Expanded(
+                      child: FilledButton.tonal(
+                        onPressed: () {
+                          HapticsService.heavyImpact();
+                          Navigator.of(context).pop();
+                          // TODO: Implementar remoção de membro
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Remoção de membros - Em desenvolvimento'),
+                            ),
+                          );
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: theme.colorScheme.errorContainer,
+                          foregroundColor: theme.colorScheme.onErrorContainer,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: M3Shapes.shapeXLarge,
+                          ),
+                        ),
+                        child: const Text('Remover'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            child: const Text('Remover'),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   void _addCat() {
+    HapticsService.mediumImpact();
     context.push('/cats/create?homeId=${widget.home.id}');
   }
 
-  void _deleteCat(Cat cat) {
-    showDialog(
+  void _deleteCatBottomSheet(Cat cat) {
+    HapticsService.mediumImpact();
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Excluir Gato'),
-        content: Text(
-          'Tem certeza que deseja excluir ${cat.name}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Implementar exclusão de gato
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${cat.name} será excluído - Em desenvolvimento'),
+      builder: (context) {
+        final theme = Theme.of(context);
+        return SafeArea(
+          child: Padding(
+            padding: const M3EdgeInsets.all(M3SpacingToken.space24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.delete_forever_rounded,
+                  size: 64,
+                  color: theme.colorScheme.error,
                 ),
-              );
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
+                SizedBox(height: M3SpacingToken.space16.value),
+                Text(
+                  'Excluir Gato',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                SizedBox(height: M3SpacingToken.space8.value),
+                Text(
+                  'Tem certeza que deseja excluir ${cat.name}?',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                SizedBox(height: M3SpacingToken.space24.value),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    SizedBox(width: M3SpacingToken.space16.value),
+                    Expanded(
+                      child: FilledButton.tonal(
+                        onPressed: () {
+                          HapticsService.heavyImpact();
+                          Navigator.of(context).pop();
+                          // TODO: Implementar exclusão de gato
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${cat.name} será excluído - Em desenvolvimento'),
+                            ),
+                          );
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: theme.colorScheme.errorContainer,
+                          foregroundColor: theme.colorScheme.onErrorContainer,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: M3Shapes.shapeXLarge,
+                          ),
+                        ),
+                        child: const Text('Excluir'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            child: const Text('Excluir'),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

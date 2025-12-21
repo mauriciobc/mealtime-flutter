@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
+import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
@@ -10,6 +11,9 @@ import 'package:mealtime_app/features/cats/presentation/widgets/cat_card.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
+import 'package:mealtime_app/core/theme/m3_motion_helpers.dart';
+import 'package:mealtime_app/core/utils/haptics_service.dart';
+import 'package:mealtime_app/shared/widgets/soulful_empty_state.dart';
 
 class CatsListPage extends StatefulWidget {
   const CatsListPage({super.key});
@@ -37,6 +41,7 @@ class _CatsListPageState extends State<CatsListPage> {
         actions: [
           IconButton(
             onPressed: () {
+              HapticsService.lightImpact();
               context.read<CatsBloc>().add(const RefreshCats());
             },
             icon: const Icon(Icons.refresh),
@@ -46,6 +51,7 @@ class _CatsListPageState extends State<CatsListPage> {
       body: BlocConsumer<CatsBloc, CatsState>(
         listener: (context, state) {
           if (state is CatsError) {
+            HapticsService.error();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.failure.message),
@@ -53,6 +59,7 @@ class _CatsListPageState extends State<CatsListPage> {
               ),
             );
           } else if (state is CatOperationSuccess) {
+            HapticsService.success();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -95,6 +102,7 @@ class _CatsListPageState extends State<CatsListPage> {
             return CustomErrorWidget(
               message: state.failure.message,
               onRetry: () {
+                HapticsService.lightImpact();
                 context.read<CatsBloc>().add(const LoadCats());
               },
             );
@@ -136,6 +144,7 @@ class _CatsListPageState extends State<CatsListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          HapticsService.mediumImpact();
           context.push(AppRouter.createCat);
         },
         child: const Icon(Icons.add),
@@ -144,43 +153,22 @@ class _CatsListPageState extends State<CatsListPage> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.pets,
-            size: 80,
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
-          ),
-          SizedBox(height: M3SpacingToken.space16.value),
-          Text(
-            context.l10n.cats_emptyState,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          SizedBox(height: M3SpacingToken.space8.value),
-          Text(
-            context.l10n.cats_addFirstCat,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-          SizedBox(height: M3SpacingToken.space24.value),
-          ElevatedButton.icon(
-            onPressed: () {
-              context.push(AppRouter.createCat);
-            },
-            icon: const Icon(Icons.add),
-            label: Text(context.l10n.cats_addCat),
-          ),
-        ],
-      ),
+    return SoulfulEmptyState(
+      message: context.l10n.cats_emptyState,
+      subMessage: context.l10n.cats_addFirstCat,
+      icon: Icons.pets,
+      actionLabel: context.l10n.cats_addCat,
+      onAction: () {
+        HapticsService.mediumImpact();
+        context.push(AppRouter.createCat);
+      },
     );
   }
 
-  Widget _buildCatsList(List<dynamic> cats) {
+  Widget _buildCatsList(List<Cat> cats) {
     return RefreshIndicator(
       onRefresh: () async {
+        HapticsService.mediumImpact();
         context.read<CatsBloc>().add(const RefreshCats());
       },
       child: ListView.builder(
@@ -188,19 +176,22 @@ class _CatsListPageState extends State<CatsListPage> {
         itemCount: cats.length,
         itemBuilder: (context, index) {
           final cat = cats[index];
-          return Padding(
-            padding: EdgeInsets.only(bottom: M3SpacingToken.space12.value),
-            child: CatCard(
-              cat: cat,
-              onTap: () {
-                context.push('${AppRouter.catDetail}/${cat.id}');
-              },
-              onEdit: () {
-                context.push('${AppRouter.editCat}/${cat.id}');
-              },
-              onDelete: () {
-                _showDeleteDialog(context, cat);
-              },
+          return StaggeredEntranceBuilder(
+            index: index,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: M3SpacingToken.space12.value),
+              child: CatCard(
+                cat: cat,
+                onTap: () {
+                  context.push('${AppRouter.catDetail}/${cat.id}');
+                },
+                onEdit: () {
+                  context.push('${AppRouter.editCat}/${cat.id}');
+                },
+                onDelete: () {
+                  _showDeleteBottomSheet(context, cat);
+                },
+              ),
             ),
           );
         },
@@ -208,28 +199,65 @@ class _CatsListPageState extends State<CatsListPage> {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, dynamic cat) {
-    showDialog(
+  void _showDeleteBottomSheet(BuildContext context, Cat cat) {
+    HapticsService.mediumImpact();
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.cats_deleteCat),
-        content: Text(context.l10n.cats_deleteConfirmation(cat.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.common_cancel),
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const M3EdgeInsets.all(M3SpacingToken.space24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.delete_outline,
+                size: 48,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              SizedBox(height: M3SpacingToken.space16.value),
+              Text(
+                context.l10n.cats_deleteCat,
+                style: Theme.of(context).textTheme.headlineSmall,
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: M3SpacingToken.space8.value),
+              Text(
+                context.l10n.cats_deleteConfirmation(cat.name),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: M3SpacingToken.space32.value),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(context.l10n.common_cancel),
+                    ),
+                  ),
+                  SizedBox(width: M3SpacingToken.space16.value),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () {
+                        HapticsService.heavyImpact(); // Deletion is heavy
+                        Navigator.of(context).pop();
+                        context.read<CatsBloc>().add(DeleteCat(cat.id));
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                        foregroundColor: Theme.of(context).colorScheme.onError,
+                      ),
+                      child: Text(context.l10n.common_delete),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<CatsBloc>().add(DeleteCat(cat.id));
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: Text(context.l10n.common_delete),
-          ),
-        ],
+        ),
       ),
     );
   }

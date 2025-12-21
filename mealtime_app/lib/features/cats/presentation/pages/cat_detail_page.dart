@@ -3,12 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_design/material_design.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
 import 'package:m3e_collection/m3e_collection.dart';
+import 'package:mealtime_app/core/utils/haptics_service.dart';
 
 class CatDetailPage extends StatefulWidget {
   final String catId;
@@ -36,10 +38,11 @@ class _CatDetailPageState extends State<CatDetailPage> {
             onSelected: (value) {
               switch (value) {
                 case 'edit':
+                  HapticsService.lightImpact();
                   context.push('/edit-cat/${widget.catId}');
                   break;
                 case 'delete':
-                  _showDeleteDialog(context);
+                  _showDeleteBottomSheet(context);
                   break;
               }
             },
@@ -77,6 +80,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
       body: BlocConsumer<CatsBloc, CatsState>(
         listener: (context, state) {
           if (state is CatOperationSuccess) {
+            HapticsService.success();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -92,6 +96,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
               context.pop();
             }
           } else if (state is CatsError) {
+            HapticsService.error();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.failure.message),
@@ -107,6 +112,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
             return CustomErrorWidget(
               message: state.failure.message,
               onRetry: () {
+                HapticsService.lightImpact();
                 context.read<CatsBloc>().add(LoadCatById(widget.catId));
               },
             );
@@ -119,7 +125,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
     );
   }
 
-  Widget _buildCatDetails(BuildContext context, dynamic cat) {
+  Widget _buildCatDetails(BuildContext context, Cat cat) {
     return SingleChildScrollView(
       padding: const M3EdgeInsets.all(M3SpacingToken.space16),
       child: Column(
@@ -137,8 +143,9 @@ class _CatDetailPageState extends State<CatDetailPage> {
     );
   }
 
-  Widget _buildCatHeader(BuildContext context, dynamic cat) {
+  Widget _buildCatHeader(BuildContext context, Cat cat) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     
     // Validar se a URL existe e é válida (começa com http)
     final imageUrl = cat.imageUrl;
@@ -159,7 +166,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
             placeholder: (context, url) => Container(
               width: 80,
               height: 80,
-              color: theme.colorScheme.surfaceContainerHighest,
+              color: colorScheme.surfaceContainerHighest,
               child: Center(
                 child: Material3LoadingIndicator(size: 32.0),
               ),
@@ -168,11 +175,11 @@ class _CatDetailPageState extends State<CatDetailPage> {
               return Container(
                 width: 80,
                 height: 80,
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                color: colorScheme.primary.withValues(alpha: 0.1),
                 child: Icon(
                   Icons.pets,
                   size: 40,
-                  color: theme.colorScheme.primary,
+                  color: colorScheme.primary,
                 ),
               );
             },
@@ -182,11 +189,11 @@ class _CatDetailPageState extends State<CatDetailPage> {
     } else {
       avatarWidget = CircleAvatar(
         radius: 40,
-        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+        backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
         child: Icon(
           Icons.pets,
           size: 40,
-          color: theme.colorScheme.primary,
+          color: colorScheme.primary,
         ),
       );
     }
@@ -196,7 +203,10 @@ class _CatDetailPageState extends State<CatDetailPage> {
         padding: const M3EdgeInsets.all(M3SpacingToken.space20),
         child: Row(
           children: [
-            avatarWidget,
+            Hero(
+              tag: 'cat_avatar_${cat.id}',
+              child: avatarWidget,
+            ),
             SizedBox(width: M3SpacingToken.space20.value),
             Expanded(
               child: Column(
@@ -204,7 +214,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                 children: [
                   Text(
                     cat.name,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -212,10 +222,8 @@ class _CatDetailPageState extends State<CatDetailPage> {
                     SizedBox(height: M3SpacingToken.space4.value),
                     Text(
                       cat.breed!,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.7),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -225,17 +233,13 @@ class _CatDetailPageState extends State<CatDetailPage> {
                       Icon(
                         Icons.cake,
                         size: 16,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                       SizedBox(width: M3SpacingToken.space4.value),
                       Text(
                         cat.ageDescription,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.6),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                       if (cat.gender != null) ...[
@@ -244,17 +248,15 @@ class _CatDetailPageState extends State<CatDetailPage> {
                           cat.gender == 'M' ? Icons.male : Icons.female,
                           size: 16,
                           color: cat.gender == 'M'
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.tertiary,
+                              ? colorScheme.primary
+                              : colorScheme.tertiary,
                         ),
                         SizedBox(width: M3SpacingToken.space4.value),
                         Text(
                           cat.gender == 'M' ? 'Macho' : 'Fêmea',
-                          style: Theme.of(context).textTheme.bodyMedium
+                          style: theme.textTheme.bodyMedium
                               ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.6),
+                                color: colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                         ),
                       ],
@@ -269,7 +271,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
     );
   }
 
-  Widget _buildCatInfo(BuildContext context, dynamic cat) {
+  Widget _buildCatInfo(BuildContext context, Cat cat) {
     return Card(
       child: Padding(
         padding: const M3EdgeInsets.all(M3SpacingToken.space16),
@@ -304,7 +306,10 @@ class _CatDetailPageState extends State<CatDetailPage> {
     );
   }
 
-  Widget _buildWeightSection(BuildContext context, dynamic cat) {
+  Widget _buildWeightSection(BuildContext context, Cat cat) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Card(
       child: Padding(
         padding: const M3EdgeInsets.all(M3SpacingToken.space16),
@@ -313,9 +318,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
           children: [
             Text(
               'Peso',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: M3SpacingToken.space16.value),
             if (cat.currentWeight != null) ...[
@@ -337,20 +340,23 @@ class _CatDetailPageState extends State<CatDetailPage> {
             ] else ...[
               Text(
                 'Peso não informado',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.6),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
             ],
             SizedBox(height: M3SpacingToken.space16.value),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
+              child: FilledButton.tonalIcon(
                 onPressed: () {
-                  _showUpdateWeightDialog(context, cat);
+                  HapticsService.lightImpact();
+                  _showUpdateWeightBottomSheet(context, cat);
                 },
+                style: FilledButton.styleFrom(
+                  backgroundColor: colorScheme.tertiaryContainer,
+                  foregroundColor: colorScheme.onTertiaryContainer,
+                ),
                 icon: const Icon(Icons.monitor_weight),
                 label: const Text('Atualizar Peso'),
               ),
@@ -361,7 +367,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
     );
   }
 
-  Widget _buildWeightProgress(BuildContext context, dynamic cat) {
+  Widget _buildWeightProgress(BuildContext context, Cat cat) {
     if (cat.currentWeight == null || cat.targetWeight == null) {
       return const SizedBox.shrink();
     }
@@ -378,6 +384,9 @@ class _CatDetailPageState extends State<CatDetailPage> {
       return const SizedBox.shrink();
     }
     
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     final isOverweight = progress > 1.1;
     final isUnderweight = progress < 0.9;
 
@@ -386,24 +395,22 @@ class _CatDetailPageState extends State<CatDetailPage> {
       children: [
         LinearProgressIndicatorM3E(
           value: progress.clamp(0.0, 1.5),
-          trackColor: Theme.of(
-            context,
-          ).colorScheme.surfaceContainerHighest,
+          trackColor: colorScheme.surfaceContainerHighest,
           activeColor: isOverweight
-              ? Theme.of(context).colorScheme.tertiary
+              ? colorScheme.tertiary
               : isUnderweight
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.secondary,
+              ? colorScheme.primary
+              : colorScheme.secondary,
         ),
         SizedBox(height: M3SpacingToken.space8.value),
         Text(
           _getWeightStatus(cat.currentWeight!, cat.targetWeight!),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          style: theme.textTheme.bodySmall?.copyWith(
             color: isOverweight
-                ? Theme.of(context).colorScheme.tertiary
+                ? colorScheme.tertiary
                 : isUnderweight
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.secondary,
+                ? colorScheme.primary
+                : colorScheme.secondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -424,7 +431,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
     }
   }
 
-  Widget _buildDescriptionSection(BuildContext context, dynamic cat) {
+  Widget _buildDescriptionSection(BuildContext context, Cat cat) {
     if (cat.description == null || cat.description!.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -476,72 +483,221 @@ class _CatDetailPageState extends State<CatDetailPage> {
     );
   }
 
-  void _showUpdateWeightDialog(BuildContext context, dynamic cat) {
-    final weightController = TextEditingController(
-      text: cat.currentWeight?.toString() ?? '',
-    );
-
-    showDialog(
+  void _showUpdateWeightBottomSheet(BuildContext context, Cat cat) {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Atualizar Peso'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Atualizar peso de ${cat.name}'),
-            SizedBox(height: M3SpacingToken.space16.value),
-            TextField(
-              controller: weightController,
-              decoration: const InputDecoration(
-                labelText: 'Peso (kg)',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              final weight = double.tryParse(weightController.text);
-              if (weight != null && weight > 0) {
-                context.read<CatsBloc>().add(UpdateCatWeight(cat.id, weight));
-                Navigator.of(context).pop();
-              }
-            },
-            child: const Text('Atualizar'),
-          ),
-        ],
+      showDragHandle: true,
+      isScrollControlled: true, // Importante para o teclado
+      builder: (context) => _UpdateWeightBottomSheet(
+        cat: cat,
+        initialWeight: cat.currentWeight,
       ),
     );
   }
 
-  void _showDeleteDialog(BuildContext context) {
-    showDialog(
+  void _showDeleteBottomSheet(BuildContext context) {
+    HapticsService.mediumImpact();
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Excluir Gato'),
-        content: const Text('Tem certeza que deseja excluir este gato?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const M3EdgeInsets.all(M3SpacingToken.space24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.delete_outline,
+                size: 48,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              SizedBox(height: M3SpacingToken.space16.value),
+              Text(
+                'Excluir Gato',
+                style: Theme.of(context).textTheme.headlineSmall,
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: M3SpacingToken.space8.value),
+              Text(
+                'Tem certeza que deseja excluir este gato? Esta ação não pode ser desfeita.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: M3SpacingToken.space32.value),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancelar'),
+                    ),
+                  ),
+                  SizedBox(width: M3SpacingToken.space16.value),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () {
+                        HapticsService.heavyImpact();
+                        Navigator.of(context).pop();
+                        context.read<CatsBloc>().add(DeleteCat(widget.catId));
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                        foregroundColor: Theme.of(context).colorScheme.onError,
+                      ),
+                      child: const Text('Excluir'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<CatsBloc>().add(DeleteCat(widget.catId));
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Excluir'),
+        ),
+      ),
+    );
+  }
+}
+
+class _UpdateWeightBottomSheet extends StatefulWidget {
+  final Cat cat;
+  final double? initialWeight;
+
+  const _UpdateWeightBottomSheet({
+    required this.cat,
+    this.initialWeight,
+  });
+
+  @override
+  State<_UpdateWeightBottomSheet> createState() =>
+      _UpdateWeightBottomSheetState();
+}
+
+class _UpdateWeightBottomSheetState extends State<_UpdateWeightBottomSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _weightController;
+
+  @override
+  void initState() {
+    super.initState();
+    _weightController = TextEditingController(
+      text: widget.initialWeight?.toString() ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _weightController.dispose();
+    super.dispose();
+  }
+
+  String? _validateWeight(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Peso é obrigatório';
+    }
+    final normalizedValue = value.replaceAll(',', '.').trim();
+    final weight = double.tryParse(normalizedValue);
+    if (weight == null) {
+      return 'Digite um valor numérico válido';
+    }
+    if (weight <= 0) {
+      return 'Peso deve ser maior que zero';
+    }
+    if (weight < 0.5) {
+      return 'Peso deve ser pelo menos 0.5 kg';
+    }
+    if (weight > 50.0) {
+      return 'Peso deve ser no máximo 50.0 kg';
+    }
+    // Validação adicional: verificar se há muitos dígitos decimais
+    final parts = normalizedValue.split('.');
+    if (parts.length > 1 && parts[1].length > 2) {
+      return 'Use no máximo 2 casas decimais';
+    }
+    return null;
+  }
+
+  Future<void> _handleSubmit() async {
+    if (!_formKey.currentState!.validate()) {
+      await HapticsService.error();
+      return;
+    }
+
+    final normalizedValue =
+        _weightController.text.replaceAll(',', '.').trim();
+    final weight = double.parse(normalizedValue);
+
+    await HapticsService.mediumImpact();
+    context.read<CatsBloc>().add(UpdateCatWeight(widget.cat.id, weight));
+
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Padding(
+        padding: const M3EdgeInsets.all(M3SpacingToken.space24),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Atualizar Peso',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              SizedBox(height: M3SpacingToken.space8.value),
+              Text(
+                'Informe o novo peso de ${widget.cat.name}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              SizedBox(height: M3SpacingToken.space24.value),
+              TextFormField(
+                controller: _weightController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'Peso (kg)',
+                  hintText: 'Ex: 5.5',
+                  border: OutlineInputBorder(),
+                  suffixText: 'kg',
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                textInputAction: TextInputAction.done,
+                validator: _validateWeight,
+                onFieldSubmitted: (_) => _handleSubmit(),
+              ),
+              SizedBox(height: M3SpacingToken.space32.value),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancelar'),
+                    ),
+                  ),
+                  SizedBox(width: M3SpacingToken.space16.value),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: _handleSubmit,
+                      child: const Text('Atualizar'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

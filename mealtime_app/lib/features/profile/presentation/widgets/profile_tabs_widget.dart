@@ -12,13 +12,33 @@ import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
 import 'package:go_router/go_router.dart';
 
-class ProfileTabsWidget extends StatelessWidget {
+class ProfileTabsWidget extends StatefulWidget {
   final Profile profile;
 
   const ProfileTabsWidget({
     super.key,
     required this.profile,
   });
+
+  @override
+  State<ProfileTabsWidget> createState() => _ProfileTabsWidgetState();
+}
+
+class _ProfileTabsWidgetState extends State<ProfileTabsWidget> {
+  @override
+  void initState() {
+    super.initState();
+    // Carregar dados iniciais apenas quando estiverem no estado inicial
+    final homesState = context.read<HomesBloc>().state;
+    if (homesState is HomesInitial) {
+      context.read<HomesBloc>().add(LoadHomes());
+    }
+
+    final catsState = context.read<CatsBloc>().state;
+    if (catsState is CatsInitial) {
+      context.read<CatsBloc>().add(const LoadCats());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,21 +70,11 @@ class ProfileTabsWidget extends StatelessWidget {
   Widget _buildInfoTab(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
-      child: ProfileInfoSection(profile: profile),
+      child: ProfileInfoSection(profile: widget.profile),
     );
   }
 
   Widget _buildHomesTab(BuildContext context) {
-    // Carregar homes apenas quando estiver no estado inicial
-    final homesState = context.read<HomesBloc>().state;
-    
-    if (homesState is HomesInitial) {
-      // Trigger load apenas uma vez no primeiro build
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<HomesBloc>().add(LoadHomes());
-      });
-    }
-
     return BlocBuilder<HomesBloc, HomesState>(
       builder: (context, state) {
         if (state is HomesLoading) {
@@ -102,65 +112,17 @@ class ProfileTabsWidget extends StatelessWidget {
           }
           return RefreshIndicator(
             onRefresh: () async {
-              // Capturar o estado atual ANTES de disparar o evento
               final bloc = context.read<HomesBloc>();
-              final currentState = bloc.state;
-              final isCurrentlyLoading = currentState is HomesLoading;
-              
-              // Disparar o evento de carregamento
               bloc.add(LoadHomes());
               
-              // Aguardar o estado terminal apropriado baseado no estado atual
-              try {
-                if (isCurrentlyLoading) {
-                  // Se já estamos em loading, o LoadHomes() vai emitir outro HomesLoading
-                  // Aguardar o próximo estado terminal (pode ser da requisição anterior
-                  // que terminar primeiro, ou da nossa se terminar primeiro)
-                  // Em ambos os casos, receberemos um estado atualizado
-                  await bloc.stream
-                      .where((s) => s is HomesLoaded || s is HomesError)
-                      .first
-                      .timeout(
-                        const Duration(seconds: 10),
-                        onTimeout: () => state,
-                      );
-                  
-                  // Se ainda houver um HomesLoading após o terminal (do nosso evento),
-                  // aguardar o terminal da nossa requisição também
-                  final nextState = bloc.state;
-                  if (nextState is HomesLoading) {
-                    await bloc.stream
-                        .where((s) => s is HomesLoaded || s is HomesError)
-                        .first
-                        .timeout(
-                          const Duration(seconds: 10),
-                          onTimeout: () => state,
-                        );
-                  }
-                } else {
-                  // Se não estamos em loading, o LoadHomes() sempre emite HomesLoading primeiro
-                  // Aguardar o primeiro HomesLoading que aparecer (será do nosso evento)
-                  await bloc.stream
-                      .where((s) => s is HomesLoading)
-                      .first
-                      .timeout(
-                        const Duration(seconds: 2),
-                        onTimeout: () => state,
-                      );
-                  
-                  // Agora aguardar o estado terminal após o loading
-                  await bloc.stream
-                      .where((s) => s is HomesLoaded || s is HomesError)
-                      .first
-                      .timeout(
-                        const Duration(seconds: 10),
-                        onTimeout: () => state,
-                      );
-                }
-              } catch (e) {
-                // Em caso de erro, manter o estado atual
-                // O timeout já retorna o estado, então não precisamos fazer nada
-              }
+              // Aguardar o primeiro estado terminal após o LoadHomes
+              await bloc.stream
+                  .where((s) => s is HomesLoaded || s is HomesError)
+                  .first
+                  .timeout(
+                    const Duration(seconds: 10),
+                    onTimeout: () => bloc.state,
+                  );
             },
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -181,16 +143,6 @@ class ProfileTabsWidget extends StatelessWidget {
   }
 
   Widget _buildCatsTab(BuildContext context) {
-    // Carregar cats apenas quando estiver no estado inicial
-    final catsState = context.read<CatsBloc>().state;
-    
-    if (catsState is CatsInitial) {
-      // Trigger load apenas uma vez no primeiro build
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<CatsBloc>().add(const LoadCats());
-      });
-    }
-
     return BlocBuilder<CatsBloc, CatsState>(
       builder: (context, state) {
         if (state is CatsLoading) {
@@ -228,32 +180,17 @@ class ProfileTabsWidget extends StatelessWidget {
           }
           return RefreshIndicator(
             onRefresh: () async {
-              final currentState = context.read<CatsBloc>().state;
-              context.read<CatsBloc>().add(const LoadCats());
+              final bloc = context.read<CatsBloc>();
+              bloc.add(const LoadCats());
               
-              // Se já estamos em loading, aguardar o próximo estado terminal
-              // Caso contrário, aguardar até aparecer um estado terminal
-              // após o CatsLoading que será emitido pelo nosso LoadCats
-              if (currentState is CatsLoading) {
-                await context.read<CatsBloc>().stream
-                    .where((s) => s is CatsLoaded || s is CatsError)
-                    .first
-                    .timeout(
-                      const Duration(seconds: 10),
-                      onTimeout: () => state,
-                    );
-              } else {
-                // Aguardar até que apareça um estado terminal após o Loading
-                // que será emitido pelo nosso LoadCats
-                await context.read<CatsBloc>().stream
-                    .skipWhile((s) => s == currentState)
-                    .where((s) => s is CatsLoaded || s is CatsError)
-                    .first
-                    .timeout(
-                      const Duration(seconds: 10),
-                      onTimeout: () => state,
-                    );
-              }
+              // Aguardar o primeiro estado terminal após o LoadCats
+              await bloc.stream
+                  .where((s) => s is CatsLoaded || s is CatsError)
+                  .first
+                  .timeout(
+                    const Duration(seconds: 10),
+                    onTimeout: () => bloc.state,
+                  );
             },
             child: ListView.builder(
               padding: const EdgeInsets.all(16),

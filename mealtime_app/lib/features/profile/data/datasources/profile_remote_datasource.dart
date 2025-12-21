@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:path/path.dart' as path;
@@ -124,9 +125,12 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
     } catch (e, st) {
       if (e is ServerException) rethrow;
-      throw ServerException(
-        'Erro ao fazer upload: ${e.toString()}\nStack trace: $st',
+      log(
+        'Erro ao fazer upload do avatar',
+        error: e,
+        stackTrace: st,
       );
+      throw ServerException('Erro ao fazer upload: ${e.toString()}');
     }
   }
 }

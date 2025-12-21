@@ -117,11 +117,15 @@ class _AvatarWidgetState extends State<AvatarWidget> {
       // Por enquanto, vamos simular uma URL
       final mockUrl = 'https://via.placeholder.com/300x300?text=Avatar';
       widget.onUpload(mockUrl);
-    } catch (error) {
+    } catch (error, stackTrace) {
+      // Log completo para debugging
+      debugPrint('Avatar upload error: $error');
+      debugPrint('Stack trace: $stackTrace');
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao fazer upload: ${error.toString()}'),
+            content: const Text('Erro ao fazer upload. Tente novamente.'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

@@ -155,7 +155,7 @@ O M3 Expressive define **7 táticas** para criar interfaces expressivas. Vamos a
 
 ---
 
-## 🔍 Análise Detalada por Componente
+## 🔍 Análise Detalhada por Componente
 
 ### Botões
 

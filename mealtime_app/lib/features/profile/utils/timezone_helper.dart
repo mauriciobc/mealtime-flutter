@@ -336,11 +336,14 @@ class TimezoneHelper {
 
   /// Valida se uma string é um timezone IANA válido
   static bool isValidTimezone(String timezone) {
+    // Remove espaços em branco do início e fim
+    final tz = timezone.trim();
+    
     // Rejeita strings vazias ou contendo apenas espaços em branco
-    if (timezone.trim().isEmpty) return false;
+    if (tz.isEmpty) return false;
     
     // Verifica se está na lista de timezones válidos
-    return _allTimezones.contains(timezone);
+    return _allTimezones.contains(tz);
   }
 
   /// Retorna timezones mais comuns para sugestões iniciais

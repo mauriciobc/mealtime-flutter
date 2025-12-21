@@ -13,12 +13,12 @@ ProfileModel _$ProfileModelFromJson(Map<String, dynamic> json) => ProfileModel(
   email: json['email'] as String?,
   avatarUrl: json['avatar_url'] as String?,
   timezone: json['timezone'] as String?,
-  createdAt: json['created_at'] == null
-      ? null
-      : DateTime.parse(json['created_at'] as String),
-  updatedAt: json['updated_at'] == null
-      ? null
-      : DateTime.parse(json['updated_at'] as String),
+  createdAt: const SafeDateTimeConverter().fromJson(
+    json['created_at'] as String?,
+  ),
+  updatedAt: const SafeDateTimeConverter().fromJson(
+    json['updated_at'] as String?,
+  ),
 );
 
 Map<String, dynamic> _$ProfileModelToJson(ProfileModel instance) =>
@@ -29,8 +29,8 @@ Map<String, dynamic> _$ProfileModelToJson(ProfileModel instance) =>
       'email': instance.email,
       'avatar_url': instance.avatarUrl,
       'timezone': instance.timezone,
-      'created_at': instance.createdAt?.toIso8601String(),
-      'updated_at': instance.updatedAt?.toIso8601String(),
+      'created_at': const SafeDateTimeConverter().toJson(instance.createdAt),
+      'updated_at': const SafeDateTimeConverter().toJson(instance.updatedAt),
     };
 
 ProfileInputModel _$ProfileInputModelFromJson(Map<String, dynamic> json) =>

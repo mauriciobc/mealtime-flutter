@@ -4,14 +4,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart' as cat_entity;
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
+import 'package:mealtime_app/core/utils/haptics_service.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_event.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_state.dart';
-import 'package:mealtime_app/features/weight/presentation/widgets/add_weight_dialog.dart';
-import 'package:mealtime_app/features/weight/presentation/widgets/create_goal_dialog.dart';
+import 'package:mealtime_app/features/weight/presentation/widgets/add_weight_bottom_sheet.dart';
+import 'package:mealtime_app/features/weight/presentation/widgets/create_goal_bottom_sheet.dart';
 import 'package:mealtime_app/features/weight/presentation/widgets/weight_trend_chart.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:m3e_collection/m3e_collection.dart';
@@ -41,8 +42,6 @@ class _WeightPageState extends State<WeightPage> {
     if (!mounted) return;
 
     debugPrint('[WeightPage] 🚀 Carregando gatos...');
-    // Apenas carregar gatos - a inicialização do WeightBloc será feita
-    // automaticamente quando CatsBloc retornar os gatos, via BlocListener abaixo
     context.read<CatsBloc>().add(const LoadCats());
   }
 
@@ -56,7 +55,6 @@ class _WeightPageState extends State<WeightPage> {
         listener: (context, catsState) {
           debugPrint('[WeightPage] 📢 CatsBloc emitido: ${catsState.runtimeType}');
           
-          // Quando gatos são carregados ou há uma operação de sucesso, inicializar WeightBloc
           List<cat_entity.Cat>? cats;
           if (catsState is CatsLoaded) {
             cats = catsState.cats;
@@ -64,15 +62,12 @@ class _WeightPageState extends State<WeightPage> {
           } else if (catsState is CatOperationSuccess) {
             cats = catsState.cats;
             debugPrint('[WeightPage] ✅ CatOperationSuccess com ${cats.length} gatos');
-          } else {
-            debugPrint('[WeightPage] ⚠️ Estado de gatos não reconhecido: ${catsState.runtimeType}');
           }
 
           if (cats != null) {
             final weightState = context.read<WeightBloc>().state;
             debugPrint('[WeightPage] 📊 WeightBloc estado atual: ${weightState.runtimeType}');
             
-            // Apenas inicializar se WeightBloc ainda não foi inicializado
             if (weightState is WeightInitial || 
                 (weightState is WeightLoaded && weightState.cats.isEmpty)) {
               debugPrint('[WeightPage] 🎯 Inicializando WeightBloc com ${cats.length} gatos');
@@ -82,15 +77,11 @@ class _WeightPageState extends State<WeightPage> {
                       catId: cats.isNotEmpty ? cats.first.id : null,
                     ),
                   );
-            } else {
-              debugPrint('[WeightPage] ⏭️ WeightBloc já inicializado, pulando...');
             }
           }
         },
         child: BlocBuilder<WeightBloc, WeightState>(
           builder: (context, weightState) {
-            debugPrint('[WeightPage] 🎨 Builder: WeightState = ${weightState.runtimeType}');
-            
             if (weightState is WeightLoading) {
               return const LoadingWidget(
                 message: 'Carregando dados de peso...',
@@ -98,6 +89,7 @@ class _WeightPageState extends State<WeightPage> {
             }
 
             if (weightState is WeightError) {
+              HapticsService.error();
               return shared.CustomErrorWidget(
                 message: weightState.failure.message,
                 onRetry: () {
@@ -107,7 +99,6 @@ class _WeightPageState extends State<WeightPage> {
             }
 
             if (weightState is WeightLoaded) {
-              debugPrint('[WeightPage] 📦 WeightLoaded com ${weightState.cats.length} gatos');
               return _buildContent(
                 weightState,
                 weightState.cats,
@@ -122,6 +113,7 @@ class _WeightPageState extends State<WeightPage> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
+          HapticsService.mediumImpact();
           final weightState = context.read<WeightBloc>().state;
           if (weightState is WeightLoaded) {
             if (weightState.selectedCat == null) {
@@ -140,10 +132,12 @@ class _WeightPageState extends State<WeightPage> {
               );
               return;
             }
-            showDialog(
+            
+            showModalBottomSheet(
               context: context,
-              barrierDismissible: true,
-              builder: (context) => AddWeightDialog(
+              isScrollControlled: true,
+              showDragHandle: true,
+              builder: (context) => AddWeightBottomSheet(
                 selectedCat: weightState.selectedCat,
               ),
             );
@@ -156,15 +150,9 @@ class _WeightPageState extends State<WeightPage> {
   }
 
   Widget _buildContent(WeightLoaded weightState, List<cat_entity.Cat> cats) {
-    debugPrint('[WeightPage] 🎨 _buildContent chamado com ${cats.length} gatos');
-    if (cats.isEmpty) {
-      debugPrint('[WeightPage] ⚠️ LISTA DE GATOS VAZIA - mostrando empty state');
-    } else {
-      debugPrint('[WeightPage] ✅ Gatos disponíveis: ${cats.map((c) => c.name).join(", ")}');
-    }
-    
     return RefreshIndicator(
       onRefresh: () async {
+        HapticsService.mediumImpact();
         context.read<WeightBloc>().add(const RefreshWeightData());
       },
       child: ListView(
@@ -230,6 +218,7 @@ class _WeightPageState extends State<WeightPage> {
                   goal: weightState.activeGoal,
                   timeRangeDays: weightState.timeRangeDays,
                   onTimeRangeChanged: (days) {
+                    HapticsService.selectionClick();
                     context.read<WeightBloc>().add(ChangeTimeRange(days));
                   },
                 ),
@@ -321,10 +310,6 @@ class _WeightPageState extends State<WeightPage> {
     WeightLoaded weightState,
     List<cat_entity.Cat> cats,
   ) {
-    // O botão deve estar desabilitado quando:
-    // - Não há gatos disponíveis
-    // - Nenhum gato está selecionado
-    // - Já existe uma meta ativa
     final isDisabled = cats.isEmpty ||
         weightState.selectedCat == null ||
         weightState.activeGoal != null;
@@ -334,6 +319,7 @@ class _WeightPageState extends State<WeightPage> {
       onPressed: isDisabled
           ? null
           : () {
+              HapticsService.lightImpact();
               if (weightState.selectedCat == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -350,10 +336,12 @@ class _WeightPageState extends State<WeightPage> {
                 );
                 return;
               }
-              showDialog(
+              
+              showModalBottomSheet(
                 context: context,
-                barrierDismissible: true,
-                builder: (context) => CreateGoalDialog(
+                isScrollControlled: true,
+                showDragHandle: true,
+                builder: (context) => CreateGoalBottomSheet(
                   selectedCat: weightState.selectedCat!,
                   weightLogs: weightState.weightLogs,
                 ),
@@ -369,12 +357,10 @@ class _WeightPageState extends State<WeightPage> {
       cats: cats,
       initialSelectedId: weightState.selectedCat?.id,
       onSelected: (String? catId) {
+        HapticsService.selectionClick();
         if (catId != null) {
           context.read<WeightBloc>().add(SelectCat(catId));
         } else {
-          // Quando desselecionado, o código atual não suporta "selectedCat = null"
-          // mas o widget permite, então apenas emitimos um SelectCat com o primeiro
-          // gato disponível para manter consistência
           if (cats.isNotEmpty) {
             context.read<WeightBloc>().add(SelectCat(cats.first.id));
           }
@@ -399,6 +385,7 @@ class _WeightPageState extends State<WeightPage> {
       },
       child: GestureDetector(
         onTap: () {
+          HapticsService.lightImpact();
           context.read<WeightBloc>().add(SelectCat(cat.id));
         },
         child: AnimatedContainer(
@@ -492,7 +479,6 @@ class _WeightPageState extends State<WeightPage> {
   }
 
   Widget _buildWeightCard(String label, String value, Color accentColor) {
-    // Removido TweenAnimationBuilder duplicado - AnimatedSwitcher pai já anima
     return Card(
       elevation: 2,
       child: Padding(
@@ -524,8 +510,6 @@ class _WeightPageState extends State<WeightPage> {
 
   Widget _buildProgressCard(WeightLoaded weightState) {
     final progress = weightState.progressPercentage ?? 0.0;
-    
-    // Garantir que progress é um número válido (não NaN nem infinito)
     final safeProgress = progress.isFinite ? progress : 0.0;
     
     return TweenAnimationBuilder<double>(
@@ -551,7 +535,7 @@ class _WeightPageState extends State<WeightPage> {
                     ),
                     TextButton(
                       onPressed: () {
-                        // TODO: Implementar dicas
+                        HapticsService.lightImpact();
                       },
                       child: const Text('Ver Dicas'),
                     ),
@@ -768,4 +752,3 @@ class _WeightPageState extends State<WeightPage> {
     );
   }
 }
-

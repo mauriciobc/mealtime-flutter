@@ -10,13 +10,14 @@ import 'package:mealtime_app/features/weight/presentation/bloc/weight_event.dart
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_state.dart';
 import 'package:uuid/uuid.dart';
 import 'package:m3e_collection/m3e_collection.dart';
+import 'package:mealtime_app/core/utils/haptics_service.dart';
 
-class CreateGoalDialog extends StatefulWidget {
+class CreateGoalBottomSheet extends StatefulWidget {
   final Cat selectedCat;
   final List<WeightEntry> weightLogs;
   final WeightGoal? existingGoal; // Para edição futura
 
-  const CreateGoalDialog({
+  const CreateGoalBottomSheet({
     super.key,
     required this.selectedCat,
     required this.weightLogs,
@@ -24,10 +25,10 @@ class CreateGoalDialog extends StatefulWidget {
   });
 
   @override
-  State<CreateGoalDialog> createState() => _CreateGoalDialogState();
+  State<CreateGoalBottomSheet> createState() => _CreateGoalBottomSheetState();
 }
 
-class _CreateGoalDialogState extends State<CreateGoalDialog> {
+class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _targetWeightController = TextEditingController();
   final _notesController = TextEditingController();
@@ -76,6 +77,7 @@ class _CreateGoalDialogState extends State<CreateGoalDialog> {
     return BlocListener<WeightBloc, WeightState>(
       listener: (context, state) {
         if (state is WeightOperationSuccess) {
+          HapticsService.success();
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -94,6 +96,7 @@ class _CreateGoalDialogState extends State<CreateGoalDialog> {
             ),
           );
         } else if (state is WeightError) {
+          HapticsService.error();
           setState(() => _isSubmitting = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -130,39 +133,22 @@ class _CreateGoalDialogState extends State<CreateGoalDialog> {
           );
         }
       },
-      child: Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 500),
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const M3EdgeInsets.all(M3SpacingToken.space24),
+            child: Form(
+              key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TweenAnimationBuilder<double>(
-                    duration: M3Motion.standard.duration,
-                    tween: Tween(begin: 0.0, end: 1.0),
-                    curve: M3Motion.standard.curve,
-                    builder: (context, value, child) {
-                      return Opacity(
-                        opacity: value,
-                        child: Transform.scale(
-                          scale: 0.92 + (0.08 * value), // Escala mais sutil M3
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: Text(
-                      'Nova Meta de Peso',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
+                  Text(
+                    'Nova Meta de Peso',
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 24),
                   _buildCatInfo(startWeight),
@@ -176,7 +162,7 @@ class _CreateGoalDialogState extends State<CreateGoalDialog> {
                   _buildNotesField(),
                   const SizedBox(height: 24),
                   _buildInfoCard(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   _buildActions(),
                 ],
               ),
@@ -262,6 +248,7 @@ class _CreateGoalDialogState extends State<CreateGoalDialog> {
   Widget _buildTargetWeightField(double startWeight) {
     return TextFormField(
       controller: _targetWeightController,
+      autofocus: true,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(
         labelText: 'Peso Alvo (kg) *',
@@ -375,48 +362,68 @@ class _CreateGoalDialogState extends State<CreateGoalDialog> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        TextButton(
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
         ),
-        const SizedBox(width: 8),
-        ElevatedButton(
-          onPressed: _isSubmitting ? null : _submitForm,
-          child: _isSubmitting
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicatorM3E(size: CircularProgressM3ESize.s),
-                )
-              : const Text('Criar Meta'),
+        const SizedBox(width: 16),
+        Expanded(
+          child: FilledButton(
+            onPressed: _isSubmitting ? null : _submitForm,
+            child: _isSubmitting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicatorM3E(size: CircularProgressM3ESize.s),
+                  )
+                : const Text('Criar Meta'),
+          ),
         ),
       ],
     );
   }
 
   Future<void> _selectDate() async {
-    final date = await showDatePicker(
+    HapticsService.selectionClick();
+    await showModalBottomSheet(
       context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now().add(const Duration(days: 1)), // Mínimo: amanhã
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      helpText: 'Selecione a data alvo',
-      errorFormatText: 'Data inválida',
-      errorInvalidText: 'Data deve ser no futuro',
-      fieldHintText: 'dd/mm/aaaa',
-      fieldLabelText: 'Data da meta',
+      useRootNavigator: true,
+      builder: (context) => Container(
+        height: 450,
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Selecione a Data Alvo',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            Expanded(
+              child: CalendarDatePicker(
+                initialDate: _selectedDate,
+                firstDate: DateTime.now().add(const Duration(days: 1)),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
+                onDateChanged: (date) {
+                  setState(() => _selectedDate = date);
+                  HapticsService.lightImpact();
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
-
-    if (date != null) {
-      setState(() {
-        _selectedDate = date;
-      });
-    }
   }
 
   void _submitForm() {
+    HapticsService.lightImpact();
     if (!_formKey.currentState!.validate()) {
-      // Mostrar erro de validação
+      HapticsService.error();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Por favor, corrija os erros no formulário'),
@@ -430,7 +437,6 @@ class _CreateGoalDialogState extends State<CreateGoalDialog> {
       return;
     }
 
-    // Validação adicional de data alvo
     if (_selectedDate.isBefore(DateTime.now().add(const Duration(days: 1)))) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -445,7 +451,6 @@ class _CreateGoalDialogState extends State<CreateGoalDialog> {
       return;
     }
 
-    // Validação de prazo razoável (máximo 1 ano)
     final maxDate = DateTime.now().add(const Duration(days: 365));
     if (_selectedDate.isAfter(maxDate)) {
       ScaffoldMessenger.of(context).showSnackBar(

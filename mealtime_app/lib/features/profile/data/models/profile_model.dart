@@ -3,6 +3,27 @@ import 'package:mealtime_app/features/profile/domain/entities/profile.dart';
 
 part 'profile_model.g.dart';
 
+/// Conversor customizado para lidar com conversão segura de String para DateTime
+/// Retorna null ao invés de lançar FormatException em strings malformadas
+class SafeDateTimeConverter implements JsonConverter<DateTime?, String?> {
+  const SafeDateTimeConverter();
+
+  @override
+  DateTime? fromJson(String? json) {
+    if (json == null || json.isEmpty) return null;
+    try {
+      return DateTime.parse(json);
+    } catch (e) {
+      // Retorna null ao invés de lançar exceção para dados malformados
+      // Isso previne crashes em produção quando o backend retorna datas inválidas
+      return null;
+    }
+  }
+
+  @override
+  String? toJson(DateTime? object) => object?.toIso8601String();
+}
+
 @JsonSerializable(fieldRename: FieldRename.snake)
 class ProfileModel {
   final String id;
@@ -11,7 +32,9 @@ class ProfileModel {
   final String? email;
   final String? avatarUrl;
   final String? timezone;
+  @SafeDateTimeConverter()
   final DateTime? createdAt;
+  @SafeDateTimeConverter()
   final DateTime? updatedAt;
 
   const ProfileModel({

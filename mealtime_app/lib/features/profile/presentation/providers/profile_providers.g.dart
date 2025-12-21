@@ -54,7 +54,7 @@ final class ProfileRepositoryProvider
   }
 }
 
-String _$profileRepositoryHash() => r'37f35c5ea0081b4f7886c48625f92ccc523f02b9';
+String _$profileRepositoryHash() => r'21d43fb72040d1603e094b76d5ccff51a9c9bd94';
 
 @ProviderFor(getProfile)
 const getProfileProvider = GetProfileProvider._();
@@ -220,7 +220,7 @@ final class ProfileNotifierProvider
   }
 }
 
-String _$profileNotifierHash() => r'afe7d8d844aa47178d8d8f396306c66fe13be044';
+String _$profileNotifierHash() => r'a3d6019262eb540181a9b178c0940da00a653b82';
 
 final class ProfileNotifierFamily extends $Family
     with

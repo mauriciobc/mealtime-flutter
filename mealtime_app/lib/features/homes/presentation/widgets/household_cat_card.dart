@@ -86,7 +86,6 @@ class HouseholdCatCard extends StatelessWidget {
                       onPressed: onEdit,
                       icon: Icon(
                         Icons.edit,
-                        size: 20,
                         color: theme.colorScheme.primary,
                       ),
                       tooltip: 'Editar ${cat.name}',
@@ -96,7 +95,6 @@ class HouseholdCatCard extends StatelessWidget {
                       onPressed: onDelete,
                       icon: Icon(
                         Icons.delete,
-                        size: 20,
                         color: theme.colorScheme.error,
                       ),
                       tooltip: 'Excluir ${cat.name}',

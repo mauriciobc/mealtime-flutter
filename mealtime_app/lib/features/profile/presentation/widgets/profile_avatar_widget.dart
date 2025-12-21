@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -141,7 +142,9 @@ class _ProfileAvatarWidgetState extends ConsumerState<ProfileAvatarWidget> {
     try {
       final provider = profileProvider(widget.userId);
       final notifier = ref.read(provider.notifier);
-      final url = await notifier.uploadAvatar(imageFile.path);
+      final url = await notifier.uploadAvatar(imageFile.path).timeout(
+            const Duration(seconds: 30),
+          );
 
       if (url != null && mounted) {
         // Atualizar perfil com nova URL do avatar
@@ -168,11 +171,27 @@ class _ProfileAvatarWidgetState extends ConsumerState<ProfileAvatarWidget> {
           );
         }
       }
-    } catch (error) {
+    } on TimeoutException {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao fazer upload: ${error.toString()}'),
+            content: const Text(
+              'Upload cancelado: tempo de espera excedido. '
+              'Verifique sua conexão e tente novamente.',
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } catch (error, stackTrace) {
+      // Log completo para debugging
+      debugPrint('Avatar upload error: $error');
+      debugPrint('Stack trace: $stackTrace');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Erro ao fazer upload. Tente novamente.'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

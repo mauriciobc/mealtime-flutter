@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -9,22 +10,23 @@ import 'package:mealtime_app/features/weight/presentation/bloc/weight_event.dart
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_state.dart';
 import 'package:uuid/uuid.dart';
 import 'package:m3e_collection/m3e_collection.dart';
+import 'package:mealtime_app/core/utils/haptics_service.dart';
 
-class AddWeightDialog extends StatefulWidget {
+class AddWeightBottomSheet extends StatefulWidget {
   final Cat? selectedCat;
   final WeightEntry? weightEntry; // Para edição
 
-  const AddWeightDialog({
+  const AddWeightBottomSheet({
     super.key,
     this.selectedCat,
     this.weightEntry,
   });
 
   @override
-  State<AddWeightDialog> createState() => _AddWeightDialogState();
+  State<AddWeightBottomSheet> createState() => _AddWeightBottomSheetState();
 }
 
-class _AddWeightDialogState extends State<AddWeightDialog> {
+class _AddWeightBottomSheetState extends State<AddWeightBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _weightController = TextEditingController();
   final _notesController = TextEditingController();
@@ -55,6 +57,7 @@ class _AddWeightDialogState extends State<AddWeightDialog> {
     return BlocListener<WeightBloc, WeightState>(
       listener: (context, state) {
         if (state is WeightOperationSuccess) {
+          HapticsService.success();
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -73,6 +76,7 @@ class _AddWeightDialogState extends State<AddWeightDialog> {
             ),
           );
         } else if (state is WeightError) {
+          HapticsService.error();
           setState(() => _isSubmitting = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -109,41 +113,24 @@ class _AddWeightDialogState extends State<AddWeightDialog> {
           );
         }
       },
-      child: Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 500),
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const M3EdgeInsets.all(M3SpacingToken.space24),
+            child: Form(
+              key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TweenAnimationBuilder<double>(
-                    duration: M3Motion.standard.duration,
-                    tween: Tween(begin: 0.0, end: 1.0),
-                    curve: M3Motion.standard.curve,
-                    builder: (context, value, child) {
-                      return Opacity(
-                        opacity: value,
-                        child: Transform.scale(
-                          scale: 0.92 + (0.08 * value), // Escala mais sutil M3
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: Text(
-                      widget.weightEntry != null
-                          ? 'Editar Registro de Peso'
-                          : 'Registrar Peso',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
+                  Text(
+                    widget.weightEntry != null
+                        ? 'Editar Registro de Peso'
+                        : 'Registrar Peso',
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 24),
                   if (widget.selectedCat != null) ...[
@@ -155,7 +142,7 @@ class _AddWeightDialogState extends State<AddWeightDialog> {
                   _buildDateTimeFields(),
                   const SizedBox(height: 16),
                   _buildNotesField(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   _buildActions(),
                 ],
               ),
@@ -215,6 +202,7 @@ class _AddWeightDialogState extends State<AddWeightDialog> {
   Widget _buildWeightField() {
     return TextFormField(
       controller: _weightController,
+      autofocus: true, // Foco automático ao abrir
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(
         labelText: 'Peso (kg) *',
@@ -310,71 +298,115 @@ class _AddWeightDialogState extends State<AddWeightDialog> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        TextButton(
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
         ),
-        const SizedBox(width: 8),
-        ElevatedButton(
-          onPressed: _isSubmitting ? null : _submitForm,
-          child: _isSubmitting
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicatorM3E(size: CircularProgressM3ESize.s),
-                )
-              : Text(widget.weightEntry != null ? 'Atualizar' : 'Registrar'),
+        const SizedBox(width: 16),
+        Expanded(
+          child: FilledButton(
+            onPressed: _isSubmitting ? null : _submitForm,
+            child: _isSubmitting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicatorM3E(size: CircularProgressM3ESize.s),
+                  )
+                : Text(widget.weightEntry != null ? 'Atualizar' : 'Registrar'),
+          ),
         ),
       ],
     );
   }
 
   Future<void> _selectDate() async {
-    final date = await showDatePicker(
+    HapticsService.selectionClick();
+    await showModalBottomSheet(
       context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now(),
-      helpText: 'Selecione a data',
-      errorFormatText: 'Data inválida',
-      errorInvalidText: 'Data fora do intervalo permitido',
-      fieldHintText: 'dd/mm/aaaa',
-      fieldLabelText: 'Data da medição',
+      useRootNavigator: true,
+      builder: (context) => Container(
+        height: 450,
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Selecione a Data',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            Expanded(
+              child: CalendarDatePicker(
+                initialDate: _selectedDate,
+                firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                lastDate: DateTime.now(),
+                onDateChanged: (date) {
+                  setState(() => _selectedDate = date);
+                  HapticsService.lightImpact();
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
-
-    if (date != null) {
-      setState(() {
-        _selectedDate = date;
-      });
-    }
   }
 
   Future<void> _selectTime() async {
-    final time = await showTimePicker(
+    HapticsService.selectionClick();
+    await showModalBottomSheet(
       context: context,
-      initialTime: _selectedTime,
-      helpText: 'Selecione a hora',
-      errorInvalidText: 'Hora inválida',
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            alwaysUse24HourFormat: true,
-          ),
-          child: child!,
-        );
-      },
+      useRootNavigator: true,
+      builder: (context) => Container(
+        height: 300,
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Selecione a Hora',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.time,
+                initialDateTime: DateTime(
+                  2024, 1, 1, _selectedTime.hour, _selectedTime.minute,
+                ),
+                use24hFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+                onDateTimeChanged: (DateTime newTime) {
+                  HapticsService.selectionClick();
+                  setState(() {
+                    _selectedTime = TimeOfDay.fromDateTime(newTime);
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
-
-    if (time != null) {
-      setState(() {
-        _selectedTime = time;
-      });
-    }
   }
 
   void _submitForm() {
+    HapticsService.lightImpact();
     if (!_formKey.currentState!.validate()) {
-      // Mostrar erro de validação
+      HapticsService.error();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Por favor, corrija os erros no formulário'),
@@ -401,7 +433,6 @@ class _AddWeightDialogState extends State<AddWeightDialog> {
       return;
     }
 
-    // Validação adicional de data/hora
     final measuredAt = DateTime(
       _selectedDate.year,
       _selectedDate.month,
