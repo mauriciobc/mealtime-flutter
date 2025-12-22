@@ -1,5 +1,21 @@
 import 'package:equatable/equatable.dart';
 
+const List<String> _weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const List<String> _months = [
+  'Jan',
+  'Fev',
+  'Mar',
+  'Abr',
+  'Mai',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Set',
+  'Out',
+  'Nov',
+  'Dez',
+];
+
 enum MealStatus { scheduled, completed, skipped, cancelled }
 
 enum MealType { breakfast, lunch, dinner, snack }
@@ -18,8 +34,10 @@ class Meal extends Equatable {
   final String? foodType;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String absoluteDateString;
+  final String timeString;
 
-  const Meal({
+  Meal({
     required this.id,
     required this.catId,
     required this.homeId,
@@ -33,7 +51,8 @@ class Meal extends Equatable {
     this.foodType,
     required this.createdAt,
     required this.updatedAt,
-  });
+  })  : absoluteDateString = _formatAbsoluteDate(scheduledAt),
+        timeString = _formatTime(scheduledAt);
 
   @override
   List<Object?> get props => [
@@ -50,6 +69,8 @@ class Meal extends Equatable {
     foodType,
     createdAt,
     updatedAt,
+        absoluteDateString,
+        timeString,
   ];
 
   Meal copyWith({
@@ -121,4 +142,30 @@ class Meal extends Equatable {
         return 'Cancelada';
     }
   }
+
+  String get formattedScheduledAt {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final mealDate =
+        DateTime(scheduledAt.year, scheduledAt.month, scheduledAt.day);
+
+    if (mealDate == today) {
+      return 'Hoje às $timeString';
+    } else if (mealDate == today.add(const Duration(days: 1))) {
+      return 'Amanhã às $timeString';
+    } else if (mealDate == today.subtract(const Duration(days: 1))) {
+      return 'Ontem às $timeString';
+    } else {
+      return '$absoluteDateString às $timeString';
+    }
+  }
+}
+
+String _formatAbsoluteDate(DateTime date) {
+  final mealDate = DateTime(date.year, date.month, date.day);
+  return '${_weekdays[mealDate.weekday % 7]}, ${mealDate.day} ${_months[mealDate.month - 1]}';
+}
+
+String _formatTime(DateTime date) {
+  return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 }
