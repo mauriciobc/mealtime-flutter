@@ -6,6 +6,29 @@ class MealCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
   final VoidCallback? onSkip;
+  static const List<String> _weekdays = [
+    'Dom',
+    'Seg',
+    'Ter',
+    'Qua',
+    'Qui',
+    'Sex',
+    'Sáb'
+  ];
+  static const List<String> _months = [
+    'Jan',
+    'Fev',
+    'Mar',
+    'Abr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Set',
+    'Out',
+    'Nov',
+    'Dez'
+  ];
 
   const MealCard({
     super.key,
@@ -228,23 +251,8 @@ class MealCard extends StatelessWidget {
     } else if (mealDate == today.subtract(const Duration(days: 1))) {
       dateText = 'Ontem';
     } else {
-      final weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-      final months = [
-        'Jan',
-        'Fev',
-        'Mar',
-        'Abr',
-        'Mai',
-        'Jun',
-        'Jul',
-        'Ago',
-        'Set',
-        'Out',
-        'Nov',
-        'Dez',
-      ];
       dateText =
-          '${weekdays[mealDate.weekday % 7]}, ${mealDate.day} ${months[mealDate.month - 1]}';
+          '${_weekdays[mealDate.weekday % 7]}, ${mealDate.day} ${_months[mealDate.month - 1]}';
     }
 
     final timeText =
