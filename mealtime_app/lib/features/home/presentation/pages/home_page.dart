@@ -108,26 +108,43 @@ class _HomePageState extends State<HomePage> {
       builder: (context, catsState) {
         return BlocBuilder<MealsBloc, MealsState>(
           builder: (context, mealsState) {
-            final catsCount = catsState is CatsLoaded ? catsState.cats.length : 0;
-            final todayMeals = mealsState is MealsLoaded 
-                ? mealsState.meals.where((meal) => meal.isToday).length 
+            final catsLoading =
+                catsState is CatsLoading || catsState is CatsInitial;
+            final mealsLoading =
+                mealsState is MealsLoading || mealsState is MealsInitial;
+
+            final catsCount =
+                catsState is CatsLoaded ? catsState.cats.length : 0;
+            final todayMeals = mealsState is MealsLoaded
+                ? mealsState.meals.where((meal) => meal.isToday).length
                 : 0;
-            
+
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _buildSummaryCard('Total de Gatos', catsCount.toString())),
+                      Expanded(
+                        child: _buildSummaryCard(
+                          'Total de Gatos',
+                          catsLoading ? null : catsCount.toString(),
+                        ),
+                      ),
                       const SizedBox(width: 12),
-                      Expanded(child: _buildSummaryCard('Alimentações Hoje', todayMeals.toString())),
+                      Expanded(
+                        child: _buildSummaryCard(
+                          'Alimentações Hoje',
+                          mealsLoading ? null : todayMeals.toString(),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _buildSummaryCard('Porção Média', '9.2g')),
+                      Expanded(
+                          child: _buildSummaryCard('Porção Média', '9.2g')),
                       const SizedBox(width: 12),
                       Expanded(child: _buildSummaryCard('Última Vez', '19:28')),
                     ],
@@ -141,15 +158,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildSummaryCard(String title, String value) {
+  Widget _buildSummaryCard(String title, String? value) {
     return Container(
       padding: const EdgeInsets.all(16),
+      height: 100,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             title,
@@ -158,14 +177,22 @@ class _HomePageState extends State<HomePage> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
+          if (value != null)
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            )
+          else
+            const Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2.5),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -174,13 +201,16 @@ class _HomePageState extends State<HomePage> {
   Widget _buildLastFeedingSection(BuildContext context) {
     return BlocBuilder<MealsBloc, MealsState>(
       builder: (context, state) {
+        final mealsLoading = state is MealsLoading || state is MealsInitial;
+
         Meal? lastMeal;
         if (state is MealsLoaded && state.meals.isNotEmpty) {
           final completedMeals = state.meals
               .where((meal) => meal.status == MealStatus.completed)
               .toList();
           if (completedMeals.isNotEmpty) {
-            completedMeals.sort((a, b) => b.completedAt!.compareTo(a.completedAt!));
+            completedMeals
+                .sort((a, b) => b.completedAt!.compareTo(a.completedAt!));
             lastMeal = completedMeals.first;
           }
         }
@@ -193,12 +223,29 @@ class _HomePageState extends State<HomePage> {
               Text(
                 'Última Alimentação',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
               ),
               const SizedBox(height: 12),
-              if (lastMeal != null)
+              if (mealsLoading)
+                Container(
+                  height: 100,
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    ),
+                  ),
+                )
+              else if (lastMeal != null)
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -209,8 +256,10 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        backgroundColor:
+                            Theme.of(context).colorScheme.surfaceContainerHighest,
+                        child: Icon(Icons.pets,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -219,24 +268,38 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Text(
                               'Negresco', // TODO: Buscar nome do gato
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                  ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               '${lastMeal.amount?.toStringAsFixed(0) ?? '10'}g ${lastMeal.foodType ?? 'ração seca'}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'Por Maurício Castro · ${_formatTime(lastMeal.completedAt!)} · ${_formatDate(lastMeal.completedAt!)}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                             ),
                           ],
                         ),
@@ -254,7 +317,8 @@ class _HomePageState extends State<HomePage> {
                   child: Center(
                     child: Text(
                       'Nenhuma alimentação registrada hoje',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ),
@@ -265,7 +329,8 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () => context.push(AppRouter.meals),
                   child: Text(
                     'Ver todas',
-                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
                   ),
                 ),
               ),
@@ -334,6 +399,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildRecentRecordsSection(BuildContext context) {
     return BlocBuilder<MealsBloc, MealsState>(
       builder: (context, state) {
+        final mealsLoading = state is MealsLoading || state is MealsInitial;
         List<Meal> recentMeals = [];
         if (state is MealsLoaded) {
           recentMeals = state.meals
@@ -355,7 +421,24 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              if (recentMeals.isNotEmpty)
+              if (mealsLoading)
+                Container(
+                  height: 100,
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    ),
+                  ),
+                )
+              else if (recentMeals.isNotEmpty)
                 ...recentMeals.map((meal) => _buildRecentRecordItem(meal))
               else
                 Container(
@@ -383,7 +466,7 @@ class _HomePageState extends State<HomePage> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -428,6 +511,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildMyCatsSection(BuildContext context) {
     return BlocBuilder<CatsBloc, CatsState>(
       builder: (context, state) {
+        final catsLoading = state is CatsLoading || state is CatsInitial;
         List<Cat> cats = [];
         if (state is CatsLoaded) {
           cats = state.cats.take(3).toList();
@@ -446,7 +530,24 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              if (cats.isNotEmpty)
+              if (catsLoading)
+                Container(
+                  height: 100,
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    ),
+                  ),
+                )
+              else if (cats.isNotEmpty)
                 ...cats.map((cat) => _buildMyCatsItem(cat))
               else
                 Container(
