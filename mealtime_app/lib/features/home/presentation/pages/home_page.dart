@@ -108,20 +108,32 @@ class _HomePageState extends State<HomePage> {
       builder: (context, catsState) {
         return BlocBuilder<MealsBloc, MealsState>(
           builder: (context, mealsState) {
-            final catsCount = catsState is CatsLoaded ? catsState.cats.length : 0;
-            final todayMeals = mealsState is MealsLoaded 
-                ? mealsState.meals.where((meal) => meal.isToday).length 
+            if (catsState is CatsLoading ||
+                catsState is CatsInitial ||
+                mealsState is MealsLoading ||
+                mealsState is MealsInitial) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final catsCount =
+                catsState is CatsLoaded ? catsState.cats.length : 0;
+            final todayMeals = mealsState is MealsLoaded
+                ? mealsState.meals.where((meal) => meal.isToday).length
                 : 0;
-            
+
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _buildSummaryCard('Total de Gatos', catsCount.toString())),
+                      Expanded(
+                          child: _buildSummaryCard(
+                              'Total de Gatos', catsCount.toString())),
                       const SizedBox(width: 12),
-                      Expanded(child: _buildSummaryCard('Alimentações Hoje', todayMeals.toString())),
+                      Expanded(
+                          child: _buildSummaryCard(
+                              'Alimentações Hoje', todayMeals.toString())),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -174,6 +186,10 @@ class _HomePageState extends State<HomePage> {
   Widget _buildLastFeedingSection(BuildContext context) {
     return BlocBuilder<MealsBloc, MealsState>(
       builder: (context, state) {
+        if (state is MealsLoading || state is MealsInitial) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         Meal? lastMeal;
         if (state is MealsLoaded && state.meals.isNotEmpty) {
           final completedMeals = state.meals
@@ -334,6 +350,10 @@ class _HomePageState extends State<HomePage> {
   Widget _buildRecentRecordsSection(BuildContext context) {
     return BlocBuilder<MealsBloc, MealsState>(
       builder: (context, state) {
+        if (state is MealsLoading || state is MealsInitial) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         List<Meal> recentMeals = [];
         if (state is MealsLoaded) {
           recentMeals = state.meals
@@ -428,6 +448,10 @@ class _HomePageState extends State<HomePage> {
   Widget _buildMyCatsSection(BuildContext context) {
     return BlocBuilder<CatsBloc, CatsState>(
       builder: (context, state) {
+        if (state is CatsLoading || state is CatsInitial) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         List<Cat> cats = [];
         if (state is CatsLoaded) {
           cats = state.cats.take(3).toList();
