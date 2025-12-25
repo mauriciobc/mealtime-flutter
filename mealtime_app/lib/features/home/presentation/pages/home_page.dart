@@ -108,28 +108,43 @@ class _HomePageState extends State<HomePage> {
       builder: (context, catsState) {
         return BlocBuilder<MealsBloc, MealsState>(
           builder: (context, mealsState) {
+            final bool isLoadingCats = catsState is CatsLoading || catsState is CatsInitial;
+            final bool isLoadingMeals = mealsState is MealsLoading || mealsState is MealsInitial;
+
             final catsCount = catsState is CatsLoaded ? catsState.cats.length : 0;
-            final todayMeals = mealsState is MealsLoaded 
-                ? mealsState.meals.where((meal) => meal.isToday).length 
+            final todayMeals = mealsState is MealsLoaded
+                ? mealsState.meals.where((meal) => meal.isToday).length
                 : 0;
-            
+
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _buildSummaryCard('Total de Gatos', catsCount.toString())),
+                      Expanded(
+                        child: _buildSummaryCard(
+                          'Total de Gatos',
+                          catsCount.toString(),
+                          isLoading: isLoadingCats,
+                        ),
+                      ),
                       const SizedBox(width: 12),
-                      Expanded(child: _buildSummaryCard('Alimentações Hoje', todayMeals.toString())),
+                      Expanded(
+                        child: _buildSummaryCard(
+                          'Alimentações Hoje',
+                          todayMeals.toString(),
+                          isLoading: isLoadingMeals,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _buildSummaryCard('Porção Média', '9.2g')),
+                      Expanded(child: _buildSummaryCard('Porção Média', '9.2g')), // TODO: Implementar
                       const SizedBox(width: 12),
-                      Expanded(child: _buildSummaryCard('Última Vez', '19:28')),
+                      Expanded(child: _buildSummaryCard('Última Vez', '19:28')), // TODO: Implementar
                     ],
                   ),
                 ],
@@ -141,7 +156,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildSummaryCard(String title, String value) {
+  Widget _buildSummaryCard(String title, String value, {bool isLoading = false}) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -159,13 +174,20 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
+          if (isLoading)
+            const SizedBox(
+              height: 28, // Altura aproximada do texto
+              width: 28,
+              child: CircularProgressIndicator(strokeWidth: 3),
+            )
+          else
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
-          ),
         ],
       ),
     );
