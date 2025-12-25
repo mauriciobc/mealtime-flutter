@@ -19,11 +19,12 @@ class MealsLoading extends MealsState {
 
 class MealsLoaded extends MealsState {
   final List<Meal> meals;
+  final Meal? lastMeal;
 
-  const MealsLoaded({required this.meals});
+  const MealsLoaded({required this.meals, this.lastMeal});
 
   @override
-  List<Object> get props => [meals];
+  List<Object?> get props => [meals, lastMeal];
 }
 
 class MealLoaded extends MealsState {
@@ -49,15 +50,17 @@ class MealOperationSuccess extends MealsState {
   final String message;
   final List<Meal> meals;
   final Meal? updatedMeal;
+  final Meal? lastMeal;
 
   const MealOperationSuccess({
     required this.message,
     required this.meals,
     this.updatedMeal,
+    this.lastMeal,
   });
 
   @override
-  List<Object?> get props => [message, meals, updatedMeal];
+  List<Object?> get props => [message, meals, updatedMeal, lastMeal];
 }
 
 class MealsError extends MealsState {
