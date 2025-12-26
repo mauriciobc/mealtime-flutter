@@ -51,6 +51,11 @@ class _MealsListPageState extends State<MealsListPage> {
         ],
       ),
       body: BlocBuilder<MealsBloc, MealsState>(
+        // Performance Optimization:
+        // Prevents the list from rebuilding when a meal operation is in progress
+        // (e.g., completing, skipping). This avoids a jarring full-screen loader
+        // and keeps the UI responsive. The list will still update on success/error.
+        buildWhen: (previous, current) => current is! MealOperationInProgress,
         builder: (context, state) {
           if (state is MealsLoading) {
             return const LoadingWidget();
