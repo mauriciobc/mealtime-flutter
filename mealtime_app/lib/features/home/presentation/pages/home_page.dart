@@ -108,28 +108,54 @@ class _HomePageState extends State<HomePage> {
       builder: (context, catsState) {
         return BlocBuilder<MealsBloc, MealsState>(
           builder: (context, mealsState) {
-            final catsCount = catsState is CatsLoaded ? catsState.cats.length : 0;
-            final todayMeals = mealsState is MealsLoaded 
-                ? mealsState.meals.where((meal) => meal.isToday).length 
+            final isCatsLoading =
+                catsState is CatsLoading || catsState is CatsInitial;
+            final isMealsLoading =
+                mealsState is MealsLoading || mealsState is MealsInitial;
+
+            final catsCount =
+                catsState is CatsLoaded ? catsState.cats.length : 0;
+            final todayMeals = mealsState is MealsLoaded
+                ? mealsState.meals.where((meal) => meal.isToday).length
                 : 0;
-            
+
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _buildSummaryCard('Total de Gatos', catsCount.toString())),
+                      Expanded(
+                          child: _buildSummaryCard(
+                        'Total de Gatos',
+                        catsCount.toString(),
+                        isLoading: isCatsLoading,
+                      )),
                       const SizedBox(width: 12),
-                      Expanded(child: _buildSummaryCard('Alimentações Hoje', todayMeals.toString())),
+                      Expanded(
+                          child: _buildSummaryCard(
+                        'Alimentações Hoje',
+                        todayMeals.toString(),
+                        isLoading: isMealsLoading,
+                      )),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _buildSummaryCard('Porção Média', '9.2g')),
+                      Expanded(
+                          child: _buildSummaryCard(
+                        'Porção Média',
+                        '9.2g',
+                        isLoading: isMealsLoading,
+                      )),
                       const SizedBox(width: 12),
-                      Expanded(child: _buildSummaryCard('Última Vez', '19:28')),
+                      Expanded(
+                          child: _buildSummaryCard(
+                        'Última Vez',
+                        '19:28',
+                        isLoading: isMealsLoading,
+                      )),
                     ],
                   ),
                 ],
@@ -141,11 +167,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildSummaryCard(String title, String value) {
+  Widget _buildSummaryCard(String title, String value, {bool isLoading = false}) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -153,19 +182,32 @@ class _HomePageState extends State<HomePage> {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
+          if (isLoading)
+            SizedBox(
+              height: textTheme.headlineSmall?.fontSize,
+              child: const Align(
+                alignment: Alignment.centerLeft,
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                ),
+              ),
+            )
+          else
+            Text(
+              value,
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -174,15 +216,104 @@ class _HomePageState extends State<HomePage> {
   Widget _buildLastFeedingSection(BuildContext context) {
     return BlocBuilder<MealsBloc, MealsState>(
       builder: (context, state) {
-        Meal? lastMeal;
-        if (state is MealsLoaded && state.meals.isNotEmpty) {
+        Widget content;
+        final isLoading = state is MealsLoading || state is MealsInitial;
+
+        if (isLoading) {
+          content = Container(
+            height: 120, // Altura similar ao card
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Center(child: CircularProgressIndicator()),
+          );
+        } else if (state is MealsLoaded && state.meals.isNotEmpty) {
           final completedMeals = state.meals
               .where((meal) => meal.status == MealStatus.completed)
               .toList();
+          Meal? lastMeal;
           if (completedMeals.isNotEmpty) {
             completedMeals.sort((a, b) => b.completedAt!.compareTo(a.completedAt!));
             lastMeal = completedMeals.first;
           }
+
+          if (lastMeal != null) {
+            content = Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Negresco', // TODO: Buscar nome do gato
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${lastMeal.amount?.toStringAsFixed(0) ?? '10'}g ${lastMeal.foodType ?? 'ração seca'}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Por Maurício Castro · ${_formatTime(lastMeal.completedAt!)} · ${_formatDate(lastMeal.completedAt!)}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          } else {
+            content = Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Text(
+                  'Nenhuma alimentação registrada hoje',
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
+              ),
+            );
+          }
+        } else {
+          content = Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(
+                'Nenhuma alimentação registrada',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+            ),
+          );
         }
 
         return Padding(
@@ -198,66 +329,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              if (lastMeal != null)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Negresco', // TODO: Buscar nome do gato
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${lastMeal.amount?.toStringAsFixed(0) ?? '10'}g ${lastMeal.foodType ?? 'ração seca'}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Por Maurício Castro · ${_formatTime(lastMeal.completedAt!)} · ${_formatDate(lastMeal.completedAt!)}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Nenhuma alimentação registrada hoje',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ),
-                  ),
-                ),
+              content,
               const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
@@ -334,12 +406,50 @@ class _HomePageState extends State<HomePage> {
   Widget _buildRecentRecordsSection(BuildContext context) {
     return BlocBuilder<MealsBloc, MealsState>(
       builder: (context, state) {
-        List<Meal> recentMeals = [];
-        if (state is MealsLoaded) {
-          recentMeals = state.meals
+        Widget content;
+        final isLoading = state is MealsLoading || state is MealsInitial;
+
+        if (isLoading) {
+          content = const Center(child: CircularProgressIndicator());
+        } else if (state is MealsLoaded && state.meals.isNotEmpty) {
+          final recentMeals = state.meals
               .where((meal) => meal.status == MealStatus.completed)
               .take(3)
               .toList();
+
+          if (recentMeals.isNotEmpty) {
+            content = Column(
+              children: recentMeals.map((meal) => _buildRecentRecordItem(meal)).toList(),
+            );
+          } else {
+            content = Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Text(
+                  'Nenhum registro recente',
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
+              ),
+            );
+          }
+        } else {
+          content = Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(
+                'Nenhum registro recente',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+            ),
+          );
         }
 
         return Padding(
@@ -355,22 +465,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              if (recentMeals.isNotEmpty)
-                ...recentMeals.map((meal) => _buildRecentRecordItem(meal))
-              else
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Nenhum registro recente',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ),
-                  ),
-                ),
+              content,
             ],
           ),
         );
@@ -428,9 +523,30 @@ class _HomePageState extends State<HomePage> {
   Widget _buildMyCatsSection(BuildContext context) {
     return BlocBuilder<CatsBloc, CatsState>(
       builder: (context, state) {
-        List<Cat> cats = [];
-        if (state is CatsLoaded) {
-          cats = state.cats.take(3).toList();
+        Widget content;
+        final isLoading = state is CatsLoading || state is CatsInitial;
+
+        if (isLoading) {
+          content = const Center(child: CircularProgressIndicator());
+        } else if (state is CatsLoaded && state.cats.isNotEmpty) {
+          final cats = state.cats.take(3).toList();
+          content = Column(
+            children: cats.map((cat) => _buildMyCatsItem(cat)).toList(),
+          );
+        } else {
+          content = Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(
+                'Nenhum gato cadastrado',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+            ),
+          );
         }
 
         return Padding(
@@ -446,22 +562,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              if (cats.isNotEmpty)
-                ...cats.map((cat) => _buildMyCatsItem(cat))
-              else
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Nenhum gato cadastrado',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ),
-                  ),
-                ),
+              content,
               const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
