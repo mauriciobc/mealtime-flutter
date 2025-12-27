@@ -129,6 +129,11 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             updatedMeal: newMeal,
           ),
         );
+        // ⚡ Bolt: Immediately emit MealsLoaded after success.
+        // This makes the success state transient for UI listeners (like SnackBars)
+        // and ensures the UI rebuilds with the final, correct state,
+        // preventing the need for a manual refresh/refetch.
+        emit(MealsLoaded(meals: updatedMeals));
       } else {
         emit(
           MealOperationSuccess(
@@ -137,6 +142,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             updatedMeal: newMeal,
           ),
         );
+        emit(MealsLoaded(meals: [newMeal]));
       }
     });
   }
@@ -166,6 +172,8 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             updatedMeal: updatedMeal,
           ),
         );
+        // ⚡ Bolt: Immediately emit MealsLoaded after success.
+        emit(MealsLoaded(meals: updatedMeals));
       } else {
         emit(
           MealOperationSuccess(
@@ -174,6 +182,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             updatedMeal: updatedMeal,
           ),
         );
+        emit(MealsLoaded(meals: [updatedMeal]));
       }
     });
   }
@@ -202,6 +211,8 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             meals: updatedMeals,
           ),
         );
+        // ⚡ Bolt: Immediately emit MealsLoaded after success.
+        emit(MealsLoaded(meals: updatedMeals));
       } else {
         emit(
           const MealOperationSuccess(
@@ -209,6 +220,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             meals: [],
           ),
         );
+        emit(const MealsLoaded(meals: []));
       }
     });
   }
@@ -247,6 +259,8 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             updatedMeal: completedMeal,
           ),
         );
+        // ⚡ Bolt: Immediately emit MealsLoaded after success.
+        emit(MealsLoaded(meals: updatedMeals));
       } else {
         emit(
           MealOperationSuccess(
@@ -255,6 +269,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             updatedMeal: completedMeal,
           ),
         );
+        emit(MealsLoaded(meals: [completedMeal]));
       }
     });
   }
@@ -286,6 +301,8 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             updatedMeal: skippedMeal,
           ),
         );
+        // ⚡ Bolt: Immediately emit MealsLoaded after success.
+        emit(MealsLoaded(meals: updatedMeals));
       } else {
         emit(
           MealOperationSuccess(
@@ -294,6 +311,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             updatedMeal: skippedMeal,
           ),
         );
+        emit(MealsLoaded(meals: [skippedMeal]));
       }
     });
   }
