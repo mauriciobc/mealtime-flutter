@@ -64,7 +64,24 @@ class _CreateMealPageState extends State<CreateMealPage> {
       appBar: AppBar(
         title: const Text('Nova Refeição'),
         actions: [
-          TextButton(onPressed: _saveMeal, child: const Text('Salvar')),
+          BlocBuilder<MealsBloc, MealsState>(
+            builder: (context, state) {
+              if (state is MealsLoading) {
+                return const Padding(
+                  padding: EdgeInsets.only(right: 16.0),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+              return TextButton(
+                onPressed: _saveMeal,
+                child: const Text('Salvar'),
+              );
+            },
+          ),
         ],
       ),
       body: BlocListener<MealsBloc, MealsState>(
@@ -108,13 +125,17 @@ class _CreateMealPageState extends State<CreateMealPage> {
                       setState(() => _selectedHomeId = homeId),
                 ),
                 const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _saveMeal,
-                    icon: const Icon(Icons.save),
-                    label: const Text('Criar Refeição'),
-                  ),
+                BlocBuilder<MealsBloc, MealsState>(
+                  builder: (context, state) {
+                    return SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: state is MealsLoading ? null : _saveMeal,
+                        icon: const Icon(Icons.save),
+                        label: const Text('Criar Refeição'),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
