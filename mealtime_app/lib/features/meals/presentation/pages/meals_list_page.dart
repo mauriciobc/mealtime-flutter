@@ -50,9 +50,18 @@ class _MealsListPageState extends State<MealsListPage> {
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadMeals),
         ],
       ),
-      body: BlocBuilder<MealsBloc, MealsState>(
+      body: BlocConsumer<MealsBloc, MealsState>(
+        listener: (context, state) {
+          if (state is MealOperationSuccess) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(content: Text(state.message)),
+              );
+          }
+        },
         builder: (context, state) {
-          if (state is MealsLoading) {
+          if (state is MealsLoading || state is MealsInitial) {
             return const LoadingWidget();
           }
 
@@ -63,81 +72,59 @@ class _MealsListPageState extends State<MealsListPage> {
             );
           }
 
-          if (state is MealsLoaded) {
-            if (state.meals.isEmpty) {
-              return _buildEmptyState();
-            }
-
-            return RefreshIndicator(
-              onRefresh: () async {
-                _loadMeals();
-              },
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: state.meals.length,
-                itemBuilder: (context, index) {
-                  final meal = state.meals[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: MealCard(
-                      meal: meal,
-                      onTap: () => _navigateToMealDetail(meal),
-                      onComplete: () => _completeMeal(meal),
-                      onSkip: () => _skipMeal(meal),
-                    ),
-                  );
-                },
-              ),
-            );
+          final meals = _getMealsFromState(state);
+          if (meals == null) {
+            return _buildEmptyState();
           }
 
-          if (state is MealOperationInProgress) {
-            return Stack(
-              children: [
-                if (state.meals.isNotEmpty)
-                  RefreshIndicator(
-                    onRefresh: () async {
-                      _loadMeals();
-                    },
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: state.meals.length,
-                      itemBuilder: (context, index) {
-                        final meal = state.meals[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: MealCard(
-                            meal: meal,
-                            onTap: () => _navigateToMealDetail(meal),
-                            onComplete: () => _completeMeal(meal),
-                            onSkip: () => _skipMeal(meal),
-                          ),
-                        );
-                      },
-                    ),
-                  )
-                else
-                  _buildEmptyState(),
-                Center(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const CircularProgressIndicator(),
-                          const SizedBox(height: 16),
-                          Text(state.operation),
-                        ],
+          if (meals.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          return Stack(
+            children: [
+              RefreshIndicator(
+                onRefresh: () async {
+                  _loadMeals();
+                },
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: meals.length,
+                  itemBuilder: (context, index) {
+                    final meal = meals[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: MealCard(
+                        meal: meal,
+                        onTap: () => _navigateToMealDetail(meal),
+                        onComplete: () => _completeMeal(meal),
+                        onSkip: () => _skipMeal(meal),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              if (state is MealOperationInProgress)
+                Container(
+                  color: Colors.black.withOpacity(0.1),
+                  child: Center(
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 16),
+                            Text(state.operation),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ],
-            );
-          }
-
-          return _buildEmptyState();
+            ],
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -184,6 +171,19 @@ class _MealsListPageState extends State<MealsListPage> {
         ],
       ),
     );
+  }
+
+  List<Meal>? _getMealsFromState(MealsState state) {
+    if (state is MealsLoaded) {
+      return state.meals;
+    }
+    if (state is MealOperationInProgress) {
+      return state.meals;
+    }
+    if (state is MealOperationSuccess) {
+      return state.meals;
+    }
+    return null;
   }
 
   void _navigateToMealDetail(Meal meal) {
