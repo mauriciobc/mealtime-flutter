@@ -53,56 +53,113 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
     on<ClearMealsError>(_onClearMealsError);
   }
 
+  String _formatDateTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final mealDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+    String dateText;
+    if (mealDate == today) {
+      dateText = 'Hoje';
+    } else if (mealDate == today.add(const Duration(days: 1))) {
+      dateText = 'Amanhã';
+    } else if (mealDate == today.subtract(const Duration(days: 1))) {
+      dateText = 'Ontem';
+    } else {
+      final weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      final months = [
+        'Jan',
+        'Fev',
+        'Mar',
+        'Abr',
+        'Mai',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Set',
+        'Out',
+        'Nov',
+        'Dez',
+      ];
+      dateText =
+      '${weekdays[mealDate.weekday % 7]}, ${mealDate.day} ${months[mealDate.month - 1]}';
+    }
+
+    final timeText =
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+
+    return '$dateText às $timeText';
+  }
+
+  Map<String, String> _formatMeals(List<Meal> meals) {
+    return {
+      for (var meal in meals)
+        meal.id: _formatDateTime(meal.scheduledAt),
+    };
+  }
+
   Future<void> _onLoadMeals(LoadMeals event, Emitter<MealsState> emit) async {
     emit(const MealsLoading());
 
     final result = await getMeals(NoParams());
 
     result.fold(
-      (failure) => emit(MealsError(failure)),
-      (meals) => emit(MealsLoaded(meals: meals)),
+          (failure) => emit(MealsError(failure)),
+          (meals) => emit(MealsLoaded(
+        meals: meals,
+        formattedDates: _formatMeals(meals),
+      )),
     );
   }
 
   Future<void> _onLoadMealsByCat(
-    LoadMealsByCat event,
-    Emitter<MealsState> emit,
-  ) async {
+      LoadMealsByCat event,
+      Emitter<MealsState> emit,
+      ) async {
     emit(const MealsLoading());
 
     final result = await getMealsByCat(event.catId);
 
     result.fold(
-      (failure) => emit(MealsError(failure)),
-      (meals) => emit(MealsLoaded(meals: meals)),
+          (failure) => emit(MealsError(failure)),
+          (meals) => emit(MealsLoaded(
+        meals: meals,
+        formattedDates: _formatMeals(meals),
+      )),
     );
   }
 
   Future<void> _onLoadMealById(
-    LoadMealById event,
-    Emitter<MealsState> emit,
-  ) async {
+      LoadMealById event,
+      Emitter<MealsState> emit,
+      ) async {
     emit(const MealsLoading());
 
     final result = await getMealById(event.mealId);
 
     result.fold(
-      (failure) => emit(MealsError(failure)),
-      (meal) => emit(MealLoaded(meal: meal)),
+          (failure) => emit(MealsError(failure)),
+          (meal) => emit(MealLoaded(
+        meal: meal,
+        formattedDate: _formatDateTime(meal.scheduledAt),
+      )),
     );
   }
 
   Future<void> _onLoadTodayMeals(
-    LoadTodayMeals event,
-    Emitter<MealsState> emit,
-  ) async {
+      LoadTodayMeals event,
+      Emitter<MealsState> emit,
+      ) async {
     emit(const MealsLoading());
 
     final result = await getTodayMeals(NoParams());
 
     result.fold(
-      (failure) => emit(MealsError(failure)),
-      (meals) => emit(MealsLoaded(meals: meals)),
+          (failure) => emit(MealsError(failure)),
+          (meals) => emit(MealsLoaded(
+        meals: meals,
+        formattedDates: _formatMeals(meals),
+      )),
     );
   }
 
@@ -127,6 +184,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             message: 'Refeição criada com sucesso!',
             meals: updatedMeals,
             updatedMeal: newMeal,
+            formattedDates: _formatMeals(updatedMeals),
           ),
         );
       } else {
@@ -135,6 +193,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             message: 'Refeição criada com sucesso!',
             meals: [newMeal],
             updatedMeal: newMeal,
+            formattedDates: _formatMeals([newMeal]),
           ),
         );
       }
@@ -164,6 +223,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             message: 'Refeição atualizada com sucesso!',
             meals: updatedMeals,
             updatedMeal: updatedMeal,
+            formattedDates: _formatMeals(updatedMeals),
           ),
         );
       } else {
@@ -172,6 +232,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             message: 'Refeição atualizada com sucesso!',
             meals: [updatedMeal],
             updatedMeal: updatedMeal,
+            formattedDates: _formatMeals([updatedMeal]),
           ),
         );
       }
@@ -200,6 +261,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
           MealOperationSuccess(
             message: 'Refeição excluída com sucesso!',
             meals: updatedMeals,
+            formattedDates: _formatMeals(updatedMeals),
           ),
         );
       } else {
@@ -214,9 +276,9 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
   }
 
   Future<void> _onCompleteMeal(
-    CompleteMeal event,
-    Emitter<MealsState> emit,
-  ) async {
+      CompleteMeal event,
+      Emitter<MealsState> emit,
+      ) async {
     final currentState = state;
     if (currentState is MealsLoaded) {
       emit(
@@ -245,6 +307,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             message: 'Refeição concluída com sucesso!',
             meals: updatedMeals,
             updatedMeal: completedMeal,
+            formattedDates: _formatMeals(updatedMeals),
           ),
         );
       } else {
@@ -253,6 +316,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             message: 'Refeição concluída com sucesso!',
             meals: [completedMeal],
             updatedMeal: completedMeal,
+            formattedDates: _formatMeals([completedMeal]),
           ),
         );
       }
@@ -284,6 +348,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             message: 'Refeição pulada com sucesso!',
             meals: updatedMeals,
             updatedMeal: skippedMeal,
+            formattedDates: _formatMeals(updatedMeals),
           ),
         );
       } else {
@@ -292,6 +357,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
             message: 'Refeição pulada com sucesso!',
             meals: [skippedMeal],
             updatedMeal: skippedMeal,
+            formattedDates: _formatMeals([skippedMeal]),
           ),
         );
       }
@@ -299,9 +365,9 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
   }
 
   Future<void> _onRefreshMeals(
-    RefreshMeals event,
-    Emitter<MealsState> emit,
-  ) async {
+      RefreshMeals event,
+      Emitter<MealsState> emit,
+      ) async {
     add(const LoadMeals());
   }
 

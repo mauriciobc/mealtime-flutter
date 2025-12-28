@@ -3,6 +3,7 @@ import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
 
 class MealCard extends StatelessWidget {
   final Meal meal;
+  final String? formattedDate;
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
   final VoidCallback? onSkip;
@@ -10,6 +11,7 @@ class MealCard extends StatelessWidget {
   const MealCard({
     super.key,
     required this.meal,
+    this.formattedDate,
     this.onTap,
     this.onComplete,
     this.onSkip,
@@ -42,11 +44,11 @@ class MealCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _formatDateTime(meal.scheduledAt),
+                          formattedDate ?? '',
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
-                                color: Theme.of(context).colorScheme.outline,
-                              ),
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
                         ),
                       ],
                     ),
@@ -213,43 +215,5 @@ class MealCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final mealDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
-
-    String dateText;
-    if (mealDate == today) {
-      dateText = 'Hoje';
-    } else if (mealDate == today.add(const Duration(days: 1))) {
-      dateText = 'Amanhã';
-    } else if (mealDate == today.subtract(const Duration(days: 1))) {
-      dateText = 'Ontem';
-    } else {
-      final weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-      final months = [
-        'Jan',
-        'Fev',
-        'Mar',
-        'Abr',
-        'Mai',
-        'Jun',
-        'Jul',
-        'Ago',
-        'Set',
-        'Out',
-        'Nov',
-        'Dez',
-      ];
-      dateText =
-          '${weekdays[mealDate.weekday % 7]}, ${mealDate.day} ${months[mealDate.month - 1]}';
-    }
-
-    final timeText =
-        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-
-    return '$dateText às $timeText';
   }
 }
