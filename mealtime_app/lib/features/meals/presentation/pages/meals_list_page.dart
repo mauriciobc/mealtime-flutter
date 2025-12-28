@@ -81,6 +81,7 @@ class _MealsListPageState extends State<MealsListPage> {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: MealCard(
                       meal: meal,
+                      formattedDate: state.formattedDates[meal.id],
                       onTap: () => _navigateToMealDetail(meal),
                       onComplete: () => _completeMeal(meal),
                       onSkip: () => _skipMeal(meal),
