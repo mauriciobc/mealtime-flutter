@@ -5,6 +5,7 @@ import 'package:mealtime_app/features/meals/presentation/bloc/meals_bloc.dart';
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_event.dart';
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_state.dart';
 import 'package:mealtime_app/features/meals/presentation/widgets/meal_card.dart';
+import 'package:mealtime_app/features/meals/presentation/widgets/meal_view_model.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
@@ -68,6 +69,9 @@ class _MealsListPageState extends State<MealsListPage> {
               return _buildEmptyState();
             }
 
+            // Optimization: Get the current time once before building the list.
+            final now = DateTime.now();
+
             return RefreshIndicator(
               onRefresh: () async {
                 _loadMeals();
@@ -77,10 +81,13 @@ class _MealsListPageState extends State<MealsListPage> {
                 itemCount: state.meals.length,
                 itemBuilder: (context, index) {
                   final meal = state.meals[index];
+                  // Optimization: Create a ViewModel to handle display logic.
+                  // This prevents expensive calculations inside MealCard's build method.
+                  final mealVM = MealViewModel(meal: meal, now: now);
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: MealCard(
-                      meal: meal,
+                      mealVM: mealVM,
                       onTap: () => _navigateToMealDetail(meal),
                       onComplete: () => _completeMeal(meal),
                       onSkip: () => _skipMeal(meal),
@@ -92,6 +99,9 @@ class _MealsListPageState extends State<MealsListPage> {
           }
 
           if (state is MealOperationInProgress) {
+            // Optimization: Get the current time once before building the list.
+            final now = DateTime.now();
+
             return Stack(
               children: [
                 if (state.meals.isNotEmpty)
@@ -104,10 +114,12 @@ class _MealsListPageState extends State<MealsListPage> {
                       itemCount: state.meals.length,
                       itemBuilder: (context, index) {
                         final meal = state.meals[index];
+                        // Optimization: Create a ViewModel to handle display logic.
+                        final mealVM = MealViewModel(meal: meal, now: now);
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: MealCard(
-                            meal: meal,
+                            mealVM: mealVM,
                             onTap: () => _navigateToMealDetail(meal),
                             onComplete: () => _completeMeal(meal),
                             onSkip: () => _skipMeal(meal),
