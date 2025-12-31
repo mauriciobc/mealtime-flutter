@@ -158,27 +158,52 @@ class _EditMealPageState extends State<EditMealPage> {
                 const SizedBox(height: 24),
 
                 // Botões de ação
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _deleteMeal,
-                        icon: const Icon(Icons.delete),
-                        label: const Text('Excluir'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Theme.of(context).colorScheme.error,
+                BlocBuilder<MealsBloc, MealsState>(
+                  builder: (context, state) {
+                    final bool isLoading = state is MealOperationInProgress;
+
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: isLoading ? null : _deleteMeal,
+                            icon: isLoading
+                                ? const SizedBox.shrink()
+                                : const Icon(Icons.delete),
+                            label: isLoading
+                                ? const SizedBox.square(
+                                    dimension: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                    ),
+                                  )
+                                : const Text('Excluir'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.error,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _saveMeal,
-                        icon: const Icon(Icons.save),
-                        label: const Text('Salvar'),
-                      ),
-                    ),
-                  ],
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: isLoading ? null : _saveMeal,
+                            icon: isLoading
+                                ? const SizedBox.shrink()
+                                : const Icon(Icons.save),
+                            label: isLoading
+                                ? const SizedBox.square(
+                                    dimension: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                    ),
+                                  )
+                                : const Text('Salvar'),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
