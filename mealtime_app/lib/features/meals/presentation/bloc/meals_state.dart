@@ -19,11 +19,12 @@ class MealsLoading extends MealsState {
 
 class MealsLoaded extends MealsState {
   final List<Meal> meals;
+  final Meal? lastMeal;
 
-  const MealsLoaded({required this.meals});
+  const MealsLoaded({required this.meals, this.lastMeal});
 
   @override
-  List<Object> get props => [meals];
+  List<Object?> get props => [meals, lastMeal];
 }
 
 class MealLoaded extends MealsState {
