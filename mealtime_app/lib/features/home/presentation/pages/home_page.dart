@@ -174,16 +174,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildLastFeedingSection(BuildContext context) {
     return BlocBuilder<MealsBloc, MealsState>(
       builder: (context, state) {
-        Meal? lastMeal;
-        if (state is MealsLoaded && state.meals.isNotEmpty) {
-          final completedMeals = state.meals
-              .where((meal) => meal.status == MealStatus.completed)
-              .toList();
-          if (completedMeals.isNotEmpty) {
-            completedMeals.sort((a, b) => b.completedAt!.compareTo(a.completedAt!));
-            lastMeal = completedMeals.first;
-          }
-        }
+        final lastMeal = state is MealsLoaded ? state.lastMeal : null;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),

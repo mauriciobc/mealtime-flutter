@@ -60,7 +60,19 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
 
     result.fold(
       (failure) => emit(MealsError(failure)),
-      (meals) => emit(MealsLoaded(meals: meals)),
+      (meals) {
+        Meal? lastMeal;
+        if (meals.isNotEmpty) {
+          final completedMeals = meals
+              .where((meal) => meal.status == MealStatus.completed)
+              .toList();
+          if (completedMeals.isNotEmpty) {
+            completedMeals.sort((a, b) => b.completedAt!.compareTo(a.completedAt!));
+            lastMeal = completedMeals.first;
+          }
+        }
+        emit(MealsLoaded(meals: meals, lastMeal: lastMeal));
+      },
     );
   }
 
