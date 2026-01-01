@@ -3,6 +3,7 @@ import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
 
 class MealCard extends StatelessWidget {
   final Meal meal;
+  final DateTime now;
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
   final VoidCallback? onSkip;
@@ -10,6 +11,7 @@ class MealCard extends StatelessWidget {
   const MealCard({
     super.key,
     required this.meal,
+    required this.now,
     this.onTap,
     this.onComplete,
     this.onSkip,
@@ -216,7 +218,6 @@ class MealCard extends StatelessWidget {
   }
 
   String _formatDateTime(DateTime dateTime) {
-    final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final mealDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
 
