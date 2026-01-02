@@ -120,7 +120,12 @@ class _LoginPageState extends State<LoginPage> {
                   child: ElevatedButton(
                     onPressed: state is SimpleAuthLoading ? null : _handleAuth,
                     child: state is SimpleAuthLoading
-                        ? const CircularProgressIndicator()
+                        ? SizedBox.square(
+                            dimension: 24,
+                            child: CircularProgressIndicator(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          )
                         : Text(_isSignUp ? 'Criar Conta' : 'Entrar'),
                   ),
                 );
