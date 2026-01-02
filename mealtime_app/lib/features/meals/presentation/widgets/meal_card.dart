@@ -6,10 +6,13 @@ class MealCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
   final VoidCallback? onSkip;
+  // ⚡ Bolt: Pass `now` from the parent to avoid `DateTime.now()` in `build`.
+  final DateTime now;
 
   const MealCard({
     super.key,
     required this.meal,
+    required this.now,
     this.onTap,
     this.onComplete,
     this.onSkip,
@@ -42,7 +45,7 @@ class MealCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _formatDateTime(meal.scheduledAt),
+                          _formatDateTime(meal.scheduledAt, now),
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
@@ -215,8 +218,7 @@ class MealCard extends StatelessWidget {
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    final now = DateTime.now();
+  String _formatDateTime(DateTime dateTime, DateTime now) {
     final today = DateTime(now.year, now.month, now.day);
     final mealDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
 

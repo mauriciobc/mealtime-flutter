@@ -52,6 +52,10 @@ class _MealsListPageState extends State<MealsListPage> {
       ),
       body: BlocBuilder<MealsBloc, MealsState>(
         builder: (context, state) {
+          // ⚡ Bolt: Hoist DateTime.now() outside the list builder.
+          // This prevents repeated system calls and ensures all MealCards in the
+          // list are rendered relative to the same timestamp.
+          final now = DateTime.now();
           if (state is MealsLoading) {
             return const LoadingWidget();
           }
@@ -81,6 +85,7 @@ class _MealsListPageState extends State<MealsListPage> {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: MealCard(
                       meal: meal,
+                      now: now,
                       onTap: () => _navigateToMealDetail(meal),
                       onComplete: () => _completeMeal(meal),
                       onSkip: () => _skipMeal(meal),
@@ -108,6 +113,7 @@ class _MealsListPageState extends State<MealsListPage> {
                           padding: const EdgeInsets.only(bottom: 12),
                           child: MealCard(
                             meal: meal,
+                            now: now,
                             onTap: () => _navigateToMealDetail(meal),
                             onComplete: () => _completeMeal(meal),
                             onSkip: () => _skipMeal(meal),
