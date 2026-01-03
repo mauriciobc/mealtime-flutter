@@ -76,14 +76,14 @@ class _MealsListPageState extends State<MealsListPage> {
                 padding: const EdgeInsets.all(16),
                 itemCount: state.meals.length,
                 itemBuilder: (context, index) {
-                  final meal = state.meals[index];
+                  final viewModel = state.meals[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: MealCard(
-                      meal: meal,
-                      onTap: () => _navigateToMealDetail(meal),
-                      onComplete: () => _completeMeal(meal),
-                      onSkip: () => _skipMeal(meal),
+                      viewModel: viewModel,
+                      onTap: () => _navigateToMealDetail(viewModel.meal),
+                      onComplete: () => _completeMeal(viewModel.meal),
+                      onSkip: () => _skipMeal(viewModel.meal),
                     ),
                   );
                 },
@@ -103,14 +103,14 @@ class _MealsListPageState extends State<MealsListPage> {
                       padding: const EdgeInsets.all(16),
                       itemCount: state.meals.length,
                       itemBuilder: (context, index) {
-                        final meal = state.meals[index];
+                        final viewModel = state.meals[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: MealCard(
-                            meal: meal,
-                            onTap: () => _navigateToMealDetail(meal),
-                            onComplete: () => _completeMeal(meal),
-                            onSkip: () => _skipMeal(meal),
+                            viewModel: viewModel,
+                            onTap: () => _navigateToMealDetail(viewModel.meal),
+                            onComplete: () => _completeMeal(viewModel.meal),
+                            onSkip: () => _skipMeal(viewModel.meal),
                           ),
                         );
                       },
