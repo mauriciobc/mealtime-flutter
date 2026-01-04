@@ -63,6 +63,7 @@ class _HomePageState extends State<HomePage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: _showFeedingBottomSheet,
+          tooltip: 'Registrar nova alimentação',
           child: const Icon(Icons.add),
         ),
         bottomNavigationBar: _buildBottomNavigationBar(context),
@@ -87,6 +88,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               IconButton(
                 icon: Icon(Icons.notifications_outlined, color: Theme.of(context).colorScheme.onSurface),
+                tooltip: 'Notificações',
                 onPressed: () {
                   // TODO: Implementar notificações
                 },
