@@ -77,10 +77,12 @@ class _MealsListPageState extends State<MealsListPage> {
                 itemCount: state.meals.length,
                 itemBuilder: (context, index) {
                   final meal = state.meals[index];
+                  // Date is pre-formatted here to prevent re-calculation in each MealCard build.
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: MealCard(
                       meal: meal,
+                      formattedDateTime: _formatDateTime(meal.scheduledAt),
                       onTap: () => _navigateToMealDetail(meal),
                       onComplete: () => _completeMeal(meal),
                       onSkip: () => _skipMeal(meal),
@@ -104,10 +106,12 @@ class _MealsListPageState extends State<MealsListPage> {
                       itemCount: state.meals.length,
                       itemBuilder: (context, index) {
                         final meal = state.meals[index];
+                        // Date is pre-formatted here to prevent re-calculation in each MealCard build.
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: MealCard(
                             meal: meal,
+                            formattedDateTime: _formatDateTime(meal.scheduledAt),
                             onTap: () => _navigateToMealDetail(meal),
                             onComplete: () => _completeMeal(meal),
                             onSkip: () => _skipMeal(meal),
@@ -226,6 +230,44 @@ class _MealsListPageState extends State<MealsListPage> {
         },
       ),
     );
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final mealDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+    String dateText;
+    if (mealDate == today) {
+      dateText = 'Hoje';
+    } else if (mealDate == today.add(const Duration(days: 1))) {
+      dateText = 'Amanhã';
+    } else if (mealDate == today.subtract(const Duration(days: 1))) {
+      dateText = 'Ontem';
+    } else {
+      final weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      final months = [
+        'Jan',
+        'Fev',
+        'Mar',
+        'Abr',
+        'Mai',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Set',
+        'Out',
+        'Nov',
+        'Dez',
+      ];
+      dateText =
+          '${weekdays[mealDate.weekday % 7]}, ${mealDate.day} ${months[mealDate.month - 1]}';
+    }
+
+    final timeText =
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+
+    return '$dateText às $timeText';
   }
 }
 
