@@ -16,6 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   bool _isSignUp = false;
+  bool _isPasswordVisible = false;
 
   @override
   void dispose() {
@@ -103,11 +104,26 @@ class _LoginPageState extends State<LoginPage> {
 
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Senha',
-                prefixIcon: Icon(Icons.lock),
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: Tooltip(
+                  message: _isPasswordVisible ? 'Hide password' : 'Show password',
+                  child: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
+                ),
               ),
-              obscureText: true,
+              obscureText: !_isPasswordVisible,
             ),
             const SizedBox(height: 16),
 
