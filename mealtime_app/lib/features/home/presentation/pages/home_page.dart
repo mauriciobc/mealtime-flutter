@@ -109,8 +109,8 @@ class _HomePageState extends State<HomePage> {
         return BlocBuilder<MealsBloc, MealsState>(
           builder: (context, mealsState) {
             final catsCount = catsState is CatsLoaded ? catsState.cats.length : 0;
-            final todayMeals = mealsState is MealsLoaded 
-                ? mealsState.meals.where((meal) => meal.isToday).length 
+            final todayMeals = mealsState is MealsLoaded
+                ? mealsState.meals.where((meal) => meal.meal.isToday).length
                 : 0;
             
             return Padding(
@@ -177,7 +177,8 @@ class _HomePageState extends State<HomePage> {
         Meal? lastMeal;
         if (state is MealsLoaded && state.meals.isNotEmpty) {
           final completedMeals = state.meals
-              .where((meal) => meal.status == MealStatus.completed)
+              .where((mealVM) => mealVM.meal.status == MealStatus.completed)
+              .map((mealVM) => mealVM.meal)
               .toList();
           if (completedMeals.isNotEmpty) {
             completedMeals.sort((a, b) => b.completedAt!.compareTo(a.completedAt!));
@@ -337,7 +338,8 @@ class _HomePageState extends State<HomePage> {
         List<Meal> recentMeals = [];
         if (state is MealsLoaded) {
           recentMeals = state.meals
-              .where((meal) => meal.status == MealStatus.completed)
+              .where((mealVM) => mealVM.meal.status == MealStatus.completed)
+              .map((mealVM) => mealVM.meal)
               .take(3)
               .toList();
         }
