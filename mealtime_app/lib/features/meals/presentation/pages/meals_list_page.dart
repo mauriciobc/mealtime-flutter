@@ -76,14 +76,14 @@ class _MealsListPageState extends State<MealsListPage> {
                 padding: const EdgeInsets.all(16),
                 itemCount: state.meals.length,
                 itemBuilder: (context, index) {
-                  final meal = state.meals[index];
+                  final mealVM = state.meals[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: MealCard(
-                      meal: meal,
-                      onTap: () => _navigateToMealDetail(meal),
-                      onComplete: () => _completeMeal(meal),
-                      onSkip: () => _skipMeal(meal),
+                      meal: mealVM,
+                      onTap: () => _navigateToMealDetail(mealVM.meal),
+                      onComplete: () => _completeMeal(mealVM.meal),
+                      onSkip: () => _skipMeal(mealVM.meal),
                     ),
                   );
                 },
@@ -103,14 +103,14 @@ class _MealsListPageState extends State<MealsListPage> {
                       padding: const EdgeInsets.all(16),
                       itemCount: state.meals.length,
                       itemBuilder: (context, index) {
-                        final meal = state.meals[index];
+                        final mealVM = state.meals[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: MealCard(
-                            meal: meal,
-                            onTap: () => _navigateToMealDetail(meal),
-                            onComplete: () => _completeMeal(meal),
-                            onSkip: () => _skipMeal(meal),
+                            meal: mealVM,
+                            onTap: () => _navigateToMealDetail(mealVM.meal),
+                            onComplete: () => _completeMeal(mealVM.meal),
+                            onSkip: () => _skipMeal(mealVM.meal),
                           ),
                         );
                       },

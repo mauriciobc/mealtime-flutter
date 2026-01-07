@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:mealtime_app/core/errors/failures.dart';
-import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
+import 'package:mealtime_app/features/meals/presentation/widgets/meal_view_model.dart';
 
 abstract class MealsState extends Equatable {
   const MealsState();
@@ -18,7 +18,7 @@ class MealsLoading extends MealsState {
 }
 
 class MealsLoaded extends MealsState {
-  final List<Meal> meals;
+  final List<MealViewModel> meals;
 
   const MealsLoaded({required this.meals});
 
@@ -27,7 +27,7 @@ class MealsLoaded extends MealsState {
 }
 
 class MealLoaded extends MealsState {
-  final Meal meal;
+  final MealViewModel meal;
 
   const MealLoaded({required this.meal});
 
@@ -37,7 +37,7 @@ class MealLoaded extends MealsState {
 
 class MealOperationInProgress extends MealsState {
   final String operation;
-  final List<Meal> meals;
+  final List<MealViewModel> meals;
 
   const MealOperationInProgress({required this.operation, required this.meals});
 
@@ -47,8 +47,8 @@ class MealOperationInProgress extends MealsState {
 
 class MealOperationSuccess extends MealsState {
   final String message;
-  final List<Meal> meals;
-  final Meal? updatedMeal;
+  final List<MealViewModel> meals;
+  final MealViewModel? updatedMeal;
 
   const MealOperationSuccess({
     required this.message,
