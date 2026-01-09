@@ -47,7 +47,11 @@ class _MealsListPageState extends State<MealsListPage> {
               : 'Todas as Refeições',
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadMeals),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadMeals,
+            tooltip: 'Atualizar Refeições',
+          ),
         ],
       ),
       body: BlocBuilder<MealsBloc, MealsState>(
@@ -142,6 +146,7 @@ class _MealsListPageState extends State<MealsListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToCreateMeal,
+        tooltip: 'Criar Refeição',
         child: const Icon(Icons.add),
       ),
     );
