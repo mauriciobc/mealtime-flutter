@@ -3,6 +3,7 @@ import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
 
 class MealCard extends StatelessWidget {
   final Meal meal;
+  final DateTime now;
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
   final VoidCallback? onSkip;
@@ -10,6 +11,7 @@ class MealCard extends StatelessWidget {
   const MealCard({
     super.key,
     required this.meal,
+    required this.now,
     this.onTap,
     this.onComplete,
     this.onSkip,
@@ -42,7 +44,7 @@ class MealCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _formatDateTime(meal.scheduledAt),
+                          _formatDateTime(meal.scheduledAt, now),
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
@@ -215,8 +217,7 @@ class MealCard extends StatelessWidget {
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    final now = DateTime.now();
+  String _formatDateTime(DateTime dateTime, DateTime now) {
     final today = DateTime(now.year, now.month, now.day);
     final mealDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
 
