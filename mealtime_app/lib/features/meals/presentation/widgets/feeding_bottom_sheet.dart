@@ -4,6 +4,7 @@ import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_bloc.dart';
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_event.dart';
+import 'package:mealtime_app/features/meals/presentation/bloc/meals_state.dart';
 import 'package:mealtime_app/features/meals/presentation/widgets/cat_selection_item.dart';
 import 'package:uuid/uuid.dart';
 
@@ -55,7 +56,6 @@ class FeedingBottomSheet extends StatefulWidget {
 class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
   final Set<String> _selectedCatIds = {};
   final Map<String, FeedingFormData> _feedingData = {};
-  bool _isSubmitting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -174,45 +174,50 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
   }
 
   Widget _buildConfirmButton() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+    return BlocBuilder<MealsBloc, MealsState>(
+      builder: (context, state) {
+        final isSubmitting = state is MealOperationInProgress;
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: _selectedCatIds.isEmpty || _isSubmitting
-              ? null
-              : _submitFeedings,
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-          ),
-          child: _isSubmitting
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.check),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Confirmar Alimentação (${_selectedCatIds.length})',
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _selectedCatIds.isEmpty || isSubmitting
+                  ? null
+                  : _submitFeedings,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: isSubmitting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.check),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Confirmar Alimentação (${_selectedCatIds.length})',
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -254,8 +259,6 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
 
   Future<void> _submitFeedings() async {
     if (_selectedCatIds.isEmpty) return;
-
-    setState(() => _isSubmitting = true);
 
     try {
       final now = DateTime.now();
@@ -302,7 +305,6 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erro ao registrar alimentação: $e'),
