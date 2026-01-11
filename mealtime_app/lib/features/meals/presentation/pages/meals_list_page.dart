@@ -68,6 +68,8 @@ class _MealsListPageState extends State<MealsListPage> {
               return _buildEmptyState();
             }
 
+            // Get current time once to avoid repeated system calls in list items.
+            final now = DateTime.now();
             return RefreshIndicator(
               onRefresh: () async {
                 _loadMeals();
@@ -81,6 +83,7 @@ class _MealsListPageState extends State<MealsListPage> {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: MealCard(
                       meal: meal,
+                      now: now,
                       onTap: () => _navigateToMealDetail(meal),
                       onComplete: () => _completeMeal(meal),
                       onSkip: () => _skipMeal(meal),
@@ -92,6 +95,8 @@ class _MealsListPageState extends State<MealsListPage> {
           }
 
           if (state is MealOperationInProgress) {
+            // Get current time once to avoid repeated system calls in list items.
+            final now = DateTime.now();
             return Stack(
               children: [
                 if (state.meals.isNotEmpty)
@@ -108,6 +113,7 @@ class _MealsListPageState extends State<MealsListPage> {
                           padding: const EdgeInsets.only(bottom: 12),
                           child: MealCard(
                             meal: meal,
+                            now: now,
                             onTap: () => _navigateToMealDetail(meal),
                             onComplete: () => _completeMeal(meal),
                             onSkip: () => _skipMeal(meal),
