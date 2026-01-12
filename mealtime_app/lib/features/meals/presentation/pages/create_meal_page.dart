@@ -64,7 +64,21 @@ class _CreateMealPageState extends State<CreateMealPage> {
       appBar: AppBar(
         title: const Text('Nova Refeição'),
         actions: [
-          TextButton(onPressed: _saveMeal, child: const Text('Salvar')),
+          BlocBuilder<MealsBloc, MealsState>(
+            builder: (context, state) {
+              if (state is MealOperationInProgress) {
+                return const Padding(
+                  padding: EdgeInsets.only(right: 16.0),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                );
+              }
+              return TextButton(onPressed: _saveMeal, child: const Text('Salvar'));
+            },
+          ),
         ],
       ),
       body: BlocListener<MealsBloc, MealsState>(
@@ -108,14 +122,28 @@ class _CreateMealPageState extends State<CreateMealPage> {
                       setState(() => _selectedHomeId = homeId),
                 ),
                 const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _saveMeal,
-                    icon: const Icon(Icons.save),
-                    label: const Text('Criar Refeição'),
-                  ),
-                ),
+                BlocBuilder<MealsBloc, MealsState>(
+                  builder: (context, state) {
+                    final bool isLoading = state is MealOperationInProgress;
+                    return SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: isLoading ? null : _saveMeal,
+                        icon: isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.save),
+                        label: Text(isLoading ? 'Salvando...' : 'Criar Refeição'),
+                      ),
+                    );
+                  },
+                )
               ],
             ),
           ),
@@ -125,6 +153,10 @@ class _CreateMealPageState extends State<CreateMealPage> {
   }
 
   void _saveMeal() {
+    if (context.read<MealsBloc>().state is MealOperationInProgress) {
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
