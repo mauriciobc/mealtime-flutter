@@ -52,6 +52,7 @@ class _MealsListPageState extends State<MealsListPage> {
       ),
       body: BlocBuilder<MealsBloc, MealsState>(
         builder: (context, state) {
+          final now = DateTime.now();
           if (state is MealsLoading) {
             return const LoadingWidget();
           }
@@ -81,6 +82,7 @@ class _MealsListPageState extends State<MealsListPage> {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: MealCard(
                       meal: meal,
+                      now: now,
                       onTap: () => _navigateToMealDetail(meal),
                       onComplete: () => _completeMeal(meal),
                       onSkip: () => _skipMeal(meal),
@@ -108,6 +110,7 @@ class _MealsListPageState extends State<MealsListPage> {
                           padding: const EdgeInsets.only(bottom: 12),
                           child: MealCard(
                             meal: meal,
+                            now: now,
                             onTap: () => _navigateToMealDetail(meal),
                             onComplete: () => _completeMeal(meal),
                             onSkip: () => _skipMeal(meal),
