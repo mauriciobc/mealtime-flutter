@@ -17,6 +17,7 @@ import 'package:mealtime_app/features/meals/domain/usecases/update_meal.dart'
     as update_meal;
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_event.dart';
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_state.dart';
+import 'package:mealtime_app/features/meals/presentation/view_models/meal_view_model.dart';
 
 class MealsBloc extends Bloc<MealsEvent, MealsState> {
   final GetMeals getMeals;
@@ -60,7 +61,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
 
     result.fold(
       (failure) => emit(MealsError(failure)),
-      (meals) => emit(MealsLoaded(meals: meals)),
+      (meals) => emit(MealsLoaded(meals: _mapMealsToViewModels(meals))),
     );
   }
 
@@ -74,7 +75,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
 
     result.fold(
       (failure) => emit(MealsError(failure)),
-      (meals) => emit(MealsLoaded(meals: meals)),
+      (meals) => emit(MealsLoaded(meals: _mapMealsToViewModels(meals))),
     );
   }
 
@@ -102,7 +103,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
 
     result.fold(
       (failure) => emit(MealsError(failure)),
-      (meals) => emit(MealsLoaded(meals: meals)),
+      (meals) => emit(MealsLoaded(meals: _mapMealsToViewModels(meals))),
     );
   }
 
@@ -121,20 +122,23 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
 
     result.fold((failure) => emit(MealsError(failure)), (newMeal) {
       if (currentState is MealsLoaded) {
-        final updatedMeals = <Meal>[...currentState.meals, newMeal];
+        final updatedMeals = <MealViewModel>[
+          ...currentState.meals,
+          _mapMealToViewModel(newMeal)
+        ];
         emit(
           MealOperationSuccess(
             message: 'Refeição criada com sucesso!',
             meals: updatedMeals,
-            updatedMeal: newMeal,
+            updatedMeal: _mapMealToViewModel(newMeal),
           ),
         );
       } else {
         emit(
           MealOperationSuccess(
             message: 'Refeição criada com sucesso!',
-            meals: [newMeal],
-            updatedMeal: newMeal,
+            meals: [_mapMealToViewModel(newMeal)],
+            updatedMeal: _mapMealToViewModel(newMeal),
           ),
         );
       }
@@ -156,22 +160,24 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
 
     result.fold((failure) => emit(MealsError(failure)), (updatedMeal) {
       if (currentState is MealsLoaded) {
-        final updatedMeals = currentState.meals.map<Meal>((meal) {
-          return meal.id == updatedMeal.id ? updatedMeal : meal;
+        final updatedMeals = currentState.meals.map<MealViewModel>((vm) {
+          return vm.meal.id == updatedMeal.id
+              ? _mapMealToViewModel(updatedMeal)
+              : vm;
         }).toList();
         emit(
           MealOperationSuccess(
             message: 'Refeição atualizada com sucesso!',
             meals: updatedMeals,
-            updatedMeal: updatedMeal,
+            updatedMeal: _mapMealToViewModel(updatedMeal),
           ),
         );
       } else {
         emit(
           MealOperationSuccess(
             message: 'Refeição atualizada com sucesso!',
-            meals: [updatedMeal],
-            updatedMeal: updatedMeal,
+            meals: [_mapMealToViewModel(updatedMeal)],
+            updatedMeal: _mapMealToViewModel(updatedMeal),
           ),
         );
       }
@@ -194,7 +200,7 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
     result.fold((failure) => emit(MealsError(failure)), (_) {
       if (currentState is MealsLoaded) {
         final updatedMeals = currentState.meals
-            .where((meal) => meal.id != event.mealId)
+            .where((vm) => vm.meal.id != event.mealId)
             .toList();
         emit(
           MealOperationSuccess(
@@ -237,22 +243,24 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
 
     result.fold((failure) => emit(MealsError(failure)), (completedMeal) {
       if (currentState is MealsLoaded) {
-        final updatedMeals = currentState.meals.map<Meal>((meal) {
-          return meal.id == completedMeal.id ? completedMeal : meal;
+        final updatedMeals = currentState.meals.map<MealViewModel>((vm) {
+          return vm.meal.id == completedMeal.id
+              ? _mapMealToViewModel(completedMeal)
+              : vm;
         }).toList();
         emit(
           MealOperationSuccess(
             message: 'Refeição concluída com sucesso!',
             meals: updatedMeals,
-            updatedMeal: completedMeal,
+            updatedMeal: _mapMealToViewModel(completedMeal),
           ),
         );
       } else {
         emit(
           MealOperationSuccess(
             message: 'Refeição concluída com sucesso!',
-            meals: [completedMeal],
-            updatedMeal: completedMeal,
+            meals: [_mapMealToViewModel(completedMeal)],
+            updatedMeal: _mapMealToViewModel(completedMeal),
           ),
         );
       }
@@ -276,22 +284,24 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
 
     result.fold((failure) => emit(MealsError(failure)), (skippedMeal) {
       if (currentState is MealsLoaded) {
-        final updatedMeals = currentState.meals.map<Meal>((meal) {
-          return meal.id == skippedMeal.id ? skippedMeal : meal;
+        final updatedMeals = currentState.meals.map<MealViewModel>((vm) {
+          return vm.meal.id == skippedMeal.id
+              ? _mapMealToViewModel(skippedMeal)
+              : vm;
         }).toList();
         emit(
           MealOperationSuccess(
             message: 'Refeição pulada com sucesso!',
             meals: updatedMeals,
-            updatedMeal: skippedMeal,
+            updatedMeal: _mapMealToViewModel(skippedMeal),
           ),
         );
       } else {
         emit(
           MealOperationSuccess(
             message: 'Refeição pulada com sucesso!',
-            meals: [skippedMeal],
-            updatedMeal: skippedMeal,
+            meals: [_mapMealToViewModel(skippedMeal)],
+            updatedMeal: _mapMealToViewModel(skippedMeal),
           ),
         );
       }
@@ -309,5 +319,57 @@ class MealsBloc extends Bloc<MealsEvent, MealsState> {
     if (state is MealsError) {
       emit(const MealsInitial());
     }
+  }
+
+  // Optimization: Pre-format date strings here in the BLoC to avoid
+  // re-calculating them in the build method of every list item.
+  // This improves scroll performance by reducing CPU work on the UI thread.
+  List<MealViewModel> _mapMealsToViewModels(List<Meal> meals) {
+    return meals.map((meal) => _mapMealToViewModel(meal)).toList();
+  }
+
+  MealViewModel _mapMealToViewModel(Meal meal) {
+    return MealViewModel(
+      meal: meal,
+      scheduledAtFormatted: _formatDateTime(meal.scheduledAt),
+    );
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final mealDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+    String dateText;
+    if (mealDate == today) {
+      dateText = 'Hoje';
+    } else if (mealDate == today.add(const Duration(days: 1))) {
+      dateText = 'Amanhã';
+    } else if (mealDate == today.subtract(const Duration(days: 1))) {
+      dateText = 'Ontem';
+    } else {
+      final weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      final months = [
+        'Jan',
+        'Fev',
+        'Mar',
+        'Abr',
+        'Mai',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Set',
+        'Out',
+        'Nov',
+        'Dez',
+      ];
+      dateText =
+          '${weekdays[mealDate.weekday % 7]}, ${mealDate.day} ${months[mealDate.month - 1]}';
+    }
+
+    final timeText =
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+
+    return '$dateText às $timeText';
   }
 }
