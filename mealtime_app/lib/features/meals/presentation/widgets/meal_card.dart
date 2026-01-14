@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
+import 'package:mealtime_app/features/meals/presentation/view_models/meal_view_model.dart';
 
 class MealCard extends StatelessWidget {
-  final Meal meal;
+  final MealViewModel meal;
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
   final VoidCallback? onSkip;
@@ -36,13 +37,13 @@ class MealCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          meal.typeDisplayName,
+                          meal.meal.typeDisplayName,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _formatDateTime(meal.scheduledAt),
+                          meal.formattedDateTime,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
@@ -54,14 +55,14 @@ class MealCard extends StatelessWidget {
                   _buildStatusChip(context),
                 ],
               ),
-              if (meal.notes != null) ...[
+              if (meal.meal.notes != null) ...[
                 const SizedBox(height: 12),
                 Text(
-                  meal.notes!,
+                  meal.meal.notes!,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
-              if (meal.amount != null) ...[
+              if (meal.meal.amount != null) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -72,7 +73,7 @@ class MealCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${meal.amount!.toStringAsFixed(0)}g',
+                      '${meal.meal.amount!.toStringAsFixed(0)}g',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.outline,
                       ),
@@ -80,7 +81,7 @@ class MealCard extends StatelessWidget {
                   ],
                 ),
               ],
-              if (meal.foodType != null) ...[
+              if (meal.meal.foodType != null) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -91,7 +92,7 @@ class MealCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      meal.foodType!,
+                      meal.meal.foodType!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.outline,
                       ),
@@ -99,7 +100,7 @@ class MealCard extends StatelessWidget {
                   ],
                 ),
               ],
-              if (meal.status == MealStatus.scheduled) ...[
+              if (meal.meal.status == MealStatus.scheduled) ...[
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -135,7 +136,7 @@ class MealCard extends StatelessWidget {
     IconData iconData;
     Color color;
 
-    switch (meal.type) {
+    switch (meal.meal.type) {
       case MealType.breakfast:
         iconData = Icons.wb_sunny;
         color = Colors.orange;
@@ -169,9 +170,9 @@ class MealCard extends StatelessWidget {
     Color textColor;
     String text;
 
-    switch (meal.status) {
+    switch (meal.meal.status) {
       case MealStatus.scheduled:
-        if (meal.isOverdue) {
+        if (meal.meal.isOverdue) {
           backgroundColor = Colors.red.withOpacity(0.1);
           textColor = Colors.red;
           text = 'Atrasada';
@@ -215,41 +216,4 @@ class MealCard extends StatelessWidget {
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final mealDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
-
-    String dateText;
-    if (mealDate == today) {
-      dateText = 'Hoje';
-    } else if (mealDate == today.add(const Duration(days: 1))) {
-      dateText = 'Amanhã';
-    } else if (mealDate == today.subtract(const Duration(days: 1))) {
-      dateText = 'Ontem';
-    } else {
-      final weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-      final months = [
-        'Jan',
-        'Fev',
-        'Mar',
-        'Abr',
-        'Mai',
-        'Jun',
-        'Jul',
-        'Ago',
-        'Set',
-        'Out',
-        'Nov',
-        'Dez',
-      ];
-      dateText =
-          '${weekdays[mealDate.weekday % 7]}, ${mealDate.day} ${months[mealDate.month - 1]}';
-    }
-
-    final timeText =
-        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-
-    return '$dateText às $timeText';
-  }
 }
