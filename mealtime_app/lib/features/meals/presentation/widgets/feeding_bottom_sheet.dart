@@ -186,12 +186,16 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
           ),
         ],
       ),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: _selectedCatIds.isEmpty || _isSubmitting
-              ? null
-              : _submitFeedings,
+      child: Tooltip(
+        message: _selectedCatIds.isEmpty
+            ? 'Selecione ao menos um gato para confirmar'
+            : '',
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _selectedCatIds.isEmpty || _isSubmitting
+                ? null
+                : _submitFeedings,
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
           ),
@@ -211,6 +215,7 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
                     ),
                   ],
                 ),
+          ),
         ),
       ),
     );
