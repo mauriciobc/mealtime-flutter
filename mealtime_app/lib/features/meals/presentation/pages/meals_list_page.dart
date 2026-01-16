@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_bloc.dart';
+import 'package:mealtime_app/features/meals/presentation/view_models/meal_view_model.dart';
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_event.dart';
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_state.dart';
 import 'package:mealtime_app/features/meals/presentation/widgets/meal_card.dart';
@@ -76,11 +77,13 @@ class _MealsListPageState extends State<MealsListPage> {
                 padding: const EdgeInsets.all(16),
                 itemCount: state.meals.length,
                 itemBuilder: (context, index) {
-                  final meal = state.meals[index];
+                  final mealViewModel = state.meals[index];
+                  final meal = mealViewModel.meal;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: MealCard(
                       meal: meal,
+                      formattedScheduledAt: mealViewModel.formattedScheduledAt,
                       onTap: () => _navigateToMealDetail(meal),
                       onComplete: () => _completeMeal(meal),
                       onSkip: () => _skipMeal(meal),
@@ -103,11 +106,13 @@ class _MealsListPageState extends State<MealsListPage> {
                       padding: const EdgeInsets.all(16),
                       itemCount: state.meals.length,
                       itemBuilder: (context, index) {
-                        final meal = state.meals[index];
+                        final mealViewModel = state.meals[index];
+                        final meal = mealViewModel.meal;
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: MealCard(
                             meal: meal,
+                            formattedScheduledAt: mealViewModel.formattedScheduledAt,
                             onTap: () => _navigateToMealDetail(meal),
                             onComplete: () => _completeMeal(meal),
                             onSkip: () => _skipMeal(meal),
