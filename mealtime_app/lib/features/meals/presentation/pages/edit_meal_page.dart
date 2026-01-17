@@ -72,7 +72,11 @@ class _EditMealPageState extends State<EditMealPage> {
       appBar: AppBar(
         title: const Text('Editar Refeição'),
         actions: [
-          TextButton(onPressed: _saveMeal, child: const Text('Salvar')),
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: _saveMeal,
+            tooltip: 'Salvar',
+          ),
         ],
       ),
       body: BlocListener<MealsBloc, MealsState>(
