@@ -186,31 +186,34 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
           ),
         ],
       ),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: _selectedCatIds.isEmpty || _isSubmitting
-              ? null
-              : _submitFeedings,
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Tooltip(
+        message: _selectedCatIds.isEmpty ? 'Selecione ao menos um gato' : '',
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _selectedCatIds.isEmpty || _isSubmitting
+                ? null
+                : _submitFeedings,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: _isSubmitting
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.check),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Confirmar Alimentação (${_selectedCatIds.length})',
+                      ),
+                    ],
+                  ),
           ),
-          child: _isSubmitting
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.check),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Confirmar Alimentação (${_selectedCatIds.length})',
-                    ),
-                  ],
-                ),
         ),
       ),
     );
