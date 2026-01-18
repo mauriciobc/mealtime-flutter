@@ -11,7 +11,7 @@ import 'package:mealtime_app/features/meals/presentation/bloc/meals_event.dart';
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_state.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
-import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
+import 'package:mealtime_app/features/meals/presentation/view_models/meal_view_model.dart';
 import 'package:mealtime_app/features/meals/presentation/widgets/feeding_bottom_sheet.dart';
 
 class HomePage extends StatefulWidget {
@@ -108,28 +108,35 @@ class _HomePageState extends State<HomePage> {
       builder: (context, catsState) {
         return BlocBuilder<MealsBloc, MealsState>(
           builder: (context, mealsState) {
-            final catsCount = catsState is CatsLoaded ? catsState.cats.length : 0;
-            final todayMeals = mealsState is MealsLoaded 
-                ? mealsState.meals.where((meal) => meal.isToday).length 
-                : 0;
-            
+            final catsCount =
+                catsState is CatsLoaded ? catsState.cats.length : 0;
+            final todayMeals =
+                mealsState is MealsLoaded ? mealsState.todayMealsCount : 0;
+
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _buildSummaryCard('Total de Gatos', catsCount.toString())),
+                      Expanded(
+                          child: _buildSummaryCard(
+                              'Total de Gatos', catsCount.toString())),
                       const SizedBox(width: 12),
-                      Expanded(child: _buildSummaryCard('Alimentações Hoje', todayMeals.toString())),
+                      Expanded(
+                          child: _buildSummaryCard(
+                              'Alimentações Hoje', todayMeals.toString())),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _buildSummaryCard('Porção Média', '9.2g')),
+                      Expanded(
+                          child: _buildSummaryCard('Porção Média', '9.2g')),
                       const SizedBox(width: 12),
-                      Expanded(child: _buildSummaryCard('Última Vez', '19:28')),
+                      Expanded(
+                          child: _buildSummaryCard('Última Vez',
+                              mealsState is MealsLoaded ? mealsState.lastMeal?.formattedTime ?? '--:--' : '--:--')),
                     ],
                   ),
                 ],
@@ -174,16 +181,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildLastFeedingSection(BuildContext context) {
     return BlocBuilder<MealsBloc, MealsState>(
       builder: (context, state) {
-        Meal? lastMeal;
-        if (state is MealsLoaded && state.meals.isNotEmpty) {
-          final completedMeals = state.meals
-              .where((meal) => meal.status == MealStatus.completed)
-              .toList();
-          if (completedMeals.isNotEmpty) {
-            completedMeals.sort((a, b) => b.completedAt!.compareTo(a.completedAt!));
-            lastMeal = completedMeals.first;
-          }
-        }
+        final lastMeal = state is MealsLoaded ? state.lastMeal : null;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -209,8 +207,12 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        child: Icon(Icons.pets,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -219,24 +221,39 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Text(
                               'Negresco', // TODO: Buscar nome do gato
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface,
+                                  ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${lastMeal.amount?.toStringAsFixed(0) ?? '10'}g ${lastMeal.foodType ?? 'ração seca'}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                              '${lastMeal.amount?.toStringAsFixed(0) ?? '10'}g ${lastMeal.meal.foodType ?? 'ração seca'}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Por Maurício Castro · ${_formatTime(lastMeal.completedAt!)} · ${_formatDate(lastMeal.completedAt!)}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                              'Por Maurício Castro · ${lastMeal.formattedTime} · ${lastMeal.relativeDate}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                             ),
                           ],
                         ),
@@ -254,7 +271,8 @@ class _HomePageState extends State<HomePage> {
                   child: Center(
                     child: Text(
                       'Nenhuma alimentação registrada hoje',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ),
@@ -334,10 +352,10 @@ class _HomePageState extends State<HomePage> {
   Widget _buildRecentRecordsSection(BuildContext context) {
     return BlocBuilder<MealsBloc, MealsState>(
       builder: (context, state) {
-        List<Meal> recentMeals = [];
+        List<MealViewModel> recentMeals = [];
         if (state is MealsLoaded) {
           recentMeals = state.meals
-              .where((meal) => meal.status == MealStatus.completed)
+              .where((vm) => vm.meal.status == MealStatus.completed)
               .take(3)
               .toList();
         }
@@ -356,7 +374,8 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 12),
               if (recentMeals.isNotEmpty)
-                ...recentMeals.map((meal) => _buildRecentRecordItem(meal))
+                ...recentMeals
+                    .map((mealVM) => _buildRecentRecordItem(mealVM))
               else
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -367,7 +386,8 @@ class _HomePageState extends State<HomePage> {
                   child: Center(
                     child: Text(
                       'Nenhum registro recente',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ),
@@ -378,7 +398,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildRecentRecordItem(Meal meal) {
+  Widget _buildRecentRecordItem(MealViewModel mealVM) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -390,8 +410,11 @@ class _HomePageState extends State<HomePage> {
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+            backgroundColor:
+                Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Icon(Icons.pets,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -401,24 +424,24 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   'Negresco', // TODO: Buscar nome do gato
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                 ),
                 Text(
-                  '${meal.amount?.toStringAsFixed(0) ?? '10'}g ${meal.foodType ?? 'ração seca'}',
+                  '${mealVM.amount?.toStringAsFixed(0) ?? '10'}g ${mealVM.meal.foodType ?? 'ração seca'}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
           ),
           Text(
-            _formatTime(meal.completedAt ?? meal.scheduledAt),
+            mealVM.formattedTime,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
         ],
       ),
@@ -580,14 +603,6 @@ class _HomePageState extends State<HomePage> {
         }
       },
     );
-  }
-
-  String _formatTime(DateTime dateTime) {
-    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
-
-  String _formatDate(DateTime dateTime) {
-    return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
   }
 
   void _showFeedingBottomSheet() {
