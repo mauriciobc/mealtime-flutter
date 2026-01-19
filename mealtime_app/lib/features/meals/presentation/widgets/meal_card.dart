@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
+import 'package:mealtime_app/features/meals/presentation/view_models/meal_view_model.dart';
 
 class MealCard extends StatelessWidget {
-  final Meal meal;
+  final MealViewModel mealViewModel;
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
   final VoidCallback? onSkip;
 
   const MealCard({
     super.key,
-    required this.meal,
+    required this.mealViewModel,
     this.onTap,
     this.onComplete,
     this.onSkip,
@@ -17,6 +18,9 @@ class MealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // By using MealViewModel, the meal property is now accessible via mealViewModel.meal
+    final meal = mealViewModel.meal;
+
     return Card(
       elevation: 2,
       child: InkWell(
@@ -41,8 +45,10 @@ class MealCard extends StatelessWidget {
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
+                        // PERFORMANCE: Use pre-formatted date time string from ViewModel
+                        // to avoid expensive calculations in the build method.
                         Text(
-                          _formatDateTime(meal.scheduledAt),
+                          mealViewModel.formattedDateTime,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
@@ -134,6 +140,7 @@ class MealCard extends StatelessWidget {
   Widget _buildMealTypeIcon() {
     IconData iconData;
     Color color;
+    final meal = mealViewModel.meal;
 
     switch (meal.type) {
       case MealType.breakfast:
@@ -168,6 +175,7 @@ class MealCard extends StatelessWidget {
     Color backgroundColor;
     Color textColor;
     String text;
+    final meal = mealViewModel.meal;
 
     switch (meal.status) {
       case MealStatus.scheduled:
@@ -213,43 +221,5 @@ class MealCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final mealDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
-
-    String dateText;
-    if (mealDate == today) {
-      dateText = 'Hoje';
-    } else if (mealDate == today.add(const Duration(days: 1))) {
-      dateText = 'Amanhã';
-    } else if (mealDate == today.subtract(const Duration(days: 1))) {
-      dateText = 'Ontem';
-    } else {
-      final weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-      final months = [
-        'Jan',
-        'Fev',
-        'Mar',
-        'Abr',
-        'Mai',
-        'Jun',
-        'Jul',
-        'Ago',
-        'Set',
-        'Out',
-        'Nov',
-        'Dez',
-      ];
-      dateText =
-          '${weekdays[mealDate.weekday % 7]}, ${mealDate.day} ${months[mealDate.month - 1]}';
-    }
-
-    final timeText =
-        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-
-    return '$dateText às $timeText';
   }
 }
