@@ -64,7 +64,23 @@ class _CreateMealPageState extends State<CreateMealPage> {
       appBar: AppBar(
         title: const Text('Nova Refeição'),
         actions: [
-          TextButton(onPressed: _saveMeal, child: const Text('Salvar')),
+          BlocBuilder<MealsBloc, MealsState>(
+            builder: (context, state) {
+              final bool isLoading = state is MealOperationInProgress;
+
+              return IconButton(
+                tooltip: 'Salvar',
+                icon: isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.save),
+                onPressed: isLoading ? null : _saveMeal,
+              );
+            },
+          ),
         ],
       ),
       body: BlocListener<MealsBloc, MealsState>(
@@ -110,10 +126,22 @@ class _CreateMealPageState extends State<CreateMealPage> {
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _saveMeal,
-                    icon: const Icon(Icons.save),
-                    label: const Text('Criar Refeição'),
+                  child: BlocBuilder<MealsBloc, MealsState>(
+                    builder: (context, state) {
+                      final isLoading = state is MealOperationInProgress;
+                      return ElevatedButton.icon(
+                        onPressed: isLoading ? null : _saveMeal,
+                        icon: isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.save),
+                        label:
+                            Text(isLoading ? 'Salvando...' : 'Criar Refeição'),
+                      );
+                    },
                   ),
                 ),
               ],
