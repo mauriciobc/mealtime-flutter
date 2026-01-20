@@ -1,0 +1,3 @@
+## 2024-05-20 - Performance: Move expensive calculations from `build` methods to BLoC
+**Learning:** A key performance pattern in this Flutter application is to move expensive calculations, such as date formatting, out of widget `build` methods and into the BLoC. By creating a `ViewModel` to hold the pre-computed display values, we can avoid redundant calculations on every widget rebuild, leading to a more efficient and performant UI.
+**Action:** When I identify a widget with expensive calculations in its `build` method, I will refactor it to use a `ViewModel` and move the calculation logic to the BLoC. This will ensure that the UI layer is only responsible for displaying data, not for performing complex computations.
