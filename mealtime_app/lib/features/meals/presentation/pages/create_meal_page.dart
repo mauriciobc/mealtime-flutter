@@ -64,7 +64,21 @@ class _CreateMealPageState extends State<CreateMealPage> {
       appBar: AppBar(
         title: const Text('Nova Refeição'),
         actions: [
-          TextButton(onPressed: _saveMeal, child: const Text('Salvar')),
+          BlocBuilder<MealsBloc, MealsState>(
+            builder: (context, state) {
+              final isLoading = state is MealOperationInProgress;
+              return TextButton(
+                onPressed: isLoading ? null : _saveMeal,
+                child: isLoading
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Salvar'),
+              );
+            },
+          ),
         ],
       ),
       body: BlocListener<MealsBloc, MealsState>(
@@ -108,13 +122,25 @@ class _CreateMealPageState extends State<CreateMealPage> {
                       setState(() => _selectedHomeId = homeId),
                 ),
                 const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _saveMeal,
-                    icon: const Icon(Icons.save),
-                    label: const Text('Criar Refeição'),
-                  ),
+                BlocBuilder<MealsBloc, MealsState>(
+                  builder: (context, state) {
+                    final isLoading = state is MealOperationInProgress;
+                    return SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: isLoading ? null : _saveMeal,
+                        icon: isLoading
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.save),
+                        label: const Text('Criar Refeição'),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
