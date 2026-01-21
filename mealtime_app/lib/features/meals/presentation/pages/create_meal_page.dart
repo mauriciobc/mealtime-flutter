@@ -64,7 +64,11 @@ class _CreateMealPageState extends State<CreateMealPage> {
       appBar: AppBar(
         title: const Text('Nova Refeição'),
         actions: [
-          TextButton(onPressed: _saveMeal, child: const Text('Salvar')),
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: _saveMeal,
+            tooltip: 'Salvar',
+          ),
         ],
       ),
       body: BlocListener<MealsBloc, MealsState>(
