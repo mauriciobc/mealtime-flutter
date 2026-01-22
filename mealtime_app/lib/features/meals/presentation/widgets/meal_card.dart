@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
+import 'package:mealtime_app/features/meals/presentation/view_models/meal_view_model.dart';
 
 class MealCard extends StatelessWidget {
-  final Meal meal;
+  final MealViewModel viewModel;
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
   final VoidCallback? onSkip;
 
   const MealCard({
     super.key,
-    required this.meal,
+    required this.viewModel,
     this.onTap,
     this.onComplete,
     this.onSkip,
@@ -17,6 +18,8 @@ class MealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final meal = viewModel.meal;
+
     return Card(
       elevation: 2,
       child: InkWell(
@@ -29,7 +32,7 @@ class MealCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  _buildMealTypeIcon(),
+                  _buildMealTypeIcon(meal),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -37,21 +40,22 @@ class MealCard extends StatelessWidget {
                       children: [
                         Text(
                           meal.typeDisplayName,
-                          style: Theme.of(context).textTheme.titleMedium
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _formatDateTime(meal.scheduledAt),
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
+                          viewModel.formattedScheduledAt,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
                               ),
                         ),
                       ],
                     ),
                   ),
-                  _buildStatusChip(context),
+                  _buildStatusChip(context, meal),
                 ],
               ),
               if (meal.notes != null) ...[
@@ -74,8 +78,8 @@ class MealCard extends StatelessWidget {
                     Text(
                       '${meal.amount!.toStringAsFixed(0)}g',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
                     ),
                   ],
                 ),
@@ -93,8 +97,8 @@ class MealCard extends StatelessWidget {
                     Text(
                       meal.foodType!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
                     ),
                   ],
                 ),
@@ -131,7 +135,7 @@ class MealCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMealTypeIcon() {
+  Widget _buildMealTypeIcon(Meal meal) {
     IconData iconData;
     Color color;
 
@@ -164,7 +168,7 @@ class MealCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusChip(BuildContext context) {
+  Widget _buildStatusChip(BuildContext context, Meal meal) {
     Color backgroundColor;
     Color textColor;
     String text;
@@ -213,43 +217,5 @@ class MealCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final mealDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
-
-    String dateText;
-    if (mealDate == today) {
-      dateText = 'Hoje';
-    } else if (mealDate == today.add(const Duration(days: 1))) {
-      dateText = 'Amanhã';
-    } else if (mealDate == today.subtract(const Duration(days: 1))) {
-      dateText = 'Ontem';
-    } else {
-      final weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-      final months = [
-        'Jan',
-        'Fev',
-        'Mar',
-        'Abr',
-        'Mai',
-        'Jun',
-        'Jul',
-        'Ago',
-        'Set',
-        'Out',
-        'Nov',
-        'Dez',
-      ];
-      dateText =
-          '${weekdays[mealDate.weekday % 7]}, ${mealDate.day} ${months[mealDate.month - 1]}';
-    }
-
-    final timeText =
-        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-
-    return '$dateText às $timeText';
   }
 }
