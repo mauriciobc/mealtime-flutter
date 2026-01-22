@@ -13,6 +13,7 @@ import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
 import 'package:mealtime_app/features/meals/presentation/widgets/feeding_bottom_sheet.dart';
+import 'package:mealtime_app/features/meals/presentation/view_models/meal_view_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -79,9 +80,9 @@ class _HomePageState extends State<HomePage> {
           Text(
             'MealTime',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
           ),
           Row(
             children: [
@@ -109,10 +110,10 @@ class _HomePageState extends State<HomePage> {
         return BlocBuilder<MealsBloc, MealsState>(
           builder: (context, mealsState) {
             final catsCount = catsState is CatsLoaded ? catsState.cats.length : 0;
-            final todayMeals = mealsState is MealsLoaded 
-                ? mealsState.meals.where((meal) => meal.isToday).length 
+            final todayMeals = mealsState is MealsLoaded
+                ? mealsState.meals.where((vm) => vm.meal.isToday).length
                 : 0;
-            
+
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -154,17 +155,17 @@ class _HomePageState extends State<HomePage> {
           Text(
             title,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             value,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
           ),
         ],
       ),
@@ -174,14 +175,15 @@ class _HomePageState extends State<HomePage> {
   Widget _buildLastFeedingSection(BuildContext context) {
     return BlocBuilder<MealsBloc, MealsState>(
       builder: (context, state) {
-        Meal? lastMeal;
+        MealViewModel? lastMealViewModel;
         if (state is MealsLoaded && state.meals.isNotEmpty) {
           final completedMeals = state.meals
-              .where((meal) => meal.status == MealStatus.completed)
+              .where((vm) => vm.meal.status == MealStatus.completed)
               .toList();
           if (completedMeals.isNotEmpty) {
-            completedMeals.sort((a, b) => b.completedAt!.compareTo(a.completedAt!));
-            lastMeal = completedMeals.first;
+            completedMeals.sort((a, b) =>
+                b.meal.completedAt!.compareTo(a.meal.completedAt!));
+            lastMealViewModel = completedMeals.first;
           }
         }
 
@@ -193,12 +195,12 @@ class _HomePageState extends State<HomePage> {
               Text(
                 'Última Alimentação',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
               ),
               const SizedBox(height: 12),
-              if (lastMeal != null)
+              if (lastMealViewModel != null)
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -209,8 +211,10 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        backgroundColor:
+                            Theme.of(context).colorScheme.surfaceContainerHighest,
+                        child: Icon(Icons.pets,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -219,24 +223,37 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Text(
                               'Negresco', // TODO: Buscar nome do gato
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${lastMeal.amount?.toStringAsFixed(0) ?? '10'}g ${lastMeal.foodType ?? 'ração seca'}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                              '${lastMealViewModel.meal.amount?.toStringAsFixed(0) ?? '10'}g ${lastMealViewModel.meal.foodType ?? 'ração seca'}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Por Maurício Castro · ${_formatTime(lastMeal.completedAt!)} · ${_formatDate(lastMeal.completedAt!)}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                              'Por Maurício Castro · ${_formatTime(lastMealViewModel.meal.completedAt!)} · ${_formatDate(lastMealViewModel.meal.completedAt!)}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                             ),
                           ],
                         ),
@@ -254,7 +271,8 @@ class _HomePageState extends State<HomePage> {
                   child: Center(
                     child: Text(
                       'Nenhuma alimentação registrada hoje',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ),
@@ -265,7 +283,8 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () => context.push(AppRouter.meals),
                   child: Text(
                     'Ver todas',
-                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
                   ),
                 ),
               ),
@@ -282,19 +301,19 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-              Text(
-                'Alimentações',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          Text(
+            'Alimentações',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
-              ),
+          ),
           const SizedBox(height: 4),
           Text(
             'Últimos 7 dias',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 12),
           Container(
@@ -305,25 +324,54 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Theme.of(context).colorScheme.outline),
             ),
-              child: Center(
-                child: Text(
-                  'Gráfico de alimentações\n(Em desenvolvimento)',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                ),
+            child: Center(
+              child: Text(
+                'Gráfico de alimentações\n(Em desenvolvimento)',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
+            ),
           ),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text('Dom', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              Text('Seg', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              Text('Ter', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              Text('Qua', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              Text('Qui', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              Text('Sex', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              Text('Sáb', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              Text('Dom',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              Text('Seg',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              Text('Ter',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              Text('Qua',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              Text('Qui',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              Text('Sex',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              Text('Sáb',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             ],
           ),
         ],
@@ -334,10 +382,10 @@ class _HomePageState extends State<HomePage> {
   Widget _buildRecentRecordsSection(BuildContext context) {
     return BlocBuilder<MealsBloc, MealsState>(
       builder: (context, state) {
-        List<Meal> recentMeals = [];
+        List<MealViewModel> recentMeals = [];
         if (state is MealsLoaded) {
           recentMeals = state.meals
-              .where((meal) => meal.status == MealStatus.completed)
+              .where((vm) => vm.meal.status == MealStatus.completed)
               .take(3)
               .toList();
         }
@@ -350,13 +398,13 @@ class _HomePageState extends State<HomePage> {
               Text(
                 'Registros Recentes',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
               ),
               const SizedBox(height: 12),
               if (recentMeals.isNotEmpty)
-                ...recentMeals.map((meal) => _buildRecentRecordItem(meal))
+                ...recentMeals.map((vm) => _buildRecentRecordItem(vm.meal))
               else
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -367,7 +415,8 @@ class _HomePageState extends State<HomePage> {
                   child: Center(
                     child: Text(
                       'Nenhum registro recente',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ),
@@ -390,8 +439,10 @@ class _HomePageState extends State<HomePage> {
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+            backgroundColor:
+                Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Icon(Icons.pets,
+                color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -401,15 +452,15 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   'Negresco', // TODO: Buscar nome do gato
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                 ),
                 Text(
                   '${meal.amount?.toStringAsFixed(0) ?? '10'}g ${meal.foodType ?? 'ração seca'}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
@@ -417,8 +468,8 @@ class _HomePageState extends State<HomePage> {
           Text(
             _formatTime(meal.completedAt ?? meal.scheduledAt),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
         ],
       ),
@@ -441,9 +492,9 @@ class _HomePageState extends State<HomePage> {
               Text(
                 'Meus Gatos',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
               ),
               const SizedBox(height: 12),
               if (cats.isNotEmpty)
@@ -458,7 +509,8 @@ class _HomePageState extends State<HomePage> {
                   child: Center(
                     child: Text(
                       'Nenhum gato cadastrado',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ),
@@ -469,7 +521,8 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () => context.push(AppRouter.cats),
                   child: Text(
                     'Ver todos os gatos',
-                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
                   ),
                 ),
               ),
@@ -492,8 +545,10 @@ class _HomePageState extends State<HomePage> {
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+            backgroundColor:
+                Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Icon(Icons.pets,
+                color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -503,15 +558,15 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   cat.name,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                 ),
                 Text(
                   '${cat.currentWeight?.toStringAsFixed(1) ?? '4.5'}kg',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
