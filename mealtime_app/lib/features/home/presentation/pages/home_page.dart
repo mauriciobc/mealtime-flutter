@@ -85,11 +85,14 @@ class _HomePageState extends State<HomePage> {
           ),
           Row(
             children: [
-              IconButton(
-                icon: Icon(Icons.notifications_outlined, color: Theme.of(context).colorScheme.onSurface),
-                onPressed: () {
-                  // TODO: Implementar notificações
-                },
+              Tooltip(
+                message: 'Notificações',
+                child: IconButton(
+                  icon: Icon(Icons.notifications_outlined, color: Theme.of(context).colorScheme.onSurface),
+                  onPressed: () {
+                    // TODO: Implementar notificações
+                  },
+                ),
               ),
               CircleAvatar(
                 radius: 20,
