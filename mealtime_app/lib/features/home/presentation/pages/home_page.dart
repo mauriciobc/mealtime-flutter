@@ -12,6 +12,7 @@ import 'package:mealtime_app/features/meals/presentation/bloc/meals_state.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
+import 'package:mealtime_app/features/meals/presentation/view_models/meal_view_model.dart';
 import 'package:mealtime_app/features/meals/presentation/widgets/feeding_bottom_sheet.dart';
 
 class HomePage extends StatefulWidget {
@@ -110,7 +111,7 @@ class _HomePageState extends State<HomePage> {
           builder: (context, mealsState) {
             final catsCount = catsState is CatsLoaded ? catsState.cats.length : 0;
             final todayMeals = mealsState is MealsLoaded 
-                ? mealsState.meals.where((meal) => meal.isToday).length 
+                ? mealsState.meals.where((vm) => vm.meal.isToday).length
                 : 0;
             
             return Padding(
@@ -177,7 +178,8 @@ class _HomePageState extends State<HomePage> {
         Meal? lastMeal;
         if (state is MealsLoaded && state.meals.isNotEmpty) {
           final completedMeals = state.meals
-              .where((meal) => meal.status == MealStatus.completed)
+              .where((vm) => vm.meal.status == MealStatus.completed)
+              .map((vm) => vm.meal)
               .toList();
           if (completedMeals.isNotEmpty) {
             completedMeals.sort((a, b) => b.completedAt!.compareTo(a.completedAt!));
@@ -337,7 +339,8 @@ class _HomePageState extends State<HomePage> {
         List<Meal> recentMeals = [];
         if (state is MealsLoaded) {
           recentMeals = state.meals
-              .where((meal) => meal.status == MealStatus.completed)
+              .where((vm) => vm.meal.status == MealStatus.completed)
+              .map((vm) => vm.meal)
               .take(3)
               .toList();
         }
