@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_bloc.dart';
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_event.dart';
 import 'package:mealtime_app/features/meals/presentation/bloc/meals_state.dart';
+import 'package:mealtime_app/features/meals/presentation/view_models/meal_view_model.dart';
 import 'package:mealtime_app/features/meals/presentation/widgets/meal_card.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
@@ -43,8 +43,8 @@ class _MealsListPageState extends State<MealsListPage> {
           widget.showTodayOnly
               ? 'Refeições de Hoje'
               : widget.catId != null
-              ? 'Refeições do Gato'
-              : 'Todas as Refeições',
+                  ? 'Refeições do Gato'
+                  : 'Todas as Refeições',
         ),
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadMeals),
@@ -76,14 +76,14 @@ class _MealsListPageState extends State<MealsListPage> {
                 padding: const EdgeInsets.all(16),
                 itemCount: state.meals.length,
                 itemBuilder: (context, index) {
-                  final meal = state.meals[index];
+                  final mealViewModel = state.meals[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: MealCard(
-                      meal: meal,
-                      onTap: () => _navigateToMealDetail(meal),
-                      onComplete: () => _completeMeal(meal),
-                      onSkip: () => _skipMeal(meal),
+                      mealViewModel: mealViewModel,
+                      onTap: () => _navigateToMealDetail(mealViewModel),
+                      onComplete: () => _completeMeal(mealViewModel),
+                      onSkip: () => _skipMeal(mealViewModel),
                     ),
                   );
                 },
@@ -103,14 +103,14 @@ class _MealsListPageState extends State<MealsListPage> {
                       padding: const EdgeInsets.all(16),
                       itemCount: state.meals.length,
                       itemBuilder: (context, index) {
-                        final meal = state.meals[index];
+                        final mealViewModel = state.meals[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: MealCard(
-                            meal: meal,
-                            onTap: () => _navigateToMealDetail(meal),
-                            onComplete: () => _completeMeal(meal),
-                            onSkip: () => _skipMeal(meal),
+                            mealViewModel: mealViewModel,
+                            onTap: () => _navigateToMealDetail(mealViewModel),
+                            onComplete: () => _completeMeal(mealViewModel),
+                            onSkip: () => _skipMeal(mealViewModel),
                           ),
                         );
                       },
@@ -163,8 +163,8 @@ class _MealsListPageState extends State<MealsListPage> {
                 ? 'Nenhuma refeição agendada para hoje'
                 : 'Nenhuma refeição encontrada',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.outline,
-            ),
+                  color: Theme.of(context).colorScheme.outline,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -172,8 +172,8 @@ class _MealsListPageState extends State<MealsListPage> {
                 ? 'Adicione refeições para seus gatos'
                 : 'Comece criando uma nova refeição',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.outline,
-            ),
+                  color: Theme.of(context).colorScheme.outline,
+                ),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
@@ -186,11 +186,12 @@ class _MealsListPageState extends State<MealsListPage> {
     );
   }
 
-  void _navigateToMealDetail(Meal meal) {
+  void _navigateToMealDetail(MealViewModel mealViewModel) {
     // TODO: Implementar navegação para detalhes da refeição
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text('Detalhes da refeição: ${meal.id}')));
+    ).showSnackBar(SnackBar(
+        content: Text('Detalhes da refeição: ${mealViewModel.meal.id}')));
   }
 
   void _navigateToCreateMeal() {
@@ -200,29 +201,32 @@ class _MealsListPageState extends State<MealsListPage> {
     ).showSnackBar(const SnackBar(content: Text('Criar nova refeição')));
   }
 
-  void _completeMeal(Meal meal) {
+  void _completeMeal(MealViewModel mealViewModel) {
     showDialog(
       context: context,
       builder: (context) => _CompleteMealDialog(
-        meal: meal,
+        mealViewModel: mealViewModel,
         onComplete: (notes, amount) {
           context.read<MealsBloc>().add(
-            CompleteMeal(mealId: meal.id, notes: notes, amount: amount),
-          );
+                CompleteMeal(
+                    mealId: mealViewModel.meal.id,
+                    notes: notes,
+                    amount: amount),
+              );
         },
       ),
     );
   }
 
-  void _skipMeal(Meal meal) {
+  void _skipMeal(MealViewModel mealViewModel) {
     showDialog(
       context: context,
       builder: (context) => _SkipMealDialog(
-        meal: meal,
+        mealViewModel: mealViewModel,
         onSkip: (reason) {
           context.read<MealsBloc>().add(
-            SkipMeal(mealId: meal.id, reason: reason),
-          );
+                SkipMeal(mealId: mealViewModel.meal.id, reason: reason),
+              );
         },
       ),
     );
@@ -230,10 +234,11 @@ class _MealsListPageState extends State<MealsListPage> {
 }
 
 class _CompleteMealDialog extends StatefulWidget {
-  final Meal meal;
+  final MealViewModel mealViewModel;
   final Function(String? notes, double? amount) onComplete;
 
-  const _CompleteMealDialog({required this.meal, required this.onComplete});
+  const _CompleteMealDialog(
+      {required this.mealViewModel, required this.onComplete});
 
   @override
   State<_CompleteMealDialog> createState() => _CompleteMealDialogState();
@@ -254,7 +259,7 @@ class _CompleteMealDialogState extends State<_CompleteMealDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Concluir ${widget.meal.typeDisplayName}'),
+      title: Text('Concluir ${widget.mealViewModel.meal.typeDisplayName}'),
       content: Form(
         key: _formKey,
         child: Column(
@@ -317,10 +322,10 @@ class _CompleteMealDialogState extends State<_CompleteMealDialog> {
 }
 
 class _SkipMealDialog extends StatefulWidget {
-  final Meal meal;
+  final MealViewModel mealViewModel;
   final Function(String? reason) onSkip;
 
-  const _SkipMealDialog({required this.meal, required this.onSkip});
+  const _SkipMealDialog({required this.mealViewModel, required this.onSkip});
 
   @override
   State<_SkipMealDialog> createState() => _SkipMealDialogState();
@@ -339,7 +344,7 @@ class _SkipMealDialogState extends State<_SkipMealDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Pular ${widget.meal.typeDisplayName}'),
+      title: Text('Pular ${widget.mealViewModel.meal.typeDisplayName}'),
       content: Form(
         key: _formKey,
         child: Column(
