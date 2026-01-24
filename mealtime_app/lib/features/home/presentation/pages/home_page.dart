@@ -61,9 +61,12 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _showFeedingBottomSheet,
-          child: const Icon(Icons.add),
+        floatingActionButton: Tooltip(
+          message: 'Registrar alimentação',
+          child: FloatingActionButton(
+            onPressed: _showFeedingBottomSheet,
+            child: const Icon(Icons.add),
+          ),
         ),
         bottomNavigationBar: _buildBottomNavigationBar(context),
       ),
