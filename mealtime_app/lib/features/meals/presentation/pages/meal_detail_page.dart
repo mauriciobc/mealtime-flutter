@@ -57,7 +57,7 @@ class MealDetailPage extends StatelessWidget {
           }
 
           if (state is MealLoaded) {
-            return _buildMealDetails(context, state.meal);
+            return _buildMealDetails(context, state.meal.meal);
           }
 
           // Carregar refeição se ainda não foi carregada
