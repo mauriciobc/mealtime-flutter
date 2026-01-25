@@ -60,67 +60,91 @@ class _CreateMealPageState extends State<CreateMealPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nova Refeição'),
-        actions: [
-          TextButton(onPressed: _saveMeal, child: const Text('Salvar')),
-        ],
-      ),
-      body: BlocListener<MealsBloc, MealsState>(
-        listener: (context, state) {
-          if (state is MealOperationSuccess) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-            Navigator.of(context).pop();
-          } else if (state is MealsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.failure.message),
-                backgroundColor: Theme.of(context).colorScheme.error,
+    return BlocBuilder<MealsBloc, MealsState>(
+      builder: (context, state) {
+        final isLoading = state is MealOperationInProgress;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Nova Refeição'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.save),
+                onPressed: isLoading ? null : _saveMeal,
+                tooltip: 'Salvar',
               ),
-            );
-          }
-        },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                MealForm(
-                  catIdController: _catIdController,
-                  homeIdController: _homeIdController,
-                  notesController: _notesController,
-                  amountController: _amountController,
-                  foodTypeController: _foodTypeController,
-                  selectedType: _selectedType,
-                  selectedDate: _selectedDate,
-                  selectedTime: _selectedTime,
-                  onTypeChanged: (type) => setState(() => _selectedType = type),
-                  onDateChanged: (date) => setState(() => _selectedDate = date),
-                  onTimeChanged: (time) => setState(() => _selectedTime = time),
-                  onCatSelected: (catId) =>
-                      setState(() => _selectedCatId = catId),
-                  onHomeSelected: (homeId) =>
-                      setState(() => _selectedHomeId = homeId),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _saveMeal,
-                    icon: const Icon(Icons.save),
-                    label: const Text('Criar Refeição'),
+            ],
+          ),
+          body: BlocListener<MealsBloc, MealsState>(
+            listener: (context, state) {
+              if (state is MealOperationSuccess) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.message)));
+                Navigator.of(context).pop();
+              } else if (state is MealsError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.failure.message),
+                    backgroundColor: Theme.of(context).colorScheme.error,
                   ),
+                );
+              }
+            },
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MealForm(
+                      catIdController: _catIdController,
+                      homeIdController: _homeIdController,
+                      notesController: _notesController,
+                      amountController: _amountController,
+                      foodTypeController: _foodTypeController,
+                      selectedType: _selectedType,
+                      selectedDate: _selectedDate,
+                      selectedTime: _selectedTime,
+                      onTypeChanged: (type) =>
+                          setState(() => _selectedType = type),
+                      onDateChanged: (date) =>
+                          setState(() => _selectedDate = date),
+                      onTimeChanged: (time) =>
+                          setState(() => _selectedTime = time),
+                      onCatSelected: (catId) =>
+                          setState(() => _selectedCatId = catId),
+                      onHomeSelected: (homeId) =>
+                          setState(() => _selectedHomeId = homeId),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: isLoading ? null : _saveMeal,
+                        icon: isLoading
+                            ? Container(
+                                width: 24,
+                                height: 24,
+                                padding: const EdgeInsets.all(2.0),
+                                child: const CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 3,
+                                ),
+                              )
+                            : const Icon(Icons.save),
+                        label:
+                            Text(isLoading ? 'Salvando...' : 'Criar Refeição'),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
