@@ -1,6 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:mealtime_app/features/meals/domain/entities/meal.dart';
 
+const _weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const _months = [
+  'Jan',
+  'Fev',
+  'Mar',
+  'Abr',
+  'Mai',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Set',
+  'Out',
+  'Nov',
+  'Dez',
+];
+
 class MealCard extends StatelessWidget {
   final Meal meal;
   final VoidCallback? onTap;
@@ -228,23 +244,8 @@ class MealCard extends StatelessWidget {
     } else if (mealDate == today.subtract(const Duration(days: 1))) {
       dateText = 'Ontem';
     } else {
-      final weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-      final months = [
-        'Jan',
-        'Fev',
-        'Mar',
-        'Abr',
-        'Mai',
-        'Jun',
-        'Jul',
-        'Ago',
-        'Set',
-        'Out',
-        'Nov',
-        'Dez',
-      ];
       dateText =
-          '${weekdays[mealDate.weekday % 7]}, ${mealDate.day} ${months[mealDate.month - 1]}';
+          '${_weekdays[mealDate.weekday % 7]}, ${mealDate.day} ${_months[mealDate.month - 1]}';
     }
 
     final timeText =
