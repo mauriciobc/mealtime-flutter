@@ -195,15 +195,13 @@ class _ExpressiveCatCardState extends State<ExpressiveCatCard>
 
     return Hero(
       tag: 'cat_avatar_${widget.cat.id}',
-      child: ClipPath(
-        clipper: _SquircleClipper(),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: genderColor.withValues(alpha: 0.35),
-              width: 1.5,
-            ),
-          ),
+      child: CustomPaint(
+        foregroundPainter: _SquircleBorderPainter(
+          color: genderColor.withValues(alpha: 0.35),
+          strokeWidth: 1.5,
+        ),
+        child: ClipPath(
+          clipper: _SquircleClipper(),
           child: imageContent,
         ),
       ),
@@ -390,7 +388,7 @@ class _ExpressiveCatCardState extends State<ExpressiveCatCard>
         ),
       ],
       child: Semantics(
-        label: 'More options',
+        label: context.l10n.common_moreOptions,
         button: true,
         child: Material(
           color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.8),
@@ -422,4 +420,32 @@ class _SquircleClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
+/// Desenha o contorno squircle sobre a imagem clipeada, evitando que o
+/// stroke seja cortado pelo ClipPath.
+class _SquircleBorderPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+
+  const _SquircleBorderPainter({
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = M3Shapes.squircleLarge.getOuterPath(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+    );
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SquircleBorderPainter oldDelegate) =>
+      color != oldDelegate.color || strokeWidth != oldDelegate.strokeWidth;
 }

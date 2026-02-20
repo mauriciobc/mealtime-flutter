@@ -204,7 +204,7 @@ class ProfilePage extends ConsumerWidget {
           }
         } catch (error, stackTrace) {
           developer.log(
-            'Erro ao fazer logout',
+            'Error during logout',
             error: error,
             stackTrace: stackTrace,
             name: 'ProfilePage._handleLogout',

@@ -74,7 +74,7 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
 
     final content = SafeArea(
       child: Column(
-        mainAxisSize: widget.showHeader ? MainAxisSize.min : MainAxisSize.min,
+        mainAxisSize: MainAxisSize.min,
         children: [
           if (widget.showHeader) _buildHeader(),
           _buildSelectionControls(),

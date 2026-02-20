@@ -193,7 +193,8 @@ class CatDistributionChart extends StatelessWidget {
   }
 
   /// Retorna cor de contraste para texto em fatias do gráfico (WCAG).
-  /// Usa onSurface do tema quando disponível para consistência no dark mode.
+  /// Calcula color.computeLuminance() e retorna Colors.black ou Colors.white
+  /// para garantir contraste mínimo WCAG AA.
   Color _getContrastColor(Color color) {
     final luminance = color.computeLuminance();
     return luminance > 0.5 ? Colors.black : Colors.white;

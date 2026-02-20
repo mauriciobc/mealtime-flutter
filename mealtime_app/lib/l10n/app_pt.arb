@@ -36,6 +36,7 @@
   "common_time": "Hora",
   "common_weight": "Peso",
   "common_actions": "Ações",
+  "common_moreOptions": "Mais opções",
   "navigation_home": "Início",
   "navigation_cats": "Gatos",
   "navigation_weight": "Peso",
@@ -239,7 +240,7 @@
   "notifications_empty": "Nenhuma notificação",
   "notifications_emptySubtitle": "Você está em dia!",
   "notifications_refresh": "Atualizar",
-  "notifications_delete": "Deletar notificação",
+  "notifications_delete": "Excluir notificação",
   "notifications_userNotAuthenticated": "Usuário não autenticado",
   "notifications_errorLoading": "Erro ao carregar notificações: {error}",
   "@notifications_errorLoading": {

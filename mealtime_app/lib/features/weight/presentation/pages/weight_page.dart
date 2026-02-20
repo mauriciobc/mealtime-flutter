@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mealtime_app/core/router/app_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart' as cat_entity;
@@ -269,10 +271,7 @@ class _WeightPageState extends State<WeightPage> {
         subtitle: 'Adicione um gato para começar a rastrear o peso',
         accentColor: Theme.of(context).colorScheme.primary,
         actionLabel: 'Adicionar Gato',
-        onAction: () {
-          // Navegar para a página de gatos
-          // context.go(AppRouter.cats);
-        },
+        onAction: () => context.go(AppRouter.cats),
       ),
     );
   }
@@ -535,6 +534,8 @@ class _WeightPageState extends State<WeightPage> {
                   TextButton(
                     onPressed: () {
                       HapticsService.lightImpact();
+                      // TODO(weight): Navigate to tips screen or show tips
+                      // dialog when TipsPage is implemented.
                     },
                     child: const Text('Ver Dicas'),
                   ),

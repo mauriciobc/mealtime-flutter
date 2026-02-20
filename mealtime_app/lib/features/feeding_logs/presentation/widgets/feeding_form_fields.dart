@@ -100,7 +100,7 @@ class FeedingFormFields extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     return DropdownButtonFormField<String>(
       isExpanded: true,
-      initialValue: data.status,
+      value: data.status,
       decoration: InputDecoration(
         labelText: 'Status',
         border: const OutlineInputBorder(),
@@ -156,7 +156,7 @@ class FeedingFormFields extends StatelessWidget {
         normalizeToFoodTypeId(data.foodType) ?? FoodTypeIds.dryFood;
     return DropdownButtonFormField<String>(
       isExpanded: true,
-      initialValue: currentValue,
+      value: currentValue,
       decoration: InputDecoration(
         labelText: 'Tipo',
         border: const OutlineInputBorder(),
