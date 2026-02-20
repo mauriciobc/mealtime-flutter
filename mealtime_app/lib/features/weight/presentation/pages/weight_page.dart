@@ -16,8 +16,10 @@ import 'package:mealtime_app/features/weight/presentation/widgets/create_goal_bo
 import 'package:mealtime_app/features/weight/presentation/widgets/weight_trend_chart.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:m3e_collection/m3e_collection.dart';
+import 'package:mealtime_app/core/theme/m3_motion_helpers.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart' as shared;
 import 'package:mealtime_app/shared/widgets/cat_selection_filter.dart';
+import 'package:mealtime_app/shared/widgets/expressive_widgets.dart';
 
 class WeightPage extends StatefulWidget {
   const WeightPage({super.key});
@@ -111,7 +113,7 @@ class _WeightPageState extends State<WeightPage> {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FabM3E(
         onPressed: () {
           HapticsService.mediumImpact();
           final weightState = context.read<WeightBloc>().state;
@@ -144,7 +146,7 @@ class _WeightPageState extends State<WeightPage> {
           }
         },
         icon: const Icon(Icons.add),
-        label: const Text('Registrar Peso'),
+        tooltip: 'Registrar Peso',
       ),
     );
   }
@@ -164,42 +166,48 @@ class _WeightPageState extends State<WeightPage> {
         padding: const M3EdgeInsets.all(M3SpacingToken.space16),
         children: <Widget>[
             // Header
-            _buildHeader(weightState, cats),
+            StaggeredEntranceBuilder(index: 0, child: _buildHeader(weightState, cats)),
             SizedBox(height: M3SpacingToken.space24.value),
             
             // Estado vazio quando não há gatos
             if (cats.isEmpty) ...[
-              _buildEmptyState(),
+              StaggeredEntranceBuilder(index: 1, child: _buildEmptyState()),
             ],
             
             // Seletor de Gatos (se houver mais de um)
             if (cats.length > 1) ...[
-              _buildCatSelector(weightState, cats),
+              StaggeredEntranceBuilder(index: 1, child: _buildCatSelector(weightState, cats)),
               SizedBox(height: M3SpacingToken.space24.value),
             ],
 
             // Mostrar seletor quando há apenas 1 gato não selecionado
             if (cats.length == 1 && weightState.selectedCat == null) ...[
-              _buildSingleCatSelector(weightState, cats.first),
+              StaggeredEntranceBuilder(index: 1, child: _buildSingleCatSelector(weightState, cats.first)),
               SizedBox(height: M3SpacingToken.space24.value),
             ],
 
             // Indicadores de Peso
             if (weightState.selectedCat != null) ...[
-              RepaintBoundary(
-                child: _buildWeightIndicators(weightState),
+              StaggeredEntranceBuilder(
+                index: 2,
+                child: RepaintBoundary(
+                  child: _buildWeightIndicators(weightState),
+                ),
               ),
               SizedBox(height: M3SpacingToken.space24.value),
             ],
 
             // Progresso da Meta
             if (weightState.activeGoal != null) ...[
-              RepaintBoundary(
-                child: AnimatedSwitcher(
-                  duration: M3Motion.standard.duration,
-                  switchInCurve: M3Motion.standard.curve,
-                  switchOutCurve: M3Motion.standard.curve,
-                  child: _buildProgressCard(weightState),
+              StaggeredEntranceBuilder(
+                index: 3,
+                child: RepaintBoundary(
+                  child: AnimatedSwitcher(
+                    duration: M3Motion.standard.duration,
+                    switchInCurve: M3Motion.standard.curve,
+                    switchOutCurve: M3Motion.standard.curve,
+                    child: _buildProgressCard(weightState),
+                  ),
                 ),
               ),
               SizedBox(height: M3SpacingToken.space24.value),
@@ -207,20 +215,23 @@ class _WeightPageState extends State<WeightPage> {
 
             // Gráfico de Tendência
             if (cats.isNotEmpty) ...[
-              RepaintBoundary(
-                child: WeightTrendChart(
-                  key: ValueKey(
-                    'trend-chart-${weightState.selectedCat?.id}-'
-                    '${weightState.filteredWeightLogs.length}-'
-                    '${weightState.timeRangeDays}',
+              StaggeredEntranceBuilder(
+                index: 4,
+                child: RepaintBoundary(
+                  child: WeightTrendChart(
+                    key: ValueKey(
+                      'trend-chart-${weightState.selectedCat?.id}-'
+                      '${weightState.filteredWeightLogs.length}-'
+                      '${weightState.timeRangeDays}',
+                    ),
+                    weightLogs: weightState.filteredWeightLogs,
+                    goal: weightState.activeGoal,
+                    timeRangeDays: weightState.timeRangeDays,
+                    onTimeRangeChanged: (days) {
+                      HapticsService.selectionClick();
+                      context.read<WeightBloc>().add(ChangeTimeRange(days));
+                    },
                   ),
-                  weightLogs: weightState.filteredWeightLogs,
-                  goal: weightState.activeGoal,
-                  timeRangeDays: weightState.timeRangeDays,
-                  onTimeRangeChanged: (days) {
-                    HapticsService.selectionClick();
-                    context.read<WeightBloc>().add(ChangeTimeRange(days));
-                  },
                 ),
               ),
               SizedBox(height: M3SpacingToken.space24.value),
@@ -228,8 +239,11 @@ class _WeightPageState extends State<WeightPage> {
 
             // Histórico Recente
             if (cats.isNotEmpty) ...[
-              RepaintBoundary(
-                child: _buildHistoryList(weightState),
+              StaggeredEntranceBuilder(
+                index: 5,
+                child: RepaintBoundary(
+                  child: _buildHistoryList(weightState),
+                ),
               ),
             ],
         ],
@@ -238,70 +252,27 @@ class _WeightPageState extends State<WeightPage> {
   }
 
   Widget _buildHeader(WeightLoaded weightState, List<cat_entity.Cat> cats) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Acompanhe a saúde do seu gato',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(
-                            alpha: 0.8,
-                          ),
-                    ),
-              ),
-            ],
-          ),
-        ),
-        _buildNewGoalButton(weightState, cats),
-      ],
+    return ExpressiveSectionHeader(
+      title: 'Painel de Peso',
+      subtitle: 'Acompanhe a saúde do seu gato',
+      action: _buildNewGoalButton(weightState, cats),
+      hasDivider: false,
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const M3EdgeInsets.symmetric(vertical: M3SpacingToken.space48),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.pets_outlined,
-              size: 80,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-            ),
-            SizedBox(height: M3SpacingToken.space24.value),
-            Text(
-              'Nenhum gato cadastrado',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            SizedBox(height: M3SpacingToken.space8.value),
-            Text(
-              'Adicione um gato para começar a rastrear o peso',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(
-                          alpha: 0.6,
-                        ),
-                  ),
-            ),
-            SizedBox(height: M3SpacingToken.space24.value),
-            ElevatedButton.icon(
-              onPressed: () {
-                // Navegar para a página de gatos
-                // context.go(AppRouter.cats);
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Adicionar Gato'),
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const M3EdgeInsets.symmetric(vertical: M3SpacingToken.space24),
+      child: ExpressiveEmptyState(
+        icon: Icons.pets_outlined,
+        title: 'Nenhum gato cadastrado',
+        subtitle: 'Adicione um gato para começar a rastrear o peso',
+        accentColor: Theme.of(context).colorScheme.primary,
+        actionLabel: 'Adicionar Gato',
+        onAction: () {
+          // Navegar para a página de gatos
+          // context.go(AppRouter.cats);
+        },
       ),
     );
   }
@@ -391,39 +362,54 @@ class _WeightPageState extends State<WeightPage> {
         child: AnimatedContainer(
           duration: M3Motion.standard.duration,
           curve: M3Motion.standard.curve,
-          child: Card(
-            elevation: 2,
-            child: Padding(
-              padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-              child: Row(
-                children: [
-                  _buildCatAvatar(context, cat),
-                  SizedBox(width: M3SpacingToken.space16.value),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          cat.name,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        SizedBox(height: M3SpacingToken.space4.value),
-                        Text(
-                          'Toque para ver os registros de peso',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface.withValues(
-                                      alpha: 0.6,
-                                    ),
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right),
+          child: Container(
+            padding: const M3EdgeInsets.all(M3SpacingToken.space16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+                  Theme.of(context).colorScheme.surfaceContainerLow,
                 ],
               ),
+              borderRadius: M3Shapes.shapeLarge,
+              border: Border.all(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              children: [
+                _buildCatAvatar(context, cat),
+                SizedBox(width: M3SpacingToken.space16.value),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        cat.name,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                      ),
+                      SizedBox(height: M3SpacingToken.space4.value),
+                      Text(
+                        'Toque para ver os registros de peso',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(
+                                    alpha: 0.6,
+                                  ),
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ],
             ),
           ),
         ),
@@ -455,55 +441,31 @@ class _WeightPageState extends State<WeightPage> {
         ),
         children: [
           Expanded(
-            child: _buildWeightCard(
-              'Peso Atual',
-              weightState.currentWeight != null
+            child: ExpressiveSummaryCard(
+              title: 'Peso Atual',
+              value: weightState.currentWeight != null
                   ? '${weightState.currentWeight!.toStringAsFixed(1)} kg'
                   : 'N/A',
-              Theme.of(context).colorScheme.primary,
+              icon: Icons.monitor_weight_outlined,
+              accentColor: Theme.of(context).colorScheme.primary,
+              hasGradient: true,
+              index: 0,
             ),
           ),
           SizedBox(width: M3SpacingToken.space16.value),
           Expanded(
-            child: _buildWeightCard(
-              'Meta',
-              weightState.activeGoal != null
+            child: ExpressiveSummaryCard(
+              title: 'Meta',
+              value: weightState.activeGoal != null
                   ? '${weightState.activeGoal!.targetWeight.toStringAsFixed(1)} kg'
                   : 'N/A',
-              Theme.of(context).colorScheme.secondary,
+              icon: Icons.flag_outlined,
+              accentColor: Theme.of(context).colorScheme.secondary,
+              hasGradient: true,
+              index: 1,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildWeightCard(String label, String value, Color accentColor) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(
-                          alpha: 0.6,
-                        ),
-                  ),
-            ),
-            SizedBox(height: M3SpacingToken.space4.value),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: accentColor,
-                  ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -517,50 +479,85 @@ class _WeightPageState extends State<WeightPage> {
       tween: Tween(begin: 0.0, end: safeProgress / 100),
       curve: M3Motion.emphasized.curve,
       builder: (context, animatedProgress, child) {
-        return Card(
+        final theme = Theme.of(context);
+        return Container(
           key: ValueKey('progress-card-${weightState.activeGoal?.id ?? 'none'}'),
-          child: Padding(
-            padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Progresso da Meta',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        HapticsService.lightImpact();
-                      },
-                      child: const Text('Ver Dicas'),
-                    ),
-                  ],
-                ),
-                SizedBox(height: M3SpacingToken.space16.value),
-                ClipRRect(
-                  borderRadius: M3Shapes.shapeSmall,
-                  child: LinearProgressIndicatorM3E(
-                    value: animatedProgress,
-                    size: LinearProgressM3ESize.m,
-                    activeColor: Theme.of(context).colorScheme.primary,
-                    trackColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  ),
-                ),
-                SizedBox(height: M3SpacingToken.space8.value),
-                AnimatedDefaultTextStyle(
-                  duration: M3Motion.standard.duration,
-                  style: Theme.of(context).textTheme.bodyMedium ?? const TextStyle(),
-                  child: Text(
-                    '${(animatedProgress * 100).toStringAsFixed(0)}% completo',
-                  ),
-                ),
+          padding: const M3EdgeInsets.all(M3SpacingToken.space20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                theme.colorScheme.primary.withValues(alpha: 0.05),
+                theme.colorScheme.surfaceContainerLow,
               ],
             ),
+            borderRadius: M3Shapes.shapeLarge,
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.15),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const M3EdgeInsets.all(M3SpacingToken.space8),
+                        decoration: BoxDecoration(
+                          gradient: RadialGradient(
+                            colors: [
+                              theme.colorScheme.primary.withValues(alpha: 0.2),
+                              theme.colorScheme.primary.withValues(alpha: 0.05),
+                            ],
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.flag,
+                          size: 20,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      SizedBox(width: M3SpacingToken.space12.value),
+                      Text(
+                        'Progresso da Meta',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      HapticsService.lightImpact();
+                    },
+                    child: const Text('Ver Dicas'),
+                  ),
+                ],
+              ),
+              SizedBox(height: M3SpacingToken.space20.value),
+              ClipRRect(
+                borderRadius: M3Shapes.shapeSmall,
+                child: LinearProgressIndicatorM3E(
+                  value: animatedProgress,
+                  size: LinearProgressM3ESize.m,
+                  activeColor: theme.colorScheme.primary,
+                  trackColor: theme.colorScheme.surfaceContainerHighest,
+                ),
+              ),
+              SizedBox(height: M3SpacingToken.space8.value),
+              Text(
+                '${(animatedProgress * 100).toStringAsFixed(0)}% completo',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -570,37 +567,11 @@ class _WeightPageState extends State<WeightPage> {
 
   Widget _buildHistoryList(WeightLoaded weightState) {
     if (weightState.weightLogs.isEmpty) {
-      return Card(
-        child: Padding(
-          padding: const M3EdgeInsets.all(M3SpacingToken.space32),
-          child: Center(
-            child: Column(
-              children: [
-                Icon(
-                  Icons.scale,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(
-                        alpha: 0.3,
-                      ),
-                ),
-                SizedBox(height: M3SpacingToken.space16.value),
-                Text(
-                  'Nenhum registro de peso',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                SizedBox(height: M3SpacingToken.space8.value),
-                Text(
-                  'Comece registrando o peso do seu gato',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(
-                              alpha: 0.6,
-                            ),
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      return ExpressiveEmptyState(
+        icon: Icons.scale_outlined,
+        title: 'Nenhum registro de peso',
+        subtitle: 'Comece registrando o peso do seu gato',
+        accentColor: Theme.of(context).colorScheme.primary,
       );
     }
 
@@ -608,13 +579,11 @@ class _WeightPageState extends State<WeightPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-            child: Text(
-              'Histórico Recente',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+          const Padding(
+            padding: M3EdgeInsets.all(M3SpacingToken.space16),
+            child: ExpressiveSectionHeader(
+              title: 'Histórico Recente',
+              hasDivider: false,
             ),
           ),
           ListView.builder(
@@ -634,14 +603,16 @@ class _WeightPageState extends State<WeightPage> {
                 variation = log.weight - previousLog.weight;
               }
 
+              final theme = Theme.of(context);
+              
               return ListTile(
                 key: ValueKey('weight-log-${log.id}'),
                 leading: CircleAvatar(
                   backgroundColor: variation != null && variation > 0
-                      ? Colors.green.withValues(alpha: 0.2)
+                      ? theme.colorScheme.tertiary.withValues(alpha: 0.2)
                       : variation != null && variation < 0
-                          ? Colors.red.withValues(alpha: 0.2)
-                          : Colors.grey.withValues(alpha: 0.2),
+                          ? theme.colorScheme.error.withValues(alpha: 0.2)
+                          : theme.colorScheme.outline.withValues(alpha: 0.2),
                   child: Icon(
                     variation != null && variation > 0
                         ? Icons.trending_up
@@ -649,10 +620,10 @@ class _WeightPageState extends State<WeightPage> {
                             ? Icons.trending_down
                             : Icons.remove,
                     color: variation != null && variation > 0
-                        ? Colors.green
+                        ? theme.colorScheme.onTertiaryContainer
                         : variation != null && variation < 0
-                            ? Colors.red
-                            : Colors.grey,
+                            ? theme.colorScheme.onErrorContainer
+                            : theme.colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
                 ),
@@ -668,22 +639,21 @@ class _WeightPageState extends State<WeightPage> {
                         ),
                         decoration: BoxDecoration(
                           color: variation > 0
-                              ? Colors.green.withValues(alpha: 0.1)
+                              ? theme.colorScheme.tertiary.withValues(alpha: 0.1)
                               : variation < 0
-                                  ? Colors.red.withValues(alpha: 0.1)
-                                  : Colors.grey.withValues(alpha: 0.1),
+                                  ? theme.colorScheme.error.withValues(alpha: 0.1)
+                                  : theme.colorScheme.outline.withValues(alpha: 0.1),
                           borderRadius: M3Shapes.shapeMedium,
                         ),
                         child: Text(
                           '${variation > 0 ? '+' : ''}${variation.toStringAsFixed(2)} kg',
-                          style: TextStyle(
+                          style: theme.textTheme.labelMedium?.copyWith(
                             color: variation > 0
-                                ? Colors.green.shade700
+                                ? theme.colorScheme.onTertiaryContainer
                                 : variation < 0
-                                    ? Colors.red.shade700
-                                    : Colors.grey.shade700,
+                                    ? theme.colorScheme.onErrorContainer
+                                    : theme.colorScheme.onSurfaceVariant,
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
                           ),
                         ),
                       )

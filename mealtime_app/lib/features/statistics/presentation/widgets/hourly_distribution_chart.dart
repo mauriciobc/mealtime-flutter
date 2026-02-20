@@ -35,6 +35,7 @@ class HourlyDistributionChart extends StatelessWidget {
               'Distribuição por Horário',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -92,11 +93,11 @@ class HourlyDistributionChart extends StatelessWidget {
                     data: validData,
                     width: chartWidth,
                     height: chartHeight,
-                    showGrid: false,  // ✅ Desabilitado para melhorar performance
-                    showValues: false,  // ✅ Desabilitado para melhorar performance
+                    showGrid: false,
+                    showValues: false,
                     style: BarChartStyle(
                       barColor: theme.colorScheme.tertiary,
-                      backgroundColor: theme.colorScheme.surface,
+                      backgroundColor: theme.colorScheme.surfaceContainerLow,
                       barSpacing: barSpacing,
                       cornerRadius: maxCornerRadius,
                       labelStyle: TextStyle(
@@ -188,6 +189,7 @@ class HourlyDistributionChart extends StatelessWidget {
               'Distribuição por Horário',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -205,7 +207,7 @@ class HourlyDistributionChart extends StatelessWidget {
                     Icons.schedule_outlined,
                     size: 48,
                     color: theme.colorScheme.onSurfaceVariant.withValues(
-                      alpha: 0.5,
+                      alpha: 0.7,
                     ),
                   ),
                   const SizedBox(height: 8),

@@ -49,17 +49,33 @@ class _PeriodFilterDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return DropdownButtonFormField<PeriodFilter>(
       initialValue: selectedPeriod,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         labelText: 'Período',
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        labelStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+        fillColor: colorScheme.surfaceContainerHighest,
+        filled: true,
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
+      style: theme.textTheme.bodyLarge?.copyWith(
+        color: colorScheme.onSurface,
+      ),
+      dropdownColor: colorScheme.surfaceContainerHigh,
       items: PeriodFilter.values.map((period) {
         return DropdownMenuItem<PeriodFilter>(
           value: period,
-          child: Text(period.displayName),
+          child: Text(
+            period.displayName,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurface,
+            ),
+          ),
         );
       }).toList(),
       onChanged: (period) {
@@ -94,17 +110,36 @@ class _CatFilterDropdown extends StatelessWidget {
                   .toList()
               : catsState.cats;
 
+          final theme = Theme.of(context);
+          final colorScheme = theme.colorScheme;
           return DropdownButtonFormField<String>(
             initialValue: selectedCatId,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Gato',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              labelStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              fillColor: colorScheme.surfaceContainerHighest,
+              filled: true,
+              border: const OutlineInputBorder(),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurface,
+            ),
+            dropdownColor: colorScheme.surfaceContainerHigh,
             items: [
-              const DropdownMenuItem<String>(
+              DropdownMenuItem<String>(
                 value: null,
-                child: Text('Todos os Gatos'),
+                child: Text(
+                  'Todos os Gatos',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
+                ),
               ),
               ...cats.map((cat) {
                 return DropdownMenuItem<String>(
@@ -115,12 +150,15 @@ class _CatFilterDropdown extends StatelessWidget {
                       Icon(
                         Icons.pets,
                         size: 16,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: colorScheme.primary,
                       ),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
                           cat.name,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: colorScheme.onSurface,
+                          ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),
@@ -137,14 +175,28 @@ class _CatFilterDropdown extends StatelessWidget {
             },
           );
         } else {
+          final theme = Theme.of(context);
+          final colorScheme = theme.colorScheme;
           return DropdownButtonFormField<String>(
             initialValue: selectedCatId,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Gato',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               hintText: 'Carregando...',
+              labelStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              fillColor: colorScheme.surfaceContainerHighest,
+              filled: true,
+              border: const OutlineInputBorder(),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurface,
+            ),
+            dropdownColor: colorScheme.surfaceContainerHigh,
             items: const [],
             onChanged: null,
           );

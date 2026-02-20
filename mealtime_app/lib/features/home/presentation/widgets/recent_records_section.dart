@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
-import 'package:mealtime_app/core/theme/m3_shapes.dart';
 import 'package:mealtime_app/core/theme/text_theme_extensions.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
@@ -13,6 +12,7 @@ import 'package:mealtime_app/features/feeding_logs/domain/food_type.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
 import 'package:mealtime_app/features/home/presentation/widgets/cat_avatar.dart';
+import 'package:mealtime_app/shared/widgets/expressive_widgets.dart';
 
 class RecentRecordsSection extends StatelessWidget {
   const RecentRecordsSection({super.key});
@@ -48,27 +48,24 @@ class RecentRecordsSection extends StatelessWidget {
               ),
               SizedBox(height: M3SpacingToken.space12.value),
               if (recentFeedings.isNotEmpty)
-                ...recentFeedings.map(
-                  (feeding) => _RecentRecordItem(
-                    key: ValueKey(feeding.id),
-                    feeding: feeding,
-                  ),
-                )
-              else
-                Container(
-                  padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: M3Shapes.shapeMedium,
-                  ),
-                  child: Center(
-                    child: Text(
-                      context.l10n.home_no_recent_records,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ...recentFeedings.asMap().entries.map(
+                      (entry) => Padding(
+                        key: ValueKey(entry.value.id),
+                        padding: EdgeInsets.only(
+                          bottom: entry.key < recentFeedings.length - 1
+                              ? M3SpacingToken.space8.value
+                              : 0,
+                        ),
+                        child: _RecentRecordExpressiveItem(
+                          feeding: entry.value,
+                          index: entry.key,
+                        ),
                       ),
-                    ),
-                  ),
+                    )
+              else
+                ExpressiveEmptyState(
+                  icon: Icons.history,
+                  title: context.l10n.home_no_recent_records,
                 ),
             ],
           ),
@@ -85,10 +82,14 @@ class RecentRecordsSection extends StatelessWidget {
   }
 }
 
-class _RecentRecordItem extends StatelessWidget {
-  const _RecentRecordItem({super.key, required this.feeding});
+class _RecentRecordExpressiveItem extends StatelessWidget {
+  const _RecentRecordExpressiveItem({
+    required this.feeding,
+    required this.index,
+  });
 
   final FeedingLog feeding;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +109,6 @@ class _RecentRecordItem extends StatelessWidget {
         if (catsState is CatsLoaded) {
           cat = catsState.getCatById(feeding.catId);
         }
-
         final foodTypeText = localizedFoodType(context, feeding.foodType);
         final notSpecified = context.l10n.home_food_not_specified;
         final amountText = feeding.amount != null
@@ -117,58 +117,26 @@ class _RecentRecordItem extends StatelessWidget {
                 foodTypeText ?? notSpecified,
               )
             : (foodTypeText ?? notSpecified);
+        final colorScheme = Theme.of(context).colorScheme;
+        final avatar = cat != null
+            ? CatAvatar(cat: cat, size: 44)
+            : CircleAvatar(
+                radius: 22,
+                backgroundColor: colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  Icons.pets,
+                  color: colorScheme.onSurfaceVariant,
+                  size: 22,
+                ),
+              );
 
-        return Container(
-          margin: EdgeInsets.only(bottom: M3SpacingToken.space8.value),
-          padding: const M3EdgeInsets.all(M3SpacingToken.space12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            borderRadius: M3Shapes.shapeMedium,
-          ),
-          child: Row(
-            children: [
-              cat != null
-                  ? CatAvatar(cat: cat, size: 40)
-                  : CircleAvatar(
-                      radius: 20,
-                      backgroundColor:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
-                      child: Icon(
-                        Icons.pets,
-                        color:
-                            Theme.of(context).colorScheme.onSurfaceVariant,
-                        size: 20,
-                      ),
-                    ),
-              SizedBox(width: M3SpacingToken.space12.value),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      cat?.name ?? context.l10n.home_cat_name_not_found,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    Text(
-                      amountText,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                _formatTime(context, feeding.fedAt),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
+        return ExpressiveFeedingCard(
+          avatar: avatar,
+          catName: cat?.name ?? context.l10n.home_cat_name_not_found,
+          details: amountText,
+          timeAgo: _formatTime(context, feeding.fedAt),
+          accentColor: colorScheme.primary,
+          index: index,
         );
       },
     );

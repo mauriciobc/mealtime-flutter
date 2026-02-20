@@ -10,6 +10,9 @@ class ExpressiveBottomSheet extends StatefulWidget {
   final Widget? leading;
   final bool showDragHandle;
   final bool isDismissible;
+  /// When false, child is not wrapped in SingleChildScrollView (for content
+  /// with its own scroll e.g. ListView).
+  final bool scrollable;
 
   const ExpressiveBottomSheet({
     super.key,
@@ -18,6 +21,7 @@ class ExpressiveBottomSheet extends StatefulWidget {
     this.leading,
     this.showDragHandle = true,
     this.isDismissible = true,
+    this.scrollable = true,
   });
 
   static Future<T?> show<T>({
@@ -27,20 +31,40 @@ class ExpressiveBottomSheet extends StatefulWidget {
     Widget? leading,
     bool showDragHandle = true,
     bool isDismissible = true,
+    bool scrollable = true,
+    bool isScrollControlled = false,
+    /// Fixed height; sheet is exactly this tall.
+    double? height,
+    /// Max height; sheet sizes to content but never taller than this.
+    double? maxHeight,
   }) {
     HapticsService.mediumImpact();
     return showModalBottomSheet<T>(
       context: context,
       showDragHandle: false,
       isDismissible: isDismissible,
+      isScrollControlled: isScrollControlled,
       backgroundColor: Colors.transparent,
-      builder: (context) => ExpressiveBottomSheet(
-        title: title,
-        leading: leading,
-        showDragHandle: showDragHandle,
-        isDismissible: isDismissible,
-        child: child,
-      ),
+      builder: (context) {
+        final sheet = ExpressiveBottomSheet(
+          title: title,
+          leading: leading,
+          showDragHandle: showDragHandle,
+          isDismissible: isDismissible,
+          scrollable: scrollable,
+          child: child,
+        );
+        if (height != null) {
+          return SizedBox(height: height, child: sheet);
+        }
+        if (maxHeight != null) {
+          return ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxHeight),
+            child: sheet,
+          );
+        }
+        return sheet;
+      },
     );
   }
 
@@ -155,10 +179,19 @@ class _ExpressiveBottomSheetState extends State<ExpressiveBottomSheet>
                   ),
                 ),
               Flexible(
-                child: SingleChildScrollView(
-                  padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-                  child: widget.child,
-                ),
+                child: widget.scrollable
+                    ? SingleChildScrollView(
+                        padding: const M3EdgeInsets.all(
+                          M3SpacingToken.space16,
+                        ),
+                        child: widget.child,
+                      )
+                    : Padding(
+                        padding: const M3EdgeInsets.all(
+                          M3SpacingToken.space16,
+                        ),
+                        child: widget.child,
+                      ),
               ),
             ],
           ),
@@ -405,7 +438,7 @@ Future<void> showExpressiveConfirmation({
                       confirmText,
                       style: TextStyle(
                         color: confirmColor != null
-                            ? (confirmColor!.computeLuminance() > 0.5
+                            ? (confirmColor.computeLuminance() > 0.5
                                 ? Colors.black
                                 : Colors.white)
                             : (isDestructive

@@ -93,6 +93,7 @@ class _SummaryCard extends StatelessWidget {
               value,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

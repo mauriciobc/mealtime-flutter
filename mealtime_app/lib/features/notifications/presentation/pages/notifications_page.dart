@@ -452,9 +452,9 @@ class _NotificationItem extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     switch (type.toLowerCase()) {
       case 'success':
-        return Colors.green;
+        return colorScheme.primary;
       case 'warning':
-        return Colors.orange;
+        return colorScheme.tertiary;
       case 'error':
         return colorScheme.error;
       case 'info':
@@ -475,9 +475,9 @@ class _NotificationItem extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         color: Theme.of(context).colorScheme.error,
-        child: const Icon(
+        child: Icon(
           Icons.delete,
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.onError,
         ),
       ),
       onDismissed: (_) => onDelete(),

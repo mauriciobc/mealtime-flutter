@@ -44,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(createDatabaseConnection());
 
   /// Construtor para testes com executor in-memory (ex: NativeDatabase.memory()).
-  AppDatabase.withExecutor(QueryExecutor e) : super(e);
+  AppDatabase.withExecutor(super.e);
 
   @override
   int get schemaVersion => 5;

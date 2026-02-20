@@ -49,20 +49,36 @@ class FeedingFormFields extends StatelessWidget {
     );
   }
 
+  /// Largura mínima para 3 dígitos + sufixo "g" (evita overflow no Row).
+  static const double _portionFieldWidth = 60;
+
   Widget _buildPortionField(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SizedBox(
-      width: 84.5,
+      width: _portionFieldWidth,
       child: TextFormField(
         initialValue: data.portion.toStringAsFixed(0),
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           labelText: 'Porção (g)',
           suffixText: 'g',
-          border: OutlineInputBorder(),
+          border: const OutlineInputBorder(),
           isDense: true,
-          contentPadding: EdgeInsets.symmetric(
+          contentPadding: const EdgeInsets.symmetric(
             horizontal: 8,
             vertical: 8,
           ),
+          filled: true,
+          fillColor: colorScheme.surfaceContainerHighest,
+          labelStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+          suffixStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurface,
         ),
         keyboardType: TextInputType.number,
         inputFormatters: [
@@ -80,17 +96,41 @@ class FeedingFormFields extends StatelessWidget {
   }
 
   Widget _buildStatusField(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return DropdownButtonFormField<String>(
-      value: data.status,
-      decoration: const InputDecoration(
+      isExpanded: true,
+      initialValue: data.status,
+      decoration: InputDecoration(
         labelText: 'Status',
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
         isDense: true,
-        contentPadding: EdgeInsets.symmetric(
+        contentPadding: const EdgeInsets.symmetric(
           horizontal: 8,
           vertical: 8,
         ),
+        filled: true,
+        fillColor: colorScheme.surfaceContainerHighest,
+        labelStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
       ),
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: colorScheme.onSurface,
+      ),
+      dropdownColor: colorScheme.surfaceContainerHigh,
+      selectedItemBuilder: (context) => statusOptions
+          .map(
+            (status) => Text(
+              status,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontSize: 13,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          )
+          .toList(),
       items: statusOptions.map((status) {
         return DropdownMenuItem(
           value: status,
@@ -110,17 +150,43 @@ class FeedingFormFields extends StatelessWidget {
   }
 
   Widget _buildFoodTypeField(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final currentValue =
+        normalizeToFoodTypeId(data.foodType) ?? FoodTypeIds.dryFood;
     return DropdownButtonFormField<String>(
-      value: normalizeToFoodTypeId(data.foodType) ?? FoodTypeIds.dryFood,
-      decoration: const InputDecoration(
+      isExpanded: true,
+      initialValue: currentValue,
+      decoration: InputDecoration(
         labelText: 'Tipo',
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
         isDense: true,
-        contentPadding: EdgeInsets.symmetric(
+        contentPadding: const EdgeInsets.symmetric(
           horizontal: 8,
           vertical: 8,
         ),
+        filled: true,
+        fillColor: colorScheme.surfaceContainerHighest,
+        labelStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
       ),
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: colorScheme.onSurface,
+      ),
+      dropdownColor: colorScheme.surfaceContainerHigh,
+      selectedItemBuilder: (context) => foodTypeIds
+          .map(
+            (id) => Text(
+              localizedFoodType(context, id) ?? id,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontSize: 13,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          )
+          .toList(),
       items: foodTypeIds.map((id) {
         return DropdownMenuItem<String>(
           value: id,
@@ -140,16 +206,29 @@ class FeedingFormFields extends StatelessWidget {
   }
 
   Widget _buildNotesField(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return TextFormField(
       initialValue: data.notes,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         labelText: 'Observações',
         hintText: 'Opcional',
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 12,
         ),
+        filled: true,
+        fillColor: colorScheme.surfaceContainerHighest,
+        labelStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: colorScheme.onSurface,
       ),
       maxLines: 2,
       textCapitalization: TextCapitalization.sentences,

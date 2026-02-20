@@ -78,15 +78,6 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
       listener: (context, state) {
         if (state is SimpleAuthSuccess) {
           context.go(AppRouter.home);
-        } else if (state is SimpleAuthFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Theme.of(context).colorScheme.error,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: M3Shapes.shapeMedium),
-            ),
-          );
         }
       },
       child: Scaffold(
@@ -114,6 +105,29 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
                   _buildHeader(context),
                   SizedBox(height: M3SpacingToken.space32.value),
                   _buildForm(context),
+                  BlocBuilder<SimpleAuthBloc, SimpleAuthState>(
+                    buildWhen: (prev, curr) =>
+                        curr is SimpleAuthFailure || prev is SimpleAuthFailure,
+                    builder: (context, state) {
+                      if (state is SimpleAuthFailure) {
+                        return Padding(
+                          padding: const M3EdgeInsets.only(
+                            top: M3SpacingToken.space16,
+                          ),
+                          child: SelectableText.rich(
+                            TextSpan(
+                              text: state.message,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                   SizedBox(height: M3SpacingToken.space24.value),
                   _buildToggleButton(context),
                   SizedBox(height: M3SpacingToken.space16.value),

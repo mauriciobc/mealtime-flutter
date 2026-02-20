@@ -176,6 +176,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
 
   Widget _buildEmptyState() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Padding(
       padding: const M3EdgeInsets.all(M3SpacingToken.space32),
       child: Center(
@@ -185,23 +187,22 @@ class _StatisticsPageState extends State<StatisticsPage> {
             Icon(
               Icons.bar_chart_outlined,
               size: 64,
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurfaceVariant
-                  .withValues(alpha: 0.5),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             ),
             SizedBox(height: M3SpacingToken.space16.value),
             Text(
               context.l10n.statistics_noData,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: colorScheme.onSurface,
+              ),
             ),
             SizedBox(height: M3SpacingToken.space8.value),
             Text(
               context.l10n.statistics_noDataPeriod,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -210,6 +211,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
   }
 
   Widget _buildErrorState(String message) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Center(
       child: Padding(
         padding: const M3EdgeInsets.all(M3SpacingToken.space32),
@@ -220,23 +223,25 @@ class _StatisticsPageState extends State<StatisticsPage> {
             Icon(
               Icons.error_outline,
               size: 64,
-              color: Theme.of(context).colorScheme.error,
+              color: colorScheme.error,
             ),
             SizedBox(height: M3SpacingToken.space16.value),
             Text(
               context.l10n.statistics_errorLoading,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: colorScheme.onSurface,
+              ),
             ),
             SizedBox(height: M3SpacingToken.space8.value),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
             SizedBox(height: M3SpacingToken.space24.value),
-            ElevatedButton.icon(
+            FilledButton.icon(
               onPressed: () {
                 context.read<StatisticsBloc>().add(
                       const LoadStatistics(

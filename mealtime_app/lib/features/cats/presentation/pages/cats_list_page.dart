@@ -13,6 +13,7 @@ import 'package:mealtime_app/shared/widgets/error_widget.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/core/theme/m3_motion_helpers.dart';
 import 'package:mealtime_app/core/utils/haptics_service.dart';
+import 'package:mealtime_app/shared/widgets/expressive_dialogs.dart';
 import 'package:mealtime_app/shared/widgets/soulful_empty_state.dart';
 
 class CatsListPage extends StatefulWidget {
@@ -36,16 +37,6 @@ class _CatsListPageState extends State<CatsListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(context.l10n.cats_title),
-        actions: [
-          IconButton(
-            onPressed: () {
-              HapticsService.lightImpact();
-              context.read<CatsBloc>().add(const RefreshCats());
-            },
-            icon: const Icon(Icons.refresh),
-            tooltip: context.l10n.common_refresh,
-          ),
-        ],
       ),
       body: BlocConsumer<CatsBloc, CatsState>(
         listener: (context, state) {
@@ -189,65 +180,16 @@ class _CatsListPageState extends State<CatsListPage> {
   }
 
   void _showDeleteBottomSheet(BuildContext context, Cat cat) {
-    HapticsService.mediumImpact();
-    showModalBottomSheet(
+    showExpressiveConfirmation(
       context: context,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const M3EdgeInsets.all(M3SpacingToken.space24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.delete_outline,
-                size: 48,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              SizedBox(height: M3SpacingToken.space16.value),
-              Text(
-                context.l10n.cats_deleteCat,
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: M3SpacingToken.space8.value),
-              Text(
-                context.l10n.cats_deleteConfirmation(cat.name),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: M3SpacingToken.space32.value),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(context.l10n.common_cancel),
-                    ),
-                  ),
-                  SizedBox(width: M3SpacingToken.space16.value),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        HapticsService.heavyImpact(); // Deletion is heavy
-                        Navigator.of(context).pop();
-                        context.read<CatsBloc>().add(DeleteCat(cat.id));
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                        foregroundColor: Theme.of(context).colorScheme.onError,
-                      ),
-                      child: Text(context.l10n.common_delete),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+      title: context.l10n.cats_deleteCat,
+      message: context.l10n.cats_deleteConfirmation(cat.name),
+      confirmText: context.l10n.common_delete,
+      cancelText: context.l10n.common_cancel,
+      isDestructive: true,
+      onConfirm: () {
+        context.read<CatsBloc>().add(DeleteCat(cat.id));
+      },
     );
   }
 }

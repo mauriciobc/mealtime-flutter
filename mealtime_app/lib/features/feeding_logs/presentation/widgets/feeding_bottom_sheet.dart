@@ -47,11 +47,15 @@ class FeedingFormData {
 class FeedingBottomSheet extends StatefulWidget {
   final List<Cat> availableCats;
   final String householdId;
+  /// When true, draws own header and container. When false, only form content
+  /// (for use inside ExpressiveBottomSheet).
+  final bool showHeader;
 
   const FeedingBottomSheet({
     super.key,
     required this.availableCats,
     required this.householdId,
+    this.showHeader = true,
   });
 
   @override
@@ -65,6 +69,28 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final listMaxHeight = screenHeight * 0.5;
+
+    final content = SafeArea(
+      child: Column(
+        mainAxisSize: widget.showHeader ? MainAxisSize.min : MainAxisSize.min,
+        children: [
+          if (widget.showHeader) _buildHeader(),
+          _buildSelectionControls(),
+          const Divider(height: 1),
+          if (widget.showHeader)
+            Expanded(child: _buildCatsList())
+          else
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: listMaxHeight),
+              child: _buildCatsList(shrinkWrap: true),
+            ),
+          _buildConfirmButton(),
+        ],
+      ),
+    );
+    if (!widget.showHeader) return content;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -72,20 +98,7 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
           top: Radius.circular(20),
         ),
       ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHeader(),
-            _buildSelectionControls(),
-            const Divider(height: 1),
-            Expanded(
-              child: _buildCatsList(),
-            ),
-            _buildConfirmButton(),
-          ],
-        ),
-      ),
+      child: content,
     );
   }
 
@@ -126,6 +139,12 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
   }
 
   Widget _buildSelectionControls() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    // onSurface garante contraste no fundo do sheet em light e dark.
+    final buttonTextStyle = theme.textTheme.labelLarge?.copyWith(
+      color: colorScheme.onSurface,
+    );
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: Row(
@@ -133,20 +152,20 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
         children: [
           Text(
             '${_selectedCatIds.length} de ${widget.availableCats.length} gatos selecionados',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
           Row(
             children: [
               TextButton(
                 onPressed: _selectAll,
-                child: const Text('Todos'),
+                child: Text('Todos', style: buttonTextStyle),
               ),
               const SizedBox(width: 8),
               TextButton(
                 onPressed: _selectedCatIds.isEmpty ? null : _clearAll,
-                child: const Text('Limpar'),
+                child: Text('Limpar', style: buttonTextStyle),
               ),
             ],
           ),
@@ -155,7 +174,7 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
     );
   }
 
-  Widget _buildCatsList() {
+  Widget _buildCatsList({bool shrinkWrap = false}) {
     return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
       builder: (context, state) {
         List<FeedingLog> feedingLogs = [];
@@ -164,6 +183,10 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
         }
 
         return ListView.builder(
+          shrinkWrap: shrinkWrap,
+          physics: shrinkWrap
+              ? const BouncingScrollPhysics()
+              : const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           itemCount: widget.availableCats.length,
           itemBuilder: (context, index) {
@@ -177,7 +200,8 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
                 cat: cat,
                 isSelected: isSelected,
                 formData: formData,
-                onSelectionChanged: (selected) => _toggleCatSelection(cat.id, selected),
+                onSelectionChanged: (selected) =>
+                    _toggleCatSelection(cat.id, selected),
                 onFormDataChanged: (data) => _updateFormData(cat.id, data),
                 feedingLogs: feedingLogs,
               ),
@@ -189,26 +213,34 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
   }
 
   Widget _buildConfirmButton() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    // Fixar primary/onPrimary em todos os estados (pressed, hover, focus) para
+    // evitar tema/overlay aplicando "dark blue on blue" no estado ativo.
+    final foregroundAllStates = MaterialStateProperty.resolveWith<Color>(
+      (Set<MaterialState> states) => colorScheme.onPrimary,
+    );
+    final backgroundAllStates = MaterialStateProperty.resolveWith<Color>(
+      (Set<MaterialState> states) => colorScheme.primary,
+    );
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        color: colorScheme.surfaceContainer,
       ),
       child: SizedBox(
         width: double.infinity,
-        child: ElevatedButton(
+        child: FilledButton(
           onPressed: _selectedCatIds.isEmpty || _isSubmitting
               ? null
               : _submitFeedings,
-          style: ElevatedButton.styleFrom(
+          style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
+          ).copyWith(
+            foregroundColor: foregroundAllStates,
+            backgroundColor: backgroundAllStates,
           ),
           child: _isSubmitting
               ? const Material3LoadingIndicator(size: 20.0)
@@ -219,7 +251,9 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
                     const SizedBox(width: 8),
                     Text(
                       'Confirmar Alimentação (${_selectedCatIds.length})',
-                      style: Theme.of(context).textTheme.titleMediumEmphasized,
+                      style: theme.textTheme.titleMediumEmphasized?.copyWith(
+                        color: colorScheme.onPrimary,
+                      ),
                     ),
                   ],
                 ),

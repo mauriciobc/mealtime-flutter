@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:material_design/material_design.dart';
 import 'package:material_charts/material_charts.dart';
+import 'package:mealtime_app/core/theme/m3_shapes.dart';
 import 'package:mealtime_app/features/cats/domain/entities/weight_entry.dart';
 import 'package:mealtime_app/features/weight/domain/entities/weight_goal.dart';
+import 'package:mealtime_app/shared/widgets/expressive_widgets.dart';
 
 /// Gráfico de tendência de peso ao longo do tempo
 class WeightTrendChart extends StatelessWidget {
@@ -21,210 +24,147 @@ class WeightTrendChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('[WeightTrendChart] 🚀 build() chamado');
-    debugPrint('[WeightTrendChart] 📊 weightLogs recebidos: ${weightLogs.length}');
-    debugPrint('[WeightTrendChart] 📅 timeRangeDays: $timeRangeDays');
-    
     if (weightLogs.isEmpty) {
-      debugPrint('[WeightTrendChart] ⚠️ weightLogs está vazio, mostrando empty state');
-      return _buildEmptyState(context);
-    }
-
-    // Log dos primeiros e últimos logs para debug
-    if (weightLogs.isNotEmpty) {
-      final firstLog = weightLogs.first;
-      final lastLog = weightLogs.last;
-      debugPrint('[WeightTrendChart] 📋 Primeiro log: ${firstLog.measuredAt} - ${firstLog.weight}kg');
-      debugPrint('[WeightTrendChart] 📋 Último log: ${lastLog.measuredAt} - ${lastLog.weight}kg');
+      return const ExpressiveChartContainer(
+        title: 'Tendência de Peso',
+        subtitle: 'Evolução do peso ao longo do tempo',
+        hasData: false,
+        chart: SizedBox(),
+      );
     }
 
     final theme = Theme.of(context);
     final filteredLogs = _filterByTimeRange(weightLogs);
     
-    debugPrint('[WeightTrendChart] 🔍 Logs após filtro: ${filteredLogs.length}');
-    
     if (filteredLogs.isEmpty) {
-      debugPrint('[WeightTrendChart] ⚠️ filteredLogs está vazio após filtro, mostrando empty state');
-      return _buildEmptyState(context);
+      return const ExpressiveChartContainer(
+        title: 'Tendência de Peso',
+        subtitle: 'Evolução do peso ao longo do tempo',
+        hasData: false,
+        chart: SizedBox(),
+      );
     }
 
-    // Converter para dados do gráfico
     var chartData = _mapToChartData(filteredLogs);
-    debugPrint('[WeightTrendChart] 📈 chartData mapeado: ${chartData.length} pontos');
     
-    // Se houver apenas 1 ponto, interpolar para criar um segundo ponto
     if (chartData.length == 1 && filteredLogs.isNotEmpty) {
-      debugPrint('[WeightTrendChart] 📊 Apenas 1 registro encontrado, interpolando...');
       chartData = _interpolateSinglePoint(chartData, filteredLogs);
-      debugPrint('[WeightTrendChart] 📈 Após interpolação: ${chartData.length} pontos');
-    }
-    
-    if (chartData.isNotEmpty) {
-      debugPrint('[WeightTrendChart] 📈 Primeiro ponto: ${chartData.first.label} - ${chartData.first.value}kg');
-      debugPrint('[WeightTrendChart] 📈 Último ponto: ${chartData.last.label} - ${chartData.last.value}kg');
     }
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Tendência de Peso',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+    return ExpressiveChartContainer(
+      title: 'Tendência de Peso',
+      subtitle: 'Evolução do peso ao longo do tempo',
+      hasData: true,
+      chart: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Período',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Evolução do peso ao longo do tempo.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Período',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                SegmentedButton<int>(
-                  segments: const [
-                    ButtonSegment(value: 30, label: Text('30 dias')),
-                    ButtonSegment(value: 60, label: Text('60 dias')),
-                    ButtonSegment(value: 90, label: Text('90 dias')),
-                  ],
-                  selected: {timeRangeDays},
-                  onSelectionChanged: (Set<int> selected) {
-                    if (onTimeRangeChanged != null) {
-                      onTimeRangeChanged!(selected.first);
-                    }
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final availableWidth = constraints.maxWidth;
-                final double chartWidth;
-                if (availableWidth.isFinite && availableWidth > 0) {
-                  chartWidth = availableWidth.clamp(200.0, 800.0);
-                } else {
-                  chartWidth = 400.0;
-                }
-                final chartHeight = 250.0;
+          ),
+          SizedBox(height: M3SpacingToken.space8.value),
+          SegmentedButton<int>(
+            segments: const [
+              ButtonSegment(value: 30, label: Text('30 dias')),
+              ButtonSegment(value: 60, label: Text('60 dias')),
+              ButtonSegment(value: 90, label: Text('90 dias')),
+            ],
+            selected: {timeRangeDays},
+            onSelectionChanged: (Set<int> selected) {
+              if (onTimeRangeChanged != null) {
+                onTimeRangeChanged!(selected.first);
+              }
+            },
+          ),
+          SizedBox(height: M3SpacingToken.space16.value),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final availableWidth = constraints.maxWidth;
+              final double chartWidth;
+              if (availableWidth.isFinite && availableWidth > 0) {
+                chartWidth = availableWidth.clamp(200.0, 800.0);
+              } else {
+                chartWidth = 400.0;
+              }
+              final chartHeight = 250.0;
 
-                // Validar dados com validações mais rigorosas
-                final validData = chartData.where((data) {
-                  final isValid = data.value.isFinite &&
-                      !data.value.isNaN &&
-                      !data.value.isInfinite &&
-                      data.value > 0 &&
-                      data.label.isNotEmpty;
-                  
-                  if (!isValid) {
-                    debugPrint('[WeightTrendChart] ⚠️ Dado inválido filtrado: ${data.label} - ${data.value}');
-                    debugPrint('[WeightTrendChart]   isFinite: ${data.value.isFinite}');
-                    debugPrint('[WeightTrendChart]   isNaN: ${data.value.isNaN}');
-                    debugPrint('[WeightTrendChart]   isInfinite: ${data.value.isInfinite}');
-                    debugPrint('[WeightTrendChart]   > 0: ${data.value > 0}');
-                  }
-                  return isValid;
-                }).toList();
+              final validData = chartData.where((data) {
+                return data.value.isFinite &&
+                    !data.value.isNaN &&
+                    !data.value.isInfinite &&
+                    data.value > 0 &&
+                    data.label.isNotEmpty;
+              }).toList();
 
-                debugPrint('[WeightTrendChart] ✅ Dados válidos: ${validData.length} de ${chartData.length}');
-
-                // Gráfico de linha precisa de pelo menos 2 pontos
-                if (validData.length < 2) {
-                  debugPrint('[WeightTrendChart] ❌ Insuficientes dados válidos: ${validData.length} pontos (mínimo 2)');
-                  return SizedBox(
-                    height: chartHeight,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            validData.isEmpty
-                                ? 'Dados inválidos'
-                                : 'Dados insuficientes',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.error,
-                            ),
-                          ),
-                          Text(
-                            'Total: ${chartData.length} pontos, Válidos: ${validData.length}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.error,
-                            ),
-                          ),
-                          Text(
-                            'Mínimo necessário: 2 pontos',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.error,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                // Verificação final antes de passar para o gráfico
-                final finalData = validData.map((data) {
-                  // Garantir que o valor é absolutamente válido
-                  final safeValue = data.value.isFinite &&
-                          !data.value.isNaN &&
-                          !data.value.isInfinite &&
-                          data.value > 0
-                      ? data.value
-                      : 0.0;
-                  
-                  if (safeValue != data.value) {
-                    debugPrint('[WeightTrendChart] ⚠️ Valor corrigido: ${data.label} de ${data.value} para $safeValue');
-                  }
-                  
-                  return ChartData(
-                    label: data.label,
-                    value: safeValue,
-                  );
-                }).where((data) => data.value > 0).toList();
-
-                if (finalData.length < 2) {
-                  debugPrint('[WeightTrendChart] ❌ Após validação final, insuficientes dados: ${finalData.length} pontos');
-                  return SizedBox(
-                    height: chartHeight,
-                    child: Center(
-                      child: Text(
-                        'Dados insuficientes após validação',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.error,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                debugPrint('[WeightTrendChart] 🎨 Renderizando gráfico com ${finalData.length} pontos válidos');
+              if (validData.length < 2) {
                 return SizedBox(
                   height: chartHeight,
-                  width: chartWidth,
-                  child: _buildLineChart(context, finalData, chartWidth, chartHeight),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          validData.isEmpty
+                              ? 'Dados inválidos'
+                              : 'Dados insuficientes',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                        Text(
+                          'Mínimo necessário: 2 pontos',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 );
-              },
-            ),
-            if (goal != null) ...[
-              const SizedBox(height: 8),
-              _buildGoalLine(context),
-            ],
+              }
+
+              final finalData = validData.map((data) {
+                final safeValue = data.value.isFinite &&
+                        !data.value.isNaN &&
+                        !data.value.isInfinite &&
+                        data.value > 0
+                    ? data.value
+                    : 0.0;
+                
+                return ChartData(
+                  label: data.label,
+                  value: safeValue,
+                );
+              }).where((data) => data.value > 0).toList();
+
+              if (finalData.length < 2) {
+                return SizedBox(
+                  height: chartHeight,
+                  child: Center(
+                    child: Text(
+                      'Dados insuficientes após validação',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              return SizedBox(
+                height: chartHeight,
+                width: chartWidth,
+                child: _buildLineChart(context, finalData, chartWidth, chartHeight),
+              );
+            },
+          ),
+          if (goal != null) ...[
+            SizedBox(height: M3SpacingToken.space8.value),
+            _buildGoalLine(context),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -372,10 +312,10 @@ class WeightTrendChart extends StatelessWidget {
 
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const M3EdgeInsets.all(M3SpacingToken.space8),
       decoration: BoxDecoration(
         color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: M3Shapes.shapeSmall,
       ),
       child: Row(
         children: [
@@ -384,7 +324,7 @@ class WeightTrendChart extends StatelessWidget {
             height: 2,
             color: theme.colorScheme.secondary,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: M3SpacingToken.space8.value),
           Text(
             'Meta: ${goal!.targetWeight.toStringAsFixed(1)} kg até ${DateFormat('dd/MM/yyyy').format(goal!.targetDate)}',
             style: theme.textTheme.bodySmall?.copyWith(
@@ -702,61 +642,5 @@ class WeightTrendChart extends StatelessWidget {
     return 0;
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Tendência de Peso',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Evolução do peso ao longo do tempo.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 32),
-            Center(
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.show_chart_outlined,
-                    size: 48,
-                    color: theme.colorScheme.onSurfaceVariant.withValues(
-                      alpha: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Nenhum dado disponível',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Registre pesos para ver a evolução',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.7,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 

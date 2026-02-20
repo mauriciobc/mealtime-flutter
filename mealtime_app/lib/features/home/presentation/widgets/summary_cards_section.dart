@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
-import 'package:mealtime_app/core/theme/m3_shapes.dart';
-import 'package:mealtime_app/core/theme/text_theme_extensions.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
+import 'package:mealtime_app/shared/widgets/expressive_widgets.dart';
 import 'package:material_design/material_design.dart';
 
 class SummaryCardsSection extends StatelessWidget {
@@ -77,21 +76,31 @@ class SummaryCardsSection extends StatelessWidget {
               lastFeedingTime = _formatTime(lastFeeding.fedAt);
             }
             
+            final theme = Theme.of(context);
+            final colorScheme = theme.colorScheme;
             return Padding(
               padding: const M3EdgeInsets.symmetric(horizontal: M3SpacingToken.space16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    context.l10n.home_last_7_days,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: _AnimatedSummaryCard(
                           delay: 0,
-                          child: _SummaryCard(
+                          child: ExpressiveSummaryCard(
                             title: context.l10n.home_total_cats,
                             value: catsCount.toString(),
                             icon: Icons.pets,
-                            color: Theme.of(context).colorScheme.secondary,
-                            subtitle: context.l10n.home_active_cats,
+                            accentColor: Theme.of(context).colorScheme.secondary,
+                            index: 0,
                           ),
                         ),
                       ),
@@ -99,12 +108,13 @@ class SummaryCardsSection extends StatelessWidget {
                       Expanded(
                         child: _AnimatedSummaryCard(
                           delay: 100,
-                          child: _SummaryCard(
+                          child: ExpressiveSummaryCard(
                             title: context.l10n.home_today,
                             value: todayCount.toString(),
                             icon: Icons.restaurant,
-                            color: Theme.of(context).colorScheme.primary,
-                            subtitle: context.l10n.home_feedings_title,
+                            accentColor: Theme.of(context).colorScheme.primary,
+                            hasGradient: true,
+                            index: 1,
                           ),
                         ),
                       ),
@@ -116,12 +126,12 @@ class SummaryCardsSection extends StatelessWidget {
                       Expanded(
                         child: _AnimatedSummaryCard(
                           delay: 200,
-                          child: _SummaryCard(
+                          child: ExpressiveSummaryCard(
                             title: context.l10n.home_average_portion,
                             value: averagePortionText,
                             icon: Icons.scale,
-                            color: Theme.of(context).colorScheme.tertiary,
-                            subtitle: context.l10n.home_average_portion_subtitle,
+                            accentColor: Theme.of(context).colorScheme.tertiary,
+                            index: 2,
                           ),
                         ),
                       ),
@@ -129,12 +139,12 @@ class SummaryCardsSection extends StatelessWidget {
                       Expanded(
                         child: _AnimatedSummaryCard(
                           delay: 300,
-                          child: _SummaryCard(
+                          child: ExpressiveSummaryCard(
                             title: context.l10n.home_last_time,
                             value: lastFeedingTime,
                             icon: Icons.access_time,
-                            color: Theme.of(context).colorScheme.error,
-                            subtitle: context.l10n.home_last_time_subtitle,
+                            accentColor: Theme.of(context).colorScheme.error,
+                            index: 3,
                           ),
                         ),
                       ),
@@ -179,71 +189,6 @@ class SummaryCardsSection extends StatelessWidget {
 
   String _formatTime(DateTime dateTime) {
     return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
-}
-
-class _SummaryCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final String? subtitle;
-
-  const _SummaryCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-    this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: M3Shapes.shapeMedium,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              SizedBox(width: M3SpacingToken.space8.value),
-              Expanded(
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: M3SpacingToken.space8.value),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleLargeEmphasized?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          if (subtitle != null) ...[
-            SizedBox(height: M3SpacingToken.space4.value),
-            Text(
-              subtitle!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ],
-      ),
-    );
   }
 }
 

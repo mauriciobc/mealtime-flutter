@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/providers/app_providers.dart';
+import 'package:mealtime_app/services/notifications/realtime_notification_service.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
-import 'package:mealtime_app/core/theme/text_theme_extensions.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
@@ -26,6 +27,7 @@ import 'package:mealtime_app/features/home/presentation/widgets/recent_records_s
 import 'package:mealtime_app/features/home/presentation/widgets/summary_cards_section.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
+import 'package:mealtime_app/shared/widgets/expressive_dialogs.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:m3e_collection/m3e_collection.dart';
 
@@ -42,6 +44,8 @@ class _HomePageState extends ConsumerState<HomePage>
   bool _notificationsInitialized = false;
   int _unreadNotificationsCount = 0; // Inicializar com 0, será carregado do banco
   Timer? _periodicSyncHandle; // Handle para cancelar periodic sync
+  /// Guardado em campo para usar em dispose() sem acessar ref (unsafe após unmount).
+  RealtimeNotificationService? _realtimeNotificationService;
 
   @override
   void initState() {
@@ -104,9 +108,10 @@ class _HomePageState extends ConsumerState<HomePage>
       final notificationService = ref.read(notificationServiceProvider);
       await notificationService.initialize();
 
-      // Inicializar RealtimeNotificationService
+      // Inicializar RealtimeNotificationService (guardar para disconnect em dispose)
       final realtimeService = ref.read(realtimeNotificationServiceProvider);
-      
+      _realtimeNotificationService = realtimeService;
+
       // Configurar callback para incrementar badge quando notificação for recebida
       realtimeService.onNotificationReceived = _incrementNotificationCount;
       
@@ -197,13 +202,13 @@ class _HomePageState extends ConsumerState<HomePage>
   void dispose() {
     // Remover observer
     WidgetsBinding.instance.removeObserver(this);
-    
+
     // Cancelar periodic sync
     _periodicSyncHandle?.cancel();
-    
-    // Desconectar notificações quando sair da página
+
+    // Desconectar notificações usando referência guardada (ref/context são unsafe em dispose)
     try {
-      ref.read(realtimeNotificationServiceProvider).disconnect();
+      _realtimeNotificationService?.disconnect();
     } catch (e) {
       debugPrint('[HomePage] Erro ao desconectar notificações: $e');
     }
@@ -218,6 +223,7 @@ class _HomePageState extends ConsumerState<HomePage>
   }
 
   void _loadFeedingLogs({bool forceRemote = false}) {
+    if (!mounted) return;
     final catsState = context.read<CatsBloc>().state;
     final feedingLogsState = context.read<FeedingLogsBloc>().state;
     
@@ -397,10 +403,12 @@ class _HomePageState extends ConsumerState<HomePage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            context.l10n.home_last_7_days, // This is a misplacement from the instruction, but following it.
-            style: Theme.of(context).textTheme.headlineMediumEmphasized?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
+          SvgPicture.asset(
+            'assets/images/mealtime-logo.svg',
+            height: 32,
+            colorFilter: ColorFilter.mode(
+              Theme.of(context).colorScheme.primary,
+              BlendMode.srcIn,
             ),
           ),
           Row(
@@ -490,20 +498,20 @@ class _HomePageState extends ConsumerState<HomePage>
     final authBloc = context.read<SimpleAuthBloc>();
     final feedingLogsBloc = context.read<FeedingLogsBloc>();
 
-    showModalBottomSheet(
+    ExpressiveBottomSheet.show(
       context: context,
+      title: context.l10n.home_register_feeding,
+      scrollable: false,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0),
-      builder: (bottomSheetContext) => BlocProvider.value(
+      maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+      child: BlocProvider.value(
         value: authBloc,
         child: BlocProvider.value(
           value: feedingLogsBloc,
-          child: SizedBox(
-            height: MediaQuery.of(bottomSheetContext).size.height * 0.9,
-            child: FeedingBottomSheet(
-              availableCats: catsState.cats,
-              householdId: householdId,
-            ),
+          child: FeedingBottomSheet(
+            availableCats: catsState.cats,
+            householdId: householdId,
+            showHeader: false,
           ),
         ),
       ),

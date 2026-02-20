@@ -20,6 +20,25 @@ class M3Shapes {
   /// Shape extra grande (20px) - usado em botões de ação primária
   static BorderRadius get shapeXLarge => BorderRadius.circular(20);
 
+  /// Shape expressivo grande (24px) - M3 Expressive cards/containers
+  static BorderRadius get shapeExpressiveLarge =>
+      BorderRadius.circular(24);
+
+  /// Squircle pequeno - curva orgânica M3 Expressive
+  static ShapeBorder get squircleSmall => ContinuousRectangleBorder(
+        borderRadius: BorderRadius.circular(32),
+      );
+
+  /// Squircle grande - para imagens e media em cards expressivos
+  static ShapeBorder get squircleLarge => ContinuousRectangleBorder(
+        borderRadius: BorderRadius.circular(48),
+      );
+
+  /// Shape de card expressivo (squircle)
+  static ShapeBorder get cardExpressiveShape => ContinuousRectangleBorder(
+        borderRadius: BorderRadius.circular(48),
+      );
+
   /// Shape para botões de ação primária (pill shape)
   static ShapeBorder get buttonShape => RoundedRectangleBorder(
         borderRadius: shapeXLarge,

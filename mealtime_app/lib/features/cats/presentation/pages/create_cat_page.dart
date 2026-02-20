@@ -33,30 +33,52 @@ class _CreateCatPageState extends State<CreateCatPage> {
             ),
         ],
       ),
-      body: BlocListener<CatsBloc, CatsState>(
-        listener: (context, state) {
-          if (state is CatOperationInProgress) {
-            setState(() {
-              _isLoading = true;
-            });
-          } else if (state is CatOperationSuccess) {
-            setState(() {
-              _isLoading = false;
-            });
-            context.pop();
-          } else if (state is CatsError) {
-            setState(() {
-              _isLoading = false;
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.failure.message),
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            );
-          }
-        },
-        child: CatForm(onSubmit: _createCat, isLoading: _isLoading),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: BlocListener<CatsBloc, CatsState>(
+              listener: (context, state) {
+                if (state is CatOperationInProgress) {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                } else if (state is CatOperationSuccess) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                  context.pop();
+                } else if (state is CatsError) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
+              },
+              child: CatForm(onSubmit: _createCat, isLoading: _isLoading),
+            ),
+          ),
+          BlocBuilder<CatsBloc, CatsState>(
+            buildWhen: (prev, curr) =>
+                curr is CatsError || prev is CatsError,
+            builder: (context, state) {
+              if (state is CatsError) {
+                return Padding(
+                  padding: const M3EdgeInsets.all(M3SpacingToken.space16),
+                  child: SelectableText.rich(
+                    TextSpan(
+                      text: state.failure.message,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
       ),
     );
   }

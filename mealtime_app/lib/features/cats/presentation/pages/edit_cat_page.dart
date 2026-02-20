@@ -56,12 +56,6 @@ class _EditCatPageState extends State<EditCatPage> {
             setState(() {
               _isLoading = false;
             });
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.failure.message),
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            );
           }
         },
         builder: (context, state) {

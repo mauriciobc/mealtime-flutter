@@ -70,6 +70,7 @@ class CatDistributionChart extends StatelessWidget {
               'Distribuição por Gato (%)',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -157,7 +158,9 @@ class CatDistributionChart extends StatelessWidget {
                     Flexible(
                       child: Text(
                         '$label: ${consumption.percentage.toStringAsFixed(1)}%',
-                      style: theme.textTheme.bodySmall,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -189,11 +192,10 @@ class CatDistributionChart extends StatelessWidget {
     return colors.take(count).toList();
   }
 
-  /// Retorna cor de contraste (branco ou preto) baseada na luminância
+  /// Retorna cor de contraste para texto em fatias do gráfico (WCAG).
+  /// Usa onSurface do tema quando disponível para consistência no dark mode.
   Color _getContrastColor(Color color) {
-    // Calcular luminância relativa
     final luminance = color.computeLuminance();
-    // Se a cor for clara, usar texto escuro; se for escura, usar texto claro
     return luminance > 0.5 ? Colors.black : Colors.white;
   }
 
@@ -209,6 +211,7 @@ class CatDistributionChart extends StatelessWidget {
               'Distribuição por Gato (%)',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -226,7 +229,7 @@ class CatDistributionChart extends StatelessWidget {
                     Icons.pie_chart,
                     size: 48,
                     color: theme.colorScheme.onSurfaceVariant.withValues(
-                      alpha: 0.5,
+                      alpha: 0.7,
                     ),
                   ),
                   const SizedBox(height: 8),

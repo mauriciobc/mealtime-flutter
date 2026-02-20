@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealtime_app/features/cats/data/models/cat_model.dart';
-import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 
 void main() {
   group('CatModel', () {

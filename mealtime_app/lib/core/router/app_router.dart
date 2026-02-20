@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mealtime_app/core/widgets/scaffold_with_nav.dart';
 import 'package:mealtime_app/features/auth/presentation/pages/splash_page.dart';
-import 'package:mealtime_app/features/auth/presentation/pages/login_page.dart';
+import 'package:mealtime_app/features/auth/presentation/pages/expressive_login_page.dart';
 import 'package:mealtime_app/features/auth/presentation/pages/register_page.dart';
 import 'package:mealtime_app/features/profile/presentation/pages/profile_page.dart';
 import 'package:mealtime_app/features/home/presentation/pages/home_page.dart';
@@ -35,7 +35,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/login',
-        builder: (context, state) => const LoginPage(),
+        builder: (context, state) => const ExpressiveLoginPage(),
       ),
       GoRoute(
         path: '/register',

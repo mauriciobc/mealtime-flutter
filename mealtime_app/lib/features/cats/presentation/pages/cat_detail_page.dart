@@ -628,9 +628,9 @@ class _UpdateWeightBottomSheetState extends State<_UpdateWeightBottomSheet> {
     final weight = double.parse(normalizedValue);
 
     await HapticsService.mediumImpact();
+    if (!mounted) return;
     context.read<CatsBloc>().add(UpdateCatWeight(widget.cat.id, weight));
-
-    if (context.mounted) {
+    if (mounted) {
       Navigator.of(context).pop();
     }
   }

@@ -49,6 +49,7 @@ class DailyConsumptionChart extends StatelessWidget {
               'Consumo Total Diário (g)',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -118,11 +119,11 @@ class DailyConsumptionChart extends StatelessWidget {
                           data: validData,
                           width: safeWidth,
                           height: safeHeight,
-                          showGrid: false,  // ✅ Desabilitado para melhorar performance
-                          showValues: false,  // ✅ Desabilitado para melhorar performance
+                          showGrid: false,
+                          showValues: false,
                           style: BarChartStyle(
                             barColor: theme.colorScheme.primary,
-                            backgroundColor: theme.colorScheme.surface,
+                            backgroundColor: theme.colorScheme.surfaceContainerLow,
                             barSpacing: barSpacing,
                             cornerRadius: maxCornerRadius,
                             labelStyle: TextStyle(
@@ -260,6 +261,7 @@ class DailyConsumptionChart extends StatelessWidget {
               'Consumo Total Diário (g)',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -277,7 +279,7 @@ class DailyConsumptionChart extends StatelessWidget {
                     Icons.bar_chart_outlined,
                     size: 48,
                     color: theme.colorScheme.onSurfaceVariant.withValues(
-                      alpha: 0.5,
+                      alpha: 0.7,
                     ),
                   ),
                   const SizedBox(height: 8),

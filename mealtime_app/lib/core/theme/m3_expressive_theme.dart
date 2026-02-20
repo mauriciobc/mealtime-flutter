@@ -104,7 +104,7 @@ class M3ExpressiveColors {
       background: scheme.surface,
       onBackground: scheme.onSurface,
       inverseSurface: scheme.inverseSurface,
-      inverseOnSurface: scheme.onInverseSurface.withValues(alpha: 0.87),
+      inverseOnSurface: scheme.onInverseSurface,
       inversePrimary: scheme.inversePrimary,
       surfaceContainerHighest: scheme.surfaceContainerHighest,
       surfaceContainerHigh: scheme.surfaceContainerHigh,

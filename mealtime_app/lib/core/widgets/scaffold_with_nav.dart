@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mealtime_app/shared/widgets/main_navigation_bar.dart';
+import 'package:mealtime_app/shared/widgets/expressive_navigation_bar.dart';
 
 /// Wrapper Scaffold que adiciona o NavigationBar persistente em todas as
-/// páginas autenticadas.
+/// páginas autenticadas (estilo M3 Expressive).
 class ScaffoldWithNav extends StatelessWidget {
   const ScaffoldWithNav({required this.child, super.key});
 
@@ -12,7 +12,7 @@ class ScaffoldWithNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: child,
-      bottomNavigationBar: const MainNavigationBar(),
+      bottomNavigationBar: const ExpressiveNavigationBar(),
     );
   }
 }

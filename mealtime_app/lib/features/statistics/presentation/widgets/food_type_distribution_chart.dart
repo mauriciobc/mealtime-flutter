@@ -68,6 +68,7 @@ class FoodTypeDistributionChart extends StatelessWidget {
               'Distribuição por Tipo de Comida (%)',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -175,7 +176,9 @@ class FoodTypeDistributionChart extends StatelessWidget {
                       child: Text(
                         '${localizedFoodType(context, foodType) ?? foodType}: '
                         '${percentage.toStringAsFixed(1)}%',
-                        style: theme.textTheme.bodySmall,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -266,6 +269,7 @@ class FoodTypeDistributionChart extends StatelessWidget {
               'Distribuição por Tipo de Comida (%)',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -283,7 +287,7 @@ class FoodTypeDistributionChart extends StatelessWidget {
                     Icons.pie_chart,
                     size: 48,
                     color: theme.colorScheme.onSurfaceVariant.withValues(
-                      alpha: 0.5,
+                      alpha: 0.7,
                     ),
                   ),
                   const SizedBox(height: 8),

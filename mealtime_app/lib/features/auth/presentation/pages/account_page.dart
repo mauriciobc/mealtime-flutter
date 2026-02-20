@@ -247,7 +247,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               leading: const Icon(Icons.calendar_today),
               title: Text(context.l10n.profile_accountCreated),
               subtitle: Text(
-                user.createdAt != null && user.createdAt.isNotEmpty
+                user.createdAt.isNotEmpty
                     ? _formatDate(DateTime.parse(user.createdAt))
                     : 'N/A',
               ),
@@ -256,7 +256,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               leading: const Icon(Icons.login),
               title: Text(context.l10n.profile_lastAccess),
               subtitle: Text(
-                user.lastSignInAt != null && user.lastSignInAt.isNotEmpty
+                (user.lastSignInAt ?? '').isNotEmpty
                     ? _formatDate(DateTime.parse(user.lastSignInAt!))
                     : 'N/A',
               ),
@@ -290,7 +290,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       url = await notifier.uploadAvatar(filePath);
     } catch (e, st) {
       developer.log('Avatar upload failed', error: e, stackTrace: st);
-      if (!mounted) return;
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n.profile_errorUpdating),
@@ -299,7 +299,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       );
       return;
     }
-    if (!mounted) return;
+    if (!context.mounted) return;
     if (url != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.profile_profileUpdated)),
@@ -316,7 +316,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
 
   Future<void> _updateProfile(BuildContext context, String userId) async {
     final profileAsync = ref.read(profileProvider(userId));
-    final currentProfile = profileAsync.valueOrNull;
+    final currentProfile = profileAsync.value;
     if (currentProfile == null) return;
 
     final updatedProfile = currentProfile.copyWith(
@@ -336,7 +336,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
-    if (!mounted) return;
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(

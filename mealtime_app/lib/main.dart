@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_bl
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart';
 import 'package:mealtime_app/l10n/app_localizations.dart';
 import 'package:material_design/material_design.dart';
+import 'package:mealtime_app/core/theme/m3_expressive_theme.dart';
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
 
 // Helper function to create a custom text theme with Outfit for headings and Atkinson Hyperlegible for body
@@ -69,6 +71,26 @@ TextTheme _createCustomTextTheme(ColorScheme colorScheme) {
 /// Calcula a luminância relativa de uma cor (0.0 a 1.0)
 double _getLuminance(Color color) {
   return HSLColor.fromColor(color).lightness;
+}
+
+/// Luminância relativa WCAG (sRGB, 0.0 a 1.0) para cálculo de contraste.
+double _getRelativeLuminanceWCAG(Color color) {
+  double linearize(double c) {
+    return c <= 0.04045 ? c / 12.92 : math.pow((c + 0.055) / 1.055, 2.4).toDouble();
+  }
+  final r = linearize(color.r);
+  final g = linearize(color.g);
+  final b = linearize(color.b);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/// Razão de contraste WCAG (>= 1.0). Mínimo 4.5:1 para texto normal, 3:1 para UI.
+double _getContrastRatioWCAG(Color a, Color b) {
+  final la = _getRelativeLuminanceWCAG(a);
+  final lb = _getRelativeLuminanceWCAG(b);
+  final l1 = math.max(la, lb) + 0.05;
+  final l2 = math.min(la, lb) + 0.05;
+  return l1 / l2;
 }
 
 /// Verifica se duas cores têm contraste suficiente
@@ -195,7 +217,17 @@ ColorScheme _ensureThemeColorContrast(ColorScheme colorScheme) {
       ),
     );
   }
-  
+
+  // No tema claro, garante contraste primary/onPrimary (ex.: botão FilledButton).
+  // WCAG: mínimo 4.5:1 para texto legível; 3:1 para componentes de UI.
+  const minPrimaryOnPrimaryContrast = 4.5;
+  if (brightness == Brightness.light) {
+    final ratio = _getContrastRatioWCAG(adjusted.primary, adjusted.onPrimary);
+    if (ratio < minPrimaryOnPrimaryContrast) {
+      adjusted = adjusted.copyWith(onPrimary: Colors.white);
+    }
+  }
+
   return adjusted;
 }
 
@@ -296,6 +328,12 @@ class MyApp extends StatelessWidget {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
+      extensions: [
+        M3ExpressiveTheme.fromColorScheme(colorScheme).copyWith(
+          elevation: M3ExpressiveElevation.expressive,
+          border: M3ExpressiveBorder.expressive,
+        ),
+      ],
       textTheme: _createCustomTextTheme(colorScheme),
       splashFactory: InkSparkle.splashFactory,
       // Configura transições de página com spring animations usando tokens M3

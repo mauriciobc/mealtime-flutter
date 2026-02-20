@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
-import 'package:mealtime_app/core/theme/m3_shapes.dart';
 import 'package:mealtime_app/core/theme/text_theme_extensions.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
@@ -13,6 +12,7 @@ import 'package:mealtime_app/features/feeding_logs/domain/food_type.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
 import 'package:mealtime_app/features/home/presentation/widgets/cat_avatar.dart';
+import 'package:mealtime_app/shared/widgets/expressive_widgets.dart';
 
 class LastFeedingSection extends StatelessWidget {
   const LastFeedingSection({super.key});
@@ -69,12 +69,15 @@ class LastFeedingSection extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: M3SpacingToken.space12.value),
-                  SizedBox(
-                    height: 130,
-                    child: lastFeeding != null && cat != null
-                        ? _FeedingCard(lastFeeding: lastFeeding, cat: cat)
-                        : const _EmptyFeedingCard(),
-                  ),
+                  lastFeeding != null && cat != null
+                      ? _LastFeedingExpressiveCard(
+                          lastFeeding: lastFeeding,
+                          cat: cat,
+                        )
+                      : ExpressiveEmptyState(
+                          icon: Icons.pets_outlined,
+                          title: context.l10n.home_no_feeding_recorded,
+                        ),
                 ],
               ),
             );
@@ -101,8 +104,11 @@ class LastFeedingSection extends StatelessWidget {
   }
 }
 
-class _FeedingCard extends StatelessWidget {
-  const _FeedingCard({required this.lastFeeding, required this.cat});
+class _LastFeedingExpressiveCard extends StatelessWidget {
+  const _LastFeedingExpressiveCard({
+    required this.lastFeeding,
+    required this.cat,
+  });
 
   final FeedingLog lastFeeding;
   final Cat cat;
@@ -113,7 +119,6 @@ class _FeedingCard extends StatelessWidget {
     final fedByText = lastFeeding.fedBy == currentUserId
         ? context.l10n.home_fed_by_you
         : context.l10n.home_fed_by_other;
-
     final foodType = lastFeeding.foodType;
     final translatedFoodType = localizedFoodType(context, foodType);
     final amountText = lastFeeding.amount != null
@@ -122,64 +127,19 @@ class _FeedingCard extends StatelessWidget {
             translatedFoodType ?? context.l10n.home_food_dry,
           )
         : (translatedFoodType ?? context.l10n.home_food_dry);
+    final details =
+        '${context.l10n.home_fed_by(fedByText)} · $amountText';
+    final timeAgo =
+        '${_formatTime(lastFeeding.fedAt)} · ${_formatDate(lastFeeding.fedAt)}';
+    final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: M3Shapes.shapeMedium,
-      ),
-      child: Row(
-        children: [
-          CatAvatar(cat: cat, size: 60),
-          SizedBox(width: M3SpacingToken.space16.value),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  cat.name,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: M3SpacingToken.space4.value),
-                Text(
-                  amountText,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: M3SpacingToken.space4.value),
-                Text(
-                  context.l10n.home_fed_by(fedByText),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: M3SpacingToken.space4.value),
-                Text(
-                  '${_formatTime(lastFeeding.fedAt)} · ${_formatDate(lastFeeding.fedAt)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return ExpressiveFeedingCard(
+      avatar: CatAvatar(cat: cat, size: 56),
+      catName: cat.name,
+      details: details,
+      timeAgo: timeAgo,
+      accentColor: colorScheme.primary,
+      index: 0,
     );
   }
 
@@ -188,41 +148,4 @@ class _FeedingCard extends StatelessWidget {
 
   String _formatDate(DateTime dt) =>
       '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
-}
-
-class _EmptyFeedingCard extends StatelessWidget {
-  const _EmptyFeedingCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: M3Shapes.shapeMedium,
-      ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.pets_outlined,
-              size: 48,
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-            ),
-            SizedBox(height: M3SpacingToken.space8.value),
-            Text(
-              context.l10n.home_no_feeding_recorded,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

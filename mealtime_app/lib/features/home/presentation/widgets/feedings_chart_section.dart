@@ -4,14 +4,13 @@ import 'package:intl/intl.dart';
 import 'package:material_charts/material_charts.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
-import 'package:mealtime_app/core/theme/m3_shapes.dart';
-import 'package:mealtime_app/core/theme/text_theme_extensions.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
+import 'package:mealtime_app/shared/widgets/expressive_widgets.dart';
 
 class FeedingsChartSection extends StatelessWidget {
   const FeedingsChartSection({super.key});
@@ -43,39 +42,13 @@ class FeedingsChartSection extends StatelessWidget {
 
             return Padding(
               padding: const M3EdgeInsets.symmetric(horizontal: M3SpacingToken.space16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.home_feedings_title,
-                    style: Theme.of(context).textTheme.titleLargeEmphasized?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  SizedBox(height: M3SpacingToken.space4.value),
-                  Text(
-                    context.l10n.home_last_7_days,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  SizedBox(height: M3SpacingToken.space12.value),
-                  Container(
-                    constraints: const BoxConstraints(minHeight: 200, maxHeight: 200),
-                    padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: M3Shapes.shapeMedium,
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: !chartData.isEmpty
-                        ? _ChartWidget(chartData: chartData)
-                        : const _EmptyChart(),
-                  ),
-                ],
+              child: ExpressiveChartContainer(
+                title: context.l10n.home_feedings_title,
+                subtitle: context.l10n.home_last_7_days,
+                hasData: !chartData.isEmpty,
+                chart: !chartData.isEmpty
+                    ? _ChartWidget(chartData: chartData)
+                    : const _EmptyChart(),
               ),
             );
           },
