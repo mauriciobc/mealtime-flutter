@@ -7,6 +7,7 @@ class Profile extends Equatable {
   final String? username;
   final String? fullName;
   final String? email;
+  final String? website;
   final String? avatarUrl;
   final String? timezone;
   final DateTime? createdAt;
@@ -17,6 +18,7 @@ class Profile extends Equatable {
     this.username,
     this.fullName,
     this.email,
+    this.website,
     this.avatarUrl,
     this.timezone,
     this.createdAt,
@@ -29,6 +31,7 @@ class Profile extends Equatable {
         username,
         fullName,
         email,
+        website,
         avatarUrl,
         timezone,
         createdAt,
@@ -39,6 +42,7 @@ class Profile extends Equatable {
     Object? username = _absent,
     Object? fullName = _absent,
     Object? email = _absent,
+    Object? website = _absent,
     Object? avatarUrl = _absent,
     Object? timezone = _absent,
     Object? createdAt = _absent,
@@ -49,6 +53,7 @@ class Profile extends Equatable {
       username: username == _absent ? this.username : username as String?,
       fullName: fullName == _absent ? this.fullName : fullName as String?,
       email: email == _absent ? this.email : email as String?,
+      website: website == _absent ? this.website : website as String?,
       avatarUrl: avatarUrl == _absent ? this.avatarUrl : avatarUrl as String?,
       timezone: timezone == _absent ? this.timezone : timezone as String?,
       createdAt:

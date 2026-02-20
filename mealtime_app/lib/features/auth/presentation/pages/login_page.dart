@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_design/material_design.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/main.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
@@ -46,7 +47,9 @@ class _LoginPageState extends State<LoginPage> {
       },
       child: Scaffold(
       appBar: AppBar(
-        title: Text(_isSignUp ? 'Criar Conta' : 'Entrar'),
+        title: Text(
+          _isSignUp ? context.l10n.auth_register : context.l10n.auth_signIn,
+        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -70,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: M3SpacingToken.space32.value),
 
             Text(
-              'MealTime',
+              context.l10n.appTitle,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary,
@@ -79,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: M3SpacingToken.space8.value),
 
             Text(
-              'Gerenciamento de alimentação para gatos',
+              context.l10n.auth_managementDescription,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -91,9 +94,9 @@ class _LoginPageState extends State<LoginPage> {
             if (_isSignUp) ...[
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nome completo',
-                  prefixIcon: Icon(Icons.person),
+                decoration: InputDecoration(
+                  labelText: context.l10n.auth_fullName,
+                  prefixIcon: const Icon(Icons.person),
                 ),
                 keyboardType: TextInputType.name,
               ),
@@ -102,9 +105,9 @@ class _LoginPageState extends State<LoginPage> {
 
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                prefixIcon: Icon(Icons.email),
+              decoration: InputDecoration(
+                labelText: context.l10n.common_email,
+                prefixIcon: const Icon(Icons.email),
               ),
               keyboardType: TextInputType.emailAddress,
             ),
@@ -112,9 +115,9 @@ class _LoginPageState extends State<LoginPage> {
 
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Senha',
-                prefixIcon: Icon(Icons.lock),
+              decoration: InputDecoration(
+                labelText: context.l10n.common_password,
+                prefixIcon: const Icon(Icons.lock),
               ),
               obscureText: true,
             ),
@@ -130,7 +133,11 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: state is SimpleAuthLoading ? null : _handleAuth,
                     child: state is SimpleAuthLoading
                         ? const Material3LoadingIndicator(size: 20.0)
-                        : Text(_isSignUp ? 'Criar Conta' : 'Entrar'),
+                        : Text(
+                            _isSignUp
+                                ? context.l10n.auth_registerShort
+                                : context.l10n.auth_signInShort,
+                          ),
                   ),
                 );
               },
@@ -146,8 +153,8 @@ class _LoginPageState extends State<LoginPage> {
               },
               child: Text(
                 _isSignUp
-                    ? 'Já tem uma conta? Entrar'
-                    : 'Não tem uma conta? Criar conta',
+                    ? '${context.l10n.auth_alreadyHaveAccount}${context.l10n.auth_signInShort}'
+                    : '${context.l10n.auth_noAccount}${context.l10n.auth_registerShort}',
               ),
             ),
 
@@ -155,10 +162,9 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: M3SpacingToken.space16.value),
               TextButton(
                 onPressed: () {
-                  // TODO: Implementar recuperação de senha
-                  context.showSnackBar('Funcionalidade em desenvolvimento');
+                  context.showSnackBar(context.l10n.auth_featureInDevelopment);
                 },
-                child: const Text('Esqueci minha senha'),
+                child: Text(context.l10n.auth_forgotPassword),
               ),
             ],
           ],
@@ -175,7 +181,7 @@ class _LoginPageState extends State<LoginPage> {
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Por favor, digite seu email'),
+          content: Text(context.l10n.auth_pleaseEnterEmail),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -185,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
     if (password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Por favor, digite sua senha'),
+          content: Text(context.l10n.auth_pleaseEnterPassword),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -198,18 +204,17 @@ class _LoginPageState extends State<LoginPage> {
       if (name.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Por favor, digite seu nome completo'),
+            content: Text(context.l10n.auth_pleaseEnterFullName),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
         return;
       }
 
-      // TODO: Implementar registro via AuthBloc
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Funcionalidade de cadastro em desenvolvimento',
+            context.l10n.auth_registerInDevelopment,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onPrimaryContainer,
             ),

@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mealtime_app/core/usecases/usecase.dart';
+import 'package:mealtime_app/features/homes/domain/usecases/get_active_home.dart';
 import 'package:mealtime_app/features/statistics/domain/entities/period_filter.dart';
 import 'package:mealtime_app/features/statistics/domain/usecases/get_statistics.dart';
 import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_event.dart';
@@ -7,6 +9,7 @@ import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_st
 
 class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
   final GetStatistics getStatistics;
+  final GetActiveHome getActiveHome;
 
   // Estado atual dos filtros
   PeriodFilter _currentPeriodFilter = PeriodFilter.week;
@@ -15,8 +18,10 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
   DateTime? _customStartDate;
   DateTime? _customEndDate;
 
-  StatisticsBloc({required this.getStatistics})
-      : super(const StatisticsInitial()) {
+  StatisticsBloc({
+    required this.getStatistics,
+    required this.getActiveHome,
+  }) : super(const StatisticsInitial()) {
     on<LoadStatistics>(_onLoadStatistics);
     on<UpdatePeriodFilter>(_onUpdatePeriodFilter);
     on<UpdateCatFilter>(_onUpdateCatFilter);
@@ -38,17 +43,25 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
     
     emit(const StatisticsLoading());
 
+    String? householdId = event.householdId;
+    
+    // Se não houver householdId, tenta obter o ativo
+    if (householdId == null) {
+      final result = await getActiveHome(NoParams());
+      householdId = result.fold((_) => null, (home) => home?.id);
+    }
+
     // Atualizar filtros atuais
     _currentPeriodFilter = event.periodFilter;
     _currentCatId = event.catId;
-    _currentHouseholdId = event.householdId;
+    _currentHouseholdId = householdId;
     _customStartDate = event.customStartDate;
     _customEndDate = event.customEndDate;
 
     final params = GetStatisticsParams(
       periodFilter: event.periodFilter,
       catId: event.catId,
-      householdId: event.householdId,
+      householdId: householdId,
       customStartDate: event.customStartDate,
       customEndDate: event.customEndDate,
     );

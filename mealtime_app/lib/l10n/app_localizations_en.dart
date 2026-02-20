@@ -374,6 +374,258 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get error_tryAgain => 'Try Again';
+
+  @override
+  String get home_hello => 'Hello';
+
+  @override
+  String get home_food_dry => 'Dry Food';
+
+  @override
+  String get home_food_wet => 'Wet Food';
+
+  @override
+  String get home_food_homemade => 'Homemade Food';
+
+  @override
+  String get home_food_not_specified => 'Food not specified';
+
+  @override
+  String get home_fed_by_you => 'You';
+
+  @override
+  String get home_fed_by_other => 'Other user';
+
+  @override
+  String home_fed_by(String name) {
+    return 'Fed by $name';
+  }
+
+  @override
+  String get home_no_feeding_records => 'No feeding records';
+
+  @override
+  String get home_last_7_days => 'Last 7 days';
+
+  @override
+  String get home_register_feeding_chart =>
+      'Register feedings to see the chart for the last 7 days';
+
+  @override
+  String get home_recent_records => 'Recent Records';
+
+  @override
+  String get home_no_recent_records => 'No recent records';
+
+  @override
+  String get home_see_all_cats => 'See all cats';
+
+  @override
+  String get home_no_cats_registered => 'No cats registered';
+
+  @override
+  String get home_feedings_title => 'Feedings';
+
+  @override
+  String get home_last_feeding_title => 'Last Feeding';
+
+  @override
+  String get home_average_portion => 'Avg. Portion';
+
+  @override
+  String get home_today => 'Today';
+
+  @override
+  String get home_total_cats => 'Total Cats';
+
+  @override
+  String get home_last_time => 'Last Time';
+
+  @override
+  String get home_active_cats => 'Active';
+
+  @override
+  String get home_average_portion_subtitle => 'Last 7 days';
+
+  @override
+  String get home_last_time_subtitle => 'Last record';
+
+  @override
+  String home_amount_food_type(String amount, String foodType) {
+    return '${amount}g of $foodType';
+  }
+
+  @override
+  String home_fed_by_user(String name) {
+    return 'Fed by $name';
+  }
+
+  @override
+  String get home_no_feeding_recorded => 'No feeding recorded';
+
+  @override
+  String get home_cat_name_not_found => 'Name not found';
+
+  @override
+  String get home_my_cats => 'My Cats';
+
+  @override
+  String home_cat_weight(String weight) {
+    return '${weight}kg';
+  }
+
+  @override
+  String get home_no_cats_register_first =>
+      'No cats registered. Register a cat first.';
+
+  @override
+  String get home_register_feeding => 'Register Feeding';
+
+  @override
+  String get auth_welcomeBack => 'Welcome back!';
+
+  @override
+  String get auth_managementDescription => 'Cat feeding management';
+
+  @override
+  String get auth_passwordPlaceholder => 'Password';
+
+  @override
+  String get auth_alreadyHaveAccount => 'Already have an account? ';
+
+  @override
+  String get auth_noAccount => 'Don\'t have an account? ';
+
+  @override
+  String get auth_signInShort => 'Sign in';
+
+  @override
+  String get auth_registerShort => 'Create account';
+
+  @override
+  String get auth_featureInDevelopment => 'Feature in development';
+
+  @override
+  String get auth_registerInDevelopment =>
+      'Registration feature in development';
+
+  @override
+  String get profile_accountInfo => 'Account Information';
+
+  @override
+  String get profile_userInfo => 'User Information';
+
+  @override
+  String get profile_usernameLabel => 'Username';
+
+  @override
+  String get profile_website => 'Website';
+
+  @override
+  String get profile_updateProfile => 'Update Profile';
+
+  @override
+  String get profile_userId => 'User ID';
+
+  @override
+  String get profile_accountStatus => 'Account Status';
+
+  @override
+  String get profile_verified => 'Verified';
+
+  @override
+  String get profile_notVerified => 'Not verified';
+
+  @override
+  String get profile_accountCreated => 'Account created on';
+
+  @override
+  String get profile_lastAccess => 'Last access';
+
+  @override
+  String get profile_logoutErrorGeneric => 'Error logging out';
+
+  @override
+  String get statistics_title => 'Statistics';
+
+  @override
+  String get statistics_loading => 'Loading statistics...';
+
+  @override
+  String get statistics_errorLoading => 'Error loading statistics';
+
+  @override
+  String get statistics_noData => 'No data available';
+
+  @override
+  String get statistics_noDataPeriod =>
+      'No feedings recorded for the selected period.';
+
+  @override
+  String get statistics_chartError => 'Error rendering chart';
+
+  @override
+  String get notifications_title => 'Notifications';
+
+  @override
+  String get notifications_markedAsRead => 'Notification marked as read';
+
+  @override
+  String notifications_errorMarkAsRead(String error) {
+    return 'Error marking as read: $error';
+  }
+
+  @override
+  String get notifications_allMarkedAsRead =>
+      'All notifications marked as read';
+
+  @override
+  String notifications_errorMarkAllAsRead(String error) {
+    return 'Error marking all as read: $error';
+  }
+
+  @override
+  String get notifications_removed => 'Notification removed';
+
+  @override
+  String notifications_errorRemove(String error) {
+    return 'Error removing notification: $error';
+  }
+
+  @override
+  String get notifications_tryAgain => 'Try again';
+
+  @override
+  String get notifications_markAllAsRead => 'Mark all as read';
+
+  @override
+  String get notifications_empty => 'No notifications';
+
+  @override
+  String get notifications_emptySubtitle => 'You\'re all caught up!';
+
+  @override
+  String get notifications_refresh => 'Refresh';
+
+  @override
+  String get notifications_delete => 'Delete notification';
+
+  @override
+  String get notifications_userNotAuthenticated => 'User not authenticated';
+
+  @override
+  String notifications_errorLoading(String error) {
+    return 'Error loading notifications: $error';
+  }
+
+  @override
+  String get auth_pleaseEnterEmail => 'Please enter your email';
+
+  @override
+  String get auth_pleaseEnterPassword => 'Please enter your password';
+
+  @override
+  String get auth_pleaseEnterFullName => 'Please enter your full name';
 }
 
 /// The translations for English, as used in the United States (`en_US`).

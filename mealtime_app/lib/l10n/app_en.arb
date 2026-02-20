@@ -131,6 +131,111 @@
   "error_notFound": "Not found",
   "error_unauthorized": "Unauthorized",
   "error_validation": "Validation error",
-  "error_tryAgain": "Try Again"
+  "error_tryAgain": "Try Again",
+  "home_hello": "Hello",
+  "home_food_dry": "Dry Food",
+  "home_food_wet": "Wet Food",
+  "home_food_homemade": "Homemade Food",
+  "home_fed_by_you": "You",
+  "home_fed_by_other": "Other user",
+  "home_fed_by": "Fed by {name}",
+  "@home_fed_by": {
+    "description": "Fed by user label",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "home_no_feeding_records": "No feeding records",
+  "home_last_7_days": "Last 7 days",
+  "home_register_feeding_chart": "Register feedings to see the chart for the last 7 days",
+  "home_recent_records": "Recent Records",
+  "home_no_recent_records": "No recent records",
+  "home_food_not_specified": "Food not specified",
+  "home_see_all_cats": "See all cats",
+  "home_no_cats_registered": "No cats registered",
+  "home_feedings_title": "Feedings",
+  "home_last_feeding_title": "Last Feeding",
+  "home_average_portion": "Avg. Portion",
+  "home_today": "Today",
+  "home_total_cats": "Total Cats",
+  "home_last_time": "Last Time",
+  "home_active_cats": "Active",
+  "home_average_portion_subtitle": "Last 7 days",
+  "home_last_time_subtitle": "Last record",
+  "home_amount_food_type": "{amount}g of {foodType}",
+  "@home_amount_food_type": {
+    "placeholders": {
+      "amount": { "type": "String" },
+      "foodType": { "type": "String" }
+    }
+  },
+  "home_fed_by_user": "Fed by {name}",
+  "@home_fed_by_user": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "home_no_feeding_recorded": "No feeding recorded",
+  "home_cat_name_not_found": "Name not found",
+  "home_my_cats": "My Cats",
+  "home_cat_weight": "{weight}kg",
+  "@home_cat_weight": {
+    "placeholders": {
+      "weight": { "type": "String" }
+    }
+  },
+  "home_no_cats_register_first": "No cats registered. Register a cat first.",
+  "home_register_feeding": "Register Feeding",
+  "auth_welcomeBack": "Welcome back!",
+  "auth_managementDescription": "Cat feeding management",
+  "auth_passwordPlaceholder": "Password",
+  "auth_alreadyHaveAccount": "Already have an account? ",
+  "auth_noAccount": "Don't have an account? ",
+  "auth_signInShort": "Sign in",
+  "auth_registerShort": "Create account",
+  "auth_featureInDevelopment": "Feature in development",
+  "auth_registerInDevelopment": "Registration feature in development",
+  "profile_accountInfo": "Account Information",
+  "profile_userInfo": "User Information",
+  "profile_usernameLabel": "Username",
+  "profile_website": "Website",
+  "profile_updateProfile": "Update Profile",
+  "profile_userId": "User ID",
+  "profile_accountStatus": "Account Status",
+  "profile_verified": "Verified",
+  "profile_notVerified": "Not verified",
+  "profile_accountCreated": "Account created on",
+  "profile_lastAccess": "Last access",
+  "profile_logoutErrorGeneric": "Error logging out",
+  "statistics_title": "Statistics",
+  "statistics_loading": "Loading statistics...",
+  "statistics_errorLoading": "Error loading statistics",
+  "statistics_noData": "No data available",
+  "statistics_noDataPeriod": "No feedings recorded for the selected period.",
+  "statistics_chartError": "Error rendering chart",
+  "notifications_title": "Notifications",
+  "notifications_markedAsRead": "Notification marked as read",
+  "notifications_errorMarkAsRead": "Error marking as read: {error}",
+  "@notifications_errorMarkAsRead": {"placeholders": {"error": {"type": "String"}}},
+  "notifications_allMarkedAsRead": "All notifications marked as read",
+  "notifications_errorMarkAllAsRead": "Error marking all as read: {error}",
+  "@notifications_errorMarkAllAsRead": {"placeholders": {"error": {"type": "String"}}},
+  "notifications_removed": "Notification removed",
+  "notifications_errorRemove": "Error removing notification: {error}",
+  "@notifications_errorRemove": {"placeholders": {"error": {"type": "String"}}},
+  "notifications_tryAgain": "Try again",
+  "notifications_markAllAsRead": "Mark all as read",
+  "notifications_empty": "No notifications",
+  "notifications_emptySubtitle": "You're all caught up!",
+  "notifications_refresh": "Refresh",
+  "notifications_delete": "Delete notification",
+  "notifications_userNotAuthenticated": "User not authenticated",
+  "notifications_errorLoading": "Error loading notifications: {error}",
+  "@notifications_errorLoading": {"placeholders": {"error": {"type": "String"}}},
+  "auth_pleaseEnterEmail": "Please enter your email",
+  "auth_pleaseEnterPassword": "Please enter your password",
+  "auth_pleaseEnterFullName": "Please enter your full name"
 }
 

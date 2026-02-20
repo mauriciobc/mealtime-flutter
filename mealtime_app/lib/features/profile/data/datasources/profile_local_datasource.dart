@@ -15,7 +15,8 @@ class ProfileVersionConflictException implements Exception {
 /// Persiste dados localmente e permite acesso offline
 abstract class ProfileLocalDataSource {
   Future<void> cacheProfile(domain.Profile profile);
-  Future<domain.Profile?> getCachedProfile(String id);
+  /// [idOrUsername] Identificador do usuário (ID ou username).
+  Future<domain.Profile?> getCachedProfile(String idOrUsername);
   Future<void> clearCache();
 }
 
@@ -32,6 +33,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
     return incoming.username != existing.username ||
         incoming.fullName != existing.fullName ||
         incoming.email != existing.email ||
+        incoming.website != existing.website ||
         incoming.avatarUrl != existing.avatarUrl ||
         incoming.timezone != existing.timezone ||
         incoming.createdAt != existing.createdAt ||
@@ -55,6 +57,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
           username: drift.Value(profile.username),
           fullName: drift.Value(profile.fullName),
           email: drift.Value(profile.email),
+          website: drift.Value(profile.website),
           avatarUrl: drift.Value(profile.avatarUrl),
           timezone: drift.Value(profile.timezone),
           createdAt: drift.Value(profile.createdAt),
@@ -88,6 +91,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
             username: drift.Value(profile.username),
             fullName: drift.Value(profile.fullName),
             email: drift.Value(profile.email),
+            website: drift.Value(profile.website),
             avatarUrl: drift.Value(profile.avatarUrl),
             timezone: drift.Value(profile.timezone),
             createdAt: drift.Value(profile.createdAt),
@@ -118,9 +122,9 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
   }
 
   @override
-  Future<domain.Profile?> getCachedProfile(String id) async {
+  Future<domain.Profile?> getCachedProfile(String idOrUsername) async {
     final query = database.select(database.profiles)
-      ..where((p) => p.id.equals(id));
+      ..where((p) => p.id.equals(idOrUsername) | p.username.equals(idOrUsername));
     final profileData = await query.getSingleOrNull();
     
     if (profileData == null) return null;
@@ -130,6 +134,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
       username: profileData.username,
       fullName: profileData.fullName,
       email: profileData.email,
+      website: profileData.website,
       avatarUrl: profileData.avatarUrl,
       timezone: profileData.timezone,
       createdAt: profileData.createdAt,

@@ -831,6 +831,468 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Tentar Novamente'**
   String get error_tryAgain;
+
+  /// No description provided for @home_hello.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Olá'**
+  String get home_hello;
+
+  /// No description provided for @home_food_dry.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ração Seca'**
+  String get home_food_dry;
+
+  /// No description provided for @home_food_wet.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ração Úmida'**
+  String get home_food_wet;
+
+  /// No description provided for @home_food_homemade.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Comida Caseira'**
+  String get home_food_homemade;
+
+  /// No description provided for @home_food_not_specified.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Alimento não especificado'**
+  String get home_food_not_specified;
+
+  /// No description provided for @home_fed_by_you.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Você'**
+  String get home_fed_by_you;
+
+  /// No description provided for @home_fed_by_other.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Outro usuário'**
+  String get home_fed_by_other;
+
+  /// Fed by user label
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Alimentado por {name}'**
+  String home_fed_by(String name);
+
+  /// No description provided for @home_no_feeding_records.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum registro de alimentação'**
+  String get home_no_feeding_records;
+
+  /// No description provided for @home_last_7_days.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Últimos 7 dias'**
+  String get home_last_7_days;
+
+  /// No description provided for @home_register_feeding_chart.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Registre alimentações para ver o gráfico dos últimos 7 dias'**
+  String get home_register_feeding_chart;
+
+  /// No description provided for @home_recent_records.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Registros Recentes'**
+  String get home_recent_records;
+
+  /// No description provided for @home_no_recent_records.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum registro recente'**
+  String get home_no_recent_records;
+
+  /// No description provided for @home_see_all_cats.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ver todos os gatos'**
+  String get home_see_all_cats;
+
+  /// No description provided for @home_no_cats_registered.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum gato cadastrado'**
+  String get home_no_cats_registered;
+
+  /// No description provided for @home_feedings_title.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Alimentações'**
+  String get home_feedings_title;
+
+  /// No description provided for @home_last_feeding_title.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Última Alimentação'**
+  String get home_last_feeding_title;
+
+  /// No description provided for @home_average_portion.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Porção Média'**
+  String get home_average_portion;
+
+  /// No description provided for @home_today.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Hoje'**
+  String get home_today;
+
+  /// No description provided for @home_total_cats.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Total de Gatos'**
+  String get home_total_cats;
+
+  /// No description provided for @home_last_time.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Última Vez'**
+  String get home_last_time;
+
+  /// No description provided for @home_active_cats.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Ativos'**
+  String get home_active_cats;
+
+  /// No description provided for @home_average_portion_subtitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Últimos 7 dias'**
+  String get home_average_portion_subtitle;
+
+  /// No description provided for @home_last_time_subtitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Último registro'**
+  String get home_last_time_subtitle;
+
+  /// No description provided for @home_amount_food_type.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{amount}g de {foodType}'**
+  String home_amount_food_type(String amount, String foodType);
+
+  /// No description provided for @home_fed_by_user.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Alimentado por {name}'**
+  String home_fed_by_user(String name);
+
+  /// No description provided for @home_no_feeding_recorded.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhuma alimentação registrada'**
+  String get home_no_feeding_recorded;
+
+  /// No description provided for @home_cat_name_not_found.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nome não encontrado'**
+  String get home_cat_name_not_found;
+
+  /// No description provided for @home_my_cats.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Meus Gatos'**
+  String get home_my_cats;
+
+  /// No description provided for @home_cat_weight.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{weight}kg'**
+  String home_cat_weight(String weight);
+
+  /// No description provided for @home_no_cats_register_first.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum gato cadastrado. Cadastre um gato primeiro.'**
+  String get home_no_cats_register_first;
+
+  /// No description provided for @home_register_feeding.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Registrar Alimentação'**
+  String get home_register_feeding;
+
+  /// No description provided for @auth_welcomeBack.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Bem-vindo de volta!'**
+  String get auth_welcomeBack;
+
+  /// No description provided for @auth_managementDescription.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Gerenciamento de alimentação para gatos'**
+  String get auth_managementDescription;
+
+  /// No description provided for @auth_passwordPlaceholder.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Senha'**
+  String get auth_passwordPlaceholder;
+
+  /// No description provided for @auth_alreadyHaveAccount.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Já tem uma conta? '**
+  String get auth_alreadyHaveAccount;
+
+  /// No description provided for @auth_noAccount.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não tem uma conta? '**
+  String get auth_noAccount;
+
+  /// No description provided for @auth_signInShort.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entrar'**
+  String get auth_signInShort;
+
+  /// No description provided for @auth_registerShort.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Criar conta'**
+  String get auth_registerShort;
+
+  /// No description provided for @auth_featureInDevelopment.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Funcionalidade em desenvolvimento'**
+  String get auth_featureInDevelopment;
+
+  /// No description provided for @auth_registerInDevelopment.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Funcionalidade de cadastro em desenvolvimento'**
+  String get auth_registerInDevelopment;
+
+  /// No description provided for @profile_accountInfo.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Informações da Conta'**
+  String get profile_accountInfo;
+
+  /// No description provided for @profile_userInfo.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Informações do Usuário'**
+  String get profile_userInfo;
+
+  /// No description provided for @profile_usernameLabel.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nome de usuário'**
+  String get profile_usernameLabel;
+
+  /// No description provided for @profile_website.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Website'**
+  String get profile_website;
+
+  /// No description provided for @profile_updateProfile.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Atualizar Perfil'**
+  String get profile_updateProfile;
+
+  /// No description provided for @profile_userId.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'ID do Usuário'**
+  String get profile_userId;
+
+  /// No description provided for @profile_accountStatus.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Status da Conta'**
+  String get profile_accountStatus;
+
+  /// No description provided for @profile_verified.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Verificado'**
+  String get profile_verified;
+
+  /// No description provided for @profile_notVerified.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não verificado'**
+  String get profile_notVerified;
+
+  /// No description provided for @profile_accountCreated.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Conta criada em'**
+  String get profile_accountCreated;
+
+  /// No description provided for @profile_lastAccess.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Último acesso'**
+  String get profile_lastAccess;
+
+  /// No description provided for @profile_logoutErrorGeneric.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Erro ao fazer logout'**
+  String get profile_logoutErrorGeneric;
+
+  /// No description provided for @statistics_title.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Estatísticas'**
+  String get statistics_title;
+
+  /// No description provided for @statistics_loading.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Carregando estatísticas...'**
+  String get statistics_loading;
+
+  /// No description provided for @statistics_errorLoading.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Erro ao carregar estatísticas'**
+  String get statistics_errorLoading;
+
+  /// No description provided for @statistics_noData.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum dado disponível'**
+  String get statistics_noData;
+
+  /// No description provided for @statistics_noDataPeriod.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não há alimentações registradas no período selecionado.'**
+  String get statistics_noDataPeriod;
+
+  /// No description provided for @statistics_chartError.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Erro ao renderizar gráfico'**
+  String get statistics_chartError;
+
+  /// No description provided for @notifications_title.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Notificações'**
+  String get notifications_title;
+
+  /// No description provided for @notifications_markedAsRead.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Notificação marcada como lida'**
+  String get notifications_markedAsRead;
+
+  /// No description provided for @notifications_errorMarkAsRead.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Erro ao marcar como lida: {error}'**
+  String notifications_errorMarkAsRead(String error);
+
+  /// No description provided for @notifications_allMarkedAsRead.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Todas as notificações foram marcadas como lidas'**
+  String get notifications_allMarkedAsRead;
+
+  /// No description provided for @notifications_errorMarkAllAsRead.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Erro ao marcar todas como lidas: {error}'**
+  String notifications_errorMarkAllAsRead(String error);
+
+  /// No description provided for @notifications_removed.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Notificação removida'**
+  String get notifications_removed;
+
+  /// No description provided for @notifications_errorRemove.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Erro ao remover notificação: {error}'**
+  String notifications_errorRemove(String error);
+
+  /// No description provided for @notifications_tryAgain.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Tentar novamente'**
+  String get notifications_tryAgain;
+
+  /// No description provided for @notifications_markAllAsRead.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Marcar todas como lidas'**
+  String get notifications_markAllAsRead;
+
+  /// No description provided for @notifications_empty.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhuma notificação'**
+  String get notifications_empty;
+
+  /// No description provided for @notifications_emptySubtitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Você está em dia!'**
+  String get notifications_emptySubtitle;
+
+  /// No description provided for @notifications_refresh.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Atualizar'**
+  String get notifications_refresh;
+
+  /// No description provided for @notifications_delete.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Deletar notificação'**
+  String get notifications_delete;
+
+  /// No description provided for @notifications_userNotAuthenticated.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Usuário não autenticado'**
+  String get notifications_userNotAuthenticated;
+
+  /// No description provided for @notifications_errorLoading.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Erro ao carregar notificações: {error}'**
+  String notifications_errorLoading(String error);
+
+  /// No description provided for @auth_pleaseEnterEmail.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Por favor, digite seu email'**
+  String get auth_pleaseEnterEmail;
+
+  /// No description provided for @auth_pleaseEnterPassword.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Por favor, digite sua senha'**
+  String get auth_pleaseEnterPassword;
+
+  /// No description provided for @auth_pleaseEnterFullName.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Por favor, digite seu nome completo'**
+  String get auth_pleaseEnterFullName;
 }
 
 class _AppLocalizationsDelegate

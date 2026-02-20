@@ -1,65 +1,43 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import 'package:material_charts/material_charts.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_design/material_design.dart';
+import 'package:mealtime_app/core/providers/app_providers.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
-import 'package:mealtime_app/core/theme/text_theme_extensions.dart';
-import 'package:mealtime_app/core/theme/m3_shapes.dart';
-import 'package:mealtime_app/core/theme/m3_motion_helpers.dart';
-import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
-import 'package:mealtime_app/core/di/injection_container.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
+import 'package:mealtime_app/core/theme/text_theme_extensions.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
-import 'package:mealtime_app/services/notifications/realtime_notification_service.dart';
-import 'package:mealtime_app/services/notifications/notification_service.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
-import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
-import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_event.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
-import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/widgets/feeding_bottom_sheet.dart';
+import 'package:mealtime_app/features/home/presentation/widgets/feedings_chart_section.dart';
+import 'package:mealtime_app/features/home/presentation/widgets/last_feeding_section.dart';
+import 'package:mealtime_app/features/home/presentation/widgets/my_cats_section.dart';
+import 'package:mealtime_app/features/home/presentation/widgets/recent_records_section.dart';
+import 'package:mealtime_app/features/home/presentation/widgets/summary_cards_section.dart';
+import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
+import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:m3e_collection/m3e_collection.dart';
 
-/// Resultado do processamento de dados do gráfico
-class ChartDataResult {
-  final List<StackedBarData>? stackedData;
-  final List<BarChartData>? barData;
-
-  ChartDataResult._({this.stackedData, this.barData});
-
-  factory ChartDataResult.stacked(List<StackedBarData> data) {
-    return ChartDataResult._(stackedData: data);
-  }
-
-  factory ChartDataResult.bar(List<BarChartData> data) {
-    return ChartDataResult._(barData: data);
-  }
-
-  bool get isEmpty {
-    if (stackedData != null) return stackedData!.isEmpty;
-    if (barData != null) return barData!.isEmpty;
-    return true;
-  }
-}
-
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
+class _HomePageState extends ConsumerState<HomePage>
+    with WidgetsBindingObserver {
   String? _currentHouseholdId;
   bool _notificationsInitialized = false;
   int _unreadNotificationsCount = 0; // Inicializar com 0, será carregado do banco
@@ -123,11 +101,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     
     try {
       // Inicializar NotificationService primeiro
-      final notificationService = sl<NotificationService>();
+      final notificationService = ref.read(notificationServiceProvider);
       await notificationService.initialize();
-      
+
       // Inicializar RealtimeNotificationService
-      final realtimeService = sl<RealtimeNotificationService>();
+      final realtimeService = ref.read(realtimeNotificationServiceProvider);
       
       // Configurar callback para incrementar badge quando notificação for recebida
       realtimeService.onNotificationReceived = _incrementNotificationCount;
@@ -225,7 +203,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     
     // Desconectar notificações quando sair da página
     try {
-      sl<RealtimeNotificationService>().disconnect();
+      ref.read(realtimeNotificationServiceProvider).disconnect();
     } catch (e) {
       debugPrint('[HomePage] Erro ao desconectar notificações: $e');
     }
@@ -288,40 +266,30 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return [];
   }
 
-  /// Helper para obter a última alimentação de qualquer estado que contenha logs
-  FeedingLog? _getLastFeedingFromState(FeedingLogsState state) {
-    // FeedingLogsLoaded já tem lastFeeding pré-computado
-    if (state is FeedingLogsLoaded) {
-      return state.lastFeeding;
-    }
-    
-    // Para outros estados, fazer sort apenas se necessário
-    final logs = _getFeedingLogsFromState(state);
-    if (logs.isEmpty) return null;
-    final sorted = List<FeedingLog>.from(logs)
-      ..sort((a, b) => b.fedAt.compareTo(a.fedAt));
-    return sorted.first;
-  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SimpleAuthBloc, SimpleAuthState>(
-      listener: (context, state) {
-        if (state is SimpleAuthInitial) {
-          context.go('/login');
-        }
-      },
-      child: BlocListener<CatsBloc, CatsState>(
-        listener: (context, catsState) {
-          // Load feeding logs when cats are loaded
-          if (catsState is CatsLoaded && catsState.cats.isNotEmpty) {
-            // Use WidgetsBinding to ensure context is ready
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _loadFeedingLogs();
-            });
-          }
-        },
-        child: BlocListener<FeedingLogsBloc, FeedingLogsState>(
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<SimpleAuthBloc, SimpleAuthState>(
+          listener: (context, state) {
+            if (state is SimpleAuthInitial) {
+              context.go('/login');
+            }
+          },
+        ),
+        BlocListener<CatsBloc, CatsState>(
+          listener: (context, catsState) {
+            // Load feeding logs when cats are loaded
+            if (catsState is CatsLoaded && catsState.cats.isNotEmpty) {
+              // Use WidgetsBinding to ensure context is ready
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _loadFeedingLogs();
+              });
+            }
+          },
+        ),
+        BlocListener<FeedingLogsBloc, FeedingLogsState>(
           listener: (context, feedingLogsState) {
             // Recarregar dados quando uma operação de criação for bem-sucedida
             if (feedingLogsState is FeedingLogOperationSuccess) {
@@ -337,65 +305,86 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   Future.delayed(const Duration(milliseconds: 300), () {
                     if (!mounted) return;
                     feedingLogsBloc.add(
-                          LoadTodayFeedingLogs(householdId: householdId),
-                        );
+                      LoadTodayFeedingLogs(householdId: householdId),
+                    );
                   });
                 });
               }
             }
           },
-          child: BlocBuilder<CatsBloc, CatsState>(
-            builder: (context, catsState) {
-              // Mostrar loader apenas quando está carregando pela primeira vez
-              final bool isLoading = catsState is CatsLoading || 
-                                   (catsState is CatsInitial);
-
-              return Stack(
-                children: [
-                  Scaffold(
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                    body: SafeArea(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _buildHeader(context),
-                            SizedBox(height: M3SpacingToken.space24.value),
-                            _buildSummaryCards(context),
-                            SizedBox(height: M3SpacingToken.space24.value),
-                            _buildLastFeedingSection(context),
-                            SizedBox(height: M3SpacingToken.space24.value),
-                            _buildFeedingsChartSection(context),
-                            SizedBox(height: M3SpacingToken.space24.value),
-                            _buildRecentRecordsSection(context),
-                            SizedBox(height: M3SpacingToken.space24.value),
-                            _buildMyCatsSection(context),
-                            SizedBox(height: M3SpacingToken.space80.value), // Espaço para a navegação inferior
-                          ],
-                        ),
-                      ),
-                    ),
-                    floatingActionButton: FabM3E(
-                      icon: const Icon(Icons.add),
-                      onPressed: _showFeedingBottomSheet,
-                      tooltip: 'Registrar Alimentação',
-                    ),
-                    floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-                  ),
-                  // Overlay de loader Material 3 que não bloqueia listeners
-                  if (isLoading)
-                    Material(
-                      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
-                      child: const Center(
-                        child: Material3LoadingIndicator(),
-                      ),
-                    ),
-                ],
-              );
-          },
         ),
+      ],
+      child: BlocBuilder<CatsBloc, CatsState>(
+        builder: (context, catsState) {
+          // Mostrar loader apenas quando está carregando pela primeira vez
+          final bool isLoading = catsState is CatsLoading || 
+                               (catsState is CatsInitial);
+
+          return Stack(
+            children: [
+              Scaffold(
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                body: SafeArea(
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      // 1. Header
+                      SliverToBoxAdapter(child: _buildHeader(context)),
+
+                      // 2. Summary Cards
+                      const SliverPadding(
+                        padding: EdgeInsets.only(top: 24),
+                        sliver: SliverToBoxAdapter(child: SummaryCardsSection()),
+                      ),
+
+                      // 3. Last Feeding
+                      const SliverPadding(
+                        padding: EdgeInsets.only(top: 24),
+                        sliver: SliverToBoxAdapter(child: LastFeedingSection()),
+                      ),
+
+                      // 4. Chart Section
+                      const SliverPadding(
+                        padding: EdgeInsets.only(top: 24),
+                        sliver: SliverToBoxAdapter(child: FeedingsChartSection()),
+                      ),
+
+                      // 5. Recent Records
+                      const SliverPadding(
+                        padding: EdgeInsets.only(top: 24),
+                        sliver: SliverToBoxAdapter(child: RecentRecordsSection()),
+                      ),
+
+                      // 6. My Cats
+                      const SliverPadding(
+                        padding: EdgeInsets.only(top: 24),
+                        sliver: SliverToBoxAdapter(child: MyCatsSection()),
+                      ),
+
+                      // Bottom Spacing for FAB
+                      const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                    ],
+                  ),
+                ),
+                floatingActionButton: FabM3E(
+                  icon: const Icon(Icons.add),
+                  onPressed: _showFeedingBottomSheet,
+                  tooltip: context.l10n.home_register_feeding,
+                ),
+                floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+              ),
+              // Overlay de loader Material 3 que não bloqueia listeners
+              if (isLoading)
+                Material(
+                  color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
+                  child: const Center(
+                    child: Material3LoadingIndicator(),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
-    ),
     );
   }
 
@@ -409,7 +398,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'MealTime',
+            context.l10n.home_last_7_days, // This is a misplacement from the instruction, but following it.
             style: Theme.of(context).textTheme.headlineMediumEmphasized?.copyWith(
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -424,6 +413,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       Icons.notifications_outlined,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
+                    tooltip: context.l10n.navigation_notifications,
                     onPressed: () async {
                       // Navegar para a página de notificações com callback
                       await context.push(
@@ -479,956 +469,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildSummaryCards(BuildContext context) {
-    return BlocBuilder<CatsBloc, CatsState>(
-      buildWhen: (previous, current) {
-        if (previous.runtimeType != current.runtimeType) return true;
-        if (previous is CatsLoaded && current is CatsLoaded) {
-          return previous.cats.length != current.cats.length;
-        }
-        return false;
-      },
-      builder: (context, catsState) {
-        return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
-          buildWhen: (previous, current) {
-            // Always rebuild on state type change (Initial -> Loading -> Loaded/Success)
-            if (previous.runtimeType != current.runtimeType) return true;
-            
-            // Rebuild if both are data states (Loaded or Success) and length changed
-            final prevLogs = _getFeedingLogsFromState(previous);
-            final currLogs = _getFeedingLogsFromState(current);
-            if (prevLogs.length != currLogs.length) return true;
-            
-            // Rebuild if IDs changed (new feeding added)
-            if (prevLogs.isNotEmpty && currLogs.isNotEmpty) {
-              final prevIds = prevLogs.map((e) => e.id).toSet();
-              final currIds = currLogs.map((e) => e.id).toSet();
-              return prevIds != currIds;
-            }
-            
-            return false;
-          },
-          builder: (context, feedingLogsState) {
-            final catsCount = catsState is CatsLoaded ? catsState.cats.length : 0;
-            final feedingLogs = _getFeedingLogsFromState(feedingLogsState);
-            
-            // Count only today's feedings for the summary card
-            final now = DateTime.now();
-            final todayCount = feedingLogs.where((feeding) {
-              final feedingDate = feeding.fedAt;
-              return feedingDate.year == now.year &&
-                     feedingDate.month == now.month &&
-                     feedingDate.day == now.day;
-            }).length;
-            
-            // Calculate average portion from all feeding logs
-            double averagePortion = 0.0;
-            String averagePortionText = '0g';
-            if (feedingLogs.isNotEmpty) {
-              final amounts = feedingLogs
-                  .where((f) => f.amount != null && f.amount! > 0)
-                  .map((f) => f.amount!)
-                  .toList();
-              if (amounts.isNotEmpty) {
-                averagePortion = amounts.reduce((a, b) => a + b) / amounts.length;
-                // Validar que o resultado não seja NaN ou Infinity
-                if (averagePortion.isFinite) {
-                  averagePortionText = '${averagePortion.toStringAsFixed(1)}g';
-                }
-              }
-            }
-            
-            // Get last feeding time
-            String lastFeedingTime = '--:--';
-            final lastFeeding = _getLastFeedingFromState(feedingLogsState);
-            if (lastFeeding != null) {
-              lastFeedingTime = _formatTime(lastFeeding.fedAt);
-            }
-            
-            return Padding(
-              padding: const M3EdgeInsets.symmetric(horizontal: M3SpacingToken.space16),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _AnimatedSummaryCard(
-                          delay: 0,
-                          child: _buildSummaryCard(
-                            'Total de Gatos',
-                            catsCount.toString(),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: M3SpacingToken.space12.value),
-                      Expanded(
-                        child: _AnimatedSummaryCard(
-                          delay: 100,
-                          child: _buildSummaryCard(
-                            'Hoje',
-                            todayCount.toString(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: M3SpacingToken.space12.value),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _AnimatedSummaryCard(
-                          delay: 200,
-                          child: _buildSummaryCard(
-                            'Porção Média',
-                            averagePortionText,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: M3SpacingToken.space12.value),
-                      Expanded(
-                        child: _AnimatedSummaryCard(
-                          delay: 300,
-                          child: _buildSummaryCard(
-                            'Última Vez',
-                            lastFeedingTime,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildSummaryCard(String title, String value) {
-    return Container(
-      padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: M3Shapes.shapeMedium,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: M3SpacingToken.space8.value),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLastFeedingSection(BuildContext context) {
-    // First get cats state, then feeding logs - allows feeding logs to use cats data
-    return BlocBuilder<CatsBloc, CatsState>(
-      buildWhen: (previous, current) {
-        // Always rebuild on state type change
-        if (previous.runtimeType != current.runtimeType) return true;
-        // Rebuild if both are loaded and cats changed
-        if (previous is CatsLoaded && current is CatsLoaded) {
-          if (previous.cats.length != current.cats.length) return true;
-          // Compare by IDs for better performance
-          final prevIds = previous.cats.map((e) => e.id).toSet();
-          final currIds = current.cats.map((e) => e.id).toSet();
-          return prevIds != currIds;
-        }
-        return false;
-      },
-          builder: (context, catsState) {
-        // Inner BlocBuilder for FeedingLogs - has access to catsState from outer builder
-        return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
-          buildWhen: (previous, current) {
-            // Always rebuild on state type change
-            if (previous.runtimeType != current.runtimeType) return true;
-            
-            // Rebuild if data changed
-            final prevLogs = _getFeedingLogsFromState(previous);
-            final currLogs = _getFeedingLogsFromState(current);
-            if (prevLogs.length != currLogs.length) return true;
-            
-            // Compare by IDs if same length
-            if (prevLogs.isNotEmpty && currLogs.isNotEmpty) {
-              final prevIds = prevLogs.map((e) => e.id).toSet();
-              final currIds = currLogs.map((e) => e.id).toSet();
-              return prevIds != currIds;
-            }
-            
-            return false;
-          },
-          builder: (context, feedingLogsState) {
-            final lastFeeding = _getLastFeedingFromState(feedingLogsState);
-            Cat? cat;
-            
-            if (lastFeeding != null) {
-              // Get cat object using optimized O(1) lookup
-              if (catsState is CatsLoaded) {
-                cat = catsState.getCatById(lastFeeding.catId);
-                if (cat == null) {
-                  debugPrint('[HomePage] _buildLastFeedingSection - WARNING: Cat not found in map, trying fallback');
-                  // Fallback if cat not in map yet
-                  try {
-                    cat = catsState.cats.firstWhere(
-                      (c) => c.id == lastFeeding.catId,
-                    );
-                  } catch (e) {
-                    // If no exact match, just use first cat as fallback
-                    if (catsState.cats.isNotEmpty) {
-                      cat = catsState.cats.first;
-                    }
-                  }
-                }
-              }
-            }
-
-        return Padding(
-          padding: const M3EdgeInsets.symmetric(horizontal: M3SpacingToken.space16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Última Alimentação',
-                style: Theme.of(context).textTheme.titleLargeEmphasized?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              SizedBox(height: M3SpacingToken.space12.value),
-              Builder(
-                builder: (context) {
-                  debugPrint('[HomePage] Building widget - lastFeeding: ${lastFeeding?.id ?? 'null'}, cat: ${cat?.name ?? 'null'}');
-                  if (lastFeeding != null && cat != null) {
-                    return Container(
-                      padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainer,
-                        borderRadius: M3Shapes.shapeMedium,
-                      ),
-                      child: Row(
-                        children: [
-                          _buildCatAvatar(context, cat),
-                          SizedBox(width: M3SpacingToken.space16.value),
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  cat.name,
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.onSurface,
-                                  ),
-                                ),
-                                SizedBox(height: M3SpacingToken.space4.value),
-                                Builder(
-                                  builder: (context) {
-                                    final currentUserId = SupabaseConfig.client.auth.currentUser?.id;
-                                    final fedByText = currentUserId != null && 
-                                        lastFeeding.fedBy == currentUserId
-                                        ? 'Você'
-                                        : 'Outro usuário';
-                                    
-                                    final foodTypeText = lastFeeding.foodType ?? 'Ração Seca';
-                                    final amountText = lastFeeding.amount != null 
-                                        ? '${lastFeeding.amount!.toStringAsFixed(0)}g de $foodTypeText'
-                                        : foodTypeText;
-                                    
-                                    return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          amountText,
-                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                          ),
-                                        ),
-                                        SizedBox(height: M3SpacingToken.space4.value),
-                                        Text(
-                                          'Alimentado por $fedByText',
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                                SizedBox(height: M3SpacingToken.space4.value),
-                                Text(
-                                  '${_formatTime(lastFeeding.fedAt)} · ${_formatDate(lastFeeding.fedAt)}',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return Container(
-                      padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainer,
-                        borderRadius: M3Shapes.shapeMedium,
-                      ),
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.pets_outlined,
-                              size: 48,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                            ),
-                            SizedBox(height: M3SpacingToken.space8.value),
-                            Text(
-                              'Nenhuma alimentação registrada',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-        );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildFeedingsChartSection(BuildContext context) {
-    return BlocBuilder<CatsBloc, CatsState>(
-      buildWhen: (previous, current) {
-        if (previous.runtimeType != current.runtimeType) return true;
-        if (previous is CatsLoaded && current is CatsLoaded) {
-          return previous.cats.length != current.cats.length ||
-                 previous.cats.map((e) => e.id).toSet() != 
-                 current.cats.map((e) => e.id).toSet();
-        }
-        return false;
-      },
-      builder: (context, catsState) {
-        return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
-          buildWhen: (previous, current) {
-            if (previous.runtimeType != current.runtimeType) return true;
-            final prevLogs = _getFeedingLogsFromState(previous);
-            final currLogs = _getFeedingLogsFromState(current);
-            return prevLogs.length != currLogs.length;
-          },
-          builder: (context, feedingLogsState) {
-            final List<Cat> cats = catsState is CatsLoaded ? catsState.cats : <Cat>[];
-            final List<FeedingLog> feedingLogs = _getFeedingLogsFromState(feedingLogsState);
-
-            // Processar dados dos últimos 7 dias
-            final chartData = _prepareChartData(
-              context,
-              feedingLogs,
-              cats,
-            );
-
-            return Padding(
-              padding: const M3EdgeInsets.symmetric(horizontal: M3SpacingToken.space16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Alimentações',
-                    style: Theme.of(context).textTheme.titleLargeEmphasized?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  SizedBox(height: M3SpacingToken.space4.value),
-                  Text(
-                    'Últimos 7 dias',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  SizedBox(height: M3SpacingToken.space12.value),
-                  Container(
-                    constraints: const BoxConstraints(
-                      minHeight: 200,
-                      maxHeight: 200,
-                    ),
-                    padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: M3Shapes.shapeMedium,
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: !chartData.isEmpty
-                        ? _buildChartWithErrorHandling(context, chartData)
-                        : _buildEmptyChart(context),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  /// Cores únicas para cada gato (até 5 gatos) - usar cores do tema
-  static List<Color> _getCatColors(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return [
-      colorScheme.primary,
-      colorScheme.tertiary,
-      colorScheme.secondary,
-      colorScheme.error,
-      colorScheme.inversePrimary,
-    ];
-  }
-
-  /// Prepara os dados do gráfico agrupando alimentações dos últimos 7 dias
-  /// Retorna dados para stacked chart (<= 5 gatos) ou bar chart simples (> 5 gatos)
-  ChartDataResult _prepareChartData(BuildContext context, List<FeedingLog> feedingLogs, List<Cat> cats) {
-    final now = DateTime.now();
-    final int catsCount = cats.length;
-    final bool useStackedChart = catsCount <= 5;
-    final locale = Localizations.localeOf(context);
-    
-    if (useStackedChart && catsCount > 0) {
-      // Preparar dados para stacked bar chart
-      final List<StackedBarData> stackedData = [];
-      
-      // Processar os últimos 7 dias
-      for (int i = 6; i >= 0; i--) {
-        final date = now.subtract(Duration(days: i));
-        final dateKey = DateFormat('yyyy-MM-dd').format(date);
-        final dayLabel = DateFormat('E', locale.toString()).format(date).substring(0, 3);
-        
-        // Para cada gato, contar alimentações neste dia
-        final List<StackedBarSegment> segments = [];
-        
-        for (int catIndex = 0; catIndex < catsCount; catIndex++) {
-          final cat = cats[catIndex];
-          final catFeedings = feedingLogs.where((log) {
-            final logDateKey = DateFormat('yyyy-MM-dd').format(log.fedAt);
-            return logDateKey == dateKey && log.catId == cat.id;
-          }).length;
-          
-          // Validar valor para evitar NaN ou Infinity
-          final feedingsValue = catFeedings.toDouble();
-          final safeValue = feedingsValue.isFinite && feedingsValue >= 0 
-              ? feedingsValue 
-              : 0.0;
-          
-          final colors = _getCatColors(context);
-          segments.add(
-            StackedBarSegment(
-              value: safeValue,
-              color: colors[catIndex % colors.length],
-              label: cat.name,
-            ),
-          );
-        }
-        
-        stackedData.add(
-          StackedBarData(
-            label: dayLabel,
-            segments: segments,
-          ),
-        );
-      }
-      
-      return ChartDataResult.stacked(stackedData);
-    } else {
-      // Preparar dados para bar chart simples (mais de 5 gatos ou sem gatos)
-      final List<BarChartData> barData = [];
-      for (int i = 6; i >= 0; i--) {
-        final date = now.subtract(Duration(days: i));
-        final dateKey = DateFormat('yyyy-MM-dd').format(date);
-        final dayLabel = DateFormat('E', locale.toString()).format(date).substring(0, 3);
-        
-        // Contar total de alimentações neste dia
-        final dayFeedings = feedingLogs.where((log) {
-          final logDateKey = DateFormat('yyyy-MM-dd').format(log.fedAt);
-          return logDateKey == dateKey;
-        }).length;
-        
-        // Validar valor para evitar NaN ou Infinity
-        final feedingsValue = dayFeedings.toDouble();
-        final safeValue = feedingsValue.isFinite && feedingsValue >= 0 
-            ? feedingsValue 
-            : 0.0;
-        
-        barData.add(
-          BarChartData(
-            value: safeValue,
-            label: dayLabel,
-          ),
-        );
-      }
-      
-      return ChartDataResult.bar(barData);
-    }
-  }
-
-
-  /// Constrói o gráfico usando material_charts com tratamento de erro
-  Widget _buildChartWithErrorHandling(
-    BuildContext context,
-    ChartDataResult chartDataResult,
-  ) {
-    try {
-      return _buildChart(context, chartDataResult);
-    } catch (e, stackTrace) {
-      debugPrint('[HomePage] Erro ao renderizar gráfico: $e');
-      debugPrint('[HomePage] Stack trace: $stackTrace');
-      // Retornar empty chart ao invés de quebrar
-      return _buildEmptyChart(context);
-    }
-  }
-
-  /// Constrói o gráfico usando material_charts
-  Widget _buildChart(BuildContext context, ChartDataResult chartDataResult) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Obter largura e altura disponíveis do constraints
-        // constraints já considera o padding do Container pai
-        final availableWidth = constraints.maxWidth;
-        final availableHeight = constraints.maxHeight;
-        
-        // Garantir que chartWidth seja válido e não negativo/NaN/Infinity
-        final double chartWidth;
-        if (availableWidth.isFinite && availableWidth > 0) {
-          // Usar toda a largura disponível (já descontado o padding)
-          chartWidth = availableWidth;
-        } else {
-          chartWidth = 400.0; // Fallback seguro
-        }
-        
-        // Garantir que chartHeight seja válido e não negativo/NaN/Infinity
-        final double chartHeight;
-        if (availableHeight.isFinite && availableHeight > 0) {
-          // Usar toda a altura disponível (já descontado o padding)
-          chartHeight = availableHeight;
-        } else {
-          chartHeight = 160.0; // Fallback seguro
-        }
-        
-        final colorScheme = Theme.of(context).colorScheme;
-
-        if (chartDataResult.stackedData != null) {
-          // Validar dados antes de renderizar
-          final stackedData = chartDataResult.stackedData!;
-          final validData = stackedData.where((data) {
-            return data.segments.every((segment) {
-              return segment.value.isFinite && segment.value >= 0;
-            });
-          }).toList();
-          
-          if (validData.isEmpty) {
-            return _buildEmptyChart(context);
-          }
-
-          // Validar width e height antes de usar
-          // Usar as dimensões disponíveis diretamente (já consideram padding)
-          final safeWidth = chartWidth.isFinite && chartWidth > 0 
-              ? chartWidth 
-              : 400.0;
-          final safeHeight = chartHeight.isFinite && chartHeight > 0 
-              ? chartHeight 
-              : 160.0;
-
-          // Gráfico empilhado (até 5 gatos)
-          // PERFORMANCE: Desabilitar grid e values para melhorar Raster
-          return SizedBox(
-            width: safeWidth,
-            height: safeHeight,
-            child: MaterialStackedBarChart(
-              data: validData,
-              width: safeWidth,
-              height: safeHeight,
-              showGrid: false,  // ✅ Desabilitado para melhorar performance
-              showValues: false,  // ✅ Desabilitado para melhorar performance
-              style: StackedBarChartStyle(
-                backgroundColor: colorScheme.surface,
-                gridColor: colorScheme.outline.withValues(alpha: 0.2),
-                labelStyle: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 10,
-                ),
-                valueStyle: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                ),
-                barSpacing: 0.3,
-                cornerRadius: 2,
-              ),
-            ),
-          );
-        } else {
-          // Validar dados antes de renderizar
-          final barData = chartDataResult.barData!;
-          final validData = barData.where((data) {
-            return data.value.isFinite && data.value >= 0;
-          }).toList();
-          
-          if (validData.isEmpty) {
-            return _buildEmptyChart(context);
-          }
-
-          // Validar width e height antes de usar
-          // Usar as dimensões disponíveis diretamente (já consideram padding)
-          final safeWidth = chartWidth.isFinite && chartWidth > 0 
-              ? chartWidth 
-              : 400.0;
-          final safeHeight = chartHeight.isFinite && chartHeight > 0 
-              ? chartHeight 
-              : 160.0;
-
-          // Calcular raio máximo para bordas completamente arredondadas
-          // barWidth = (chartArea.width / data.length) * (1 - barSpacing)
-          // maxRadius = barWidth / 2 (Flutter limita automaticamente)
-          final barSpacing = 0.3;
-          final barWidth = (safeWidth / validData.length) * (1 - barSpacing);
-          final maxCornerRadius = (barWidth / 2).clamp(4.0, 50.0);
-
-          // Gráfico simples (mais de 5 gatos)
-          // PERFORMANCE: Desabilitar grid e values para melhorar Raster
-          return SizedBox(
-            width: safeWidth,
-            height: safeHeight,
-            child: MaterialBarChart(
-              data: validData,
-              width: safeWidth,
-              height: safeHeight,
-              showGrid: false,  // ✅ Desabilitado para melhorar performance
-              showValues: false,  // ✅ Desabilitado para melhorar performance
-              style: BarChartStyle(
-                barColor: colorScheme.primary,
-                backgroundColor: colorScheme.surface,
-                barSpacing: barSpacing,
-                cornerRadius: maxCornerRadius,
-                labelStyle: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 10,
-                ),
-                valueStyle: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          );
-        }
-      },
-    );
-  }
-
-  /// Widget para quando não há dados
-  Widget _buildEmptyChart(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    
-    return Center(
-      child: Padding(
-        padding: const M3EdgeInsets.all(M3SpacingToken.space24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.insights_outlined,
-              size: 64,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-            ),
-            SizedBox(height: M3SpacingToken.space16.value),
-            Text(
-              'Nenhuma alimentação registrada',
-              textAlign: TextAlign.center,
-              style: textTheme.titleMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: M3SpacingToken.space8.value),
-            Text(
-              'Registre alimentações para ver o gráfico dos últimos 7 dias',
-              textAlign: TextAlign.center,
-              style: textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecentRecordsSection(BuildContext context) {
-    return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
-      buildWhen: (previous, current) {
-        if (previous.runtimeType != current.runtimeType) return true;
-        final prevLogs = _getFeedingLogsFromState(previous);
-        final currLogs = _getFeedingLogsFromState(current);
-        if (prevLogs.length != currLogs.length) return true;
-        // Compare first 3 by IDs
-        final prevFirst3 = prevLogs.take(3).map((e) => e.id).toList();
-        final currFirst3 = currLogs.take(3).map((e) => e.id).toList();
-        return prevFirst3.length != currFirst3.length || 
-               prevFirst3.toString() != currFirst3.toString();
-      },
-      builder: (context, state) {
-        final allFeedings = _getFeedingLogsFromState(state);
-        final recentFeedings = allFeedings.take(3).toList();
-
-        return Padding(
-          padding: const M3EdgeInsets.symmetric(horizontal: M3SpacingToken.space16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Registros Recentes',
-                style: Theme.of(context).textTheme.titleLargeEmphasized?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              SizedBox(height: M3SpacingToken.space12.value),
-              if (recentFeedings.isNotEmpty)
-                ...recentFeedings.map((feeding) => _buildRecentRecordItem(feeding, key: ValueKey(feeding.id)))
-              else
-                Container(
-                  padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: M3Shapes.shapeMedium,
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Nenhum registro recente',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildRecentRecordItem(FeedingLog feeding, {Key? key}) {
-    return BlocBuilder<CatsBloc, CatsState>(
-      buildWhen: (previous, current) {
-        if (previous.runtimeType != current.runtimeType) return true;
-        if (previous is CatsLoaded && current is CatsLoaded) {
-          // Only rebuild if the specific cat for this feeding changed
-          final prevCat = previous.getCatById(feeding.catId);
-          final currCat = current.getCatById(feeding.catId);
-          if (prevCat == null || currCat == null) return true;
-          return prevCat.name != currCat.name;
-        }
-        return false;
-      },
-        builder: (context, catsState) {
-        Cat? cat;
-        if (catsState is CatsLoaded) {
-          // Use optimized O(1) lookup instead of firstWhere O(n)
-          cat = catsState.getCatById(feeding.catId);
-        }
-        
-        return Container(
-          margin: EdgeInsets.only(bottom: M3SpacingToken.space8.value),
-          padding: const M3EdgeInsets.all(M3SpacingToken.space12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            borderRadius: M3Shapes.shapeMedium,
-          ),
-          child: Row(
-            children: [
-              cat != null 
-                  ? _buildSmallCatAvatar(context, cat)
-                  : CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                      child: Icon(Icons.pets, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
-                    ),
-              SizedBox(width: M3SpacingToken.space12.value),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      cat?.name ?? 'Nome não encontrado',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    Text(
-                      feeding.amount != null 
-                          ? '${feeding.amount!.toStringAsFixed(0)}g de ração'
-                          : 'Ração não especificada',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                _formatTime(feeding.fedAt),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildMyCatsSection(BuildContext context) {
-    return BlocBuilder<CatsBloc, CatsState>(
-      buildWhen: (previous, current) {
-        if (previous.runtimeType != current.runtimeType) return true;
-        if (previous is CatsLoaded && current is CatsLoaded) {
-          // Only rebuild if the first 3 cats changed (compare by IDs)
-          final prevIds = previous.cats.take(3).map((e) => e.id).toList();
-          final currIds = current.cats.take(3).map((e) => e.id).toList();
-          if (prevIds.length != currIds.length) return true;
-          for (int i = 0; i < prevIds.length; i++) {
-            if (prevIds[i] != currIds[i]) return true;
-          }
-        }
-        return false;
-      },
-      builder: (context, state) {
-        List<Cat> cats = [];
-        if (state is CatsLoaded) {
-          cats = state.cats.take(3).toList();
-        }
-
-        return Padding(
-          padding: const M3EdgeInsets.symmetric(horizontal: M3SpacingToken.space16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Meus Gatos',
-                style: Theme.of(context).textTheme.titleLargeEmphasized?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              SizedBox(height: M3SpacingToken.space12.value),
-              if (cats.isNotEmpty)
-                ...cats.map((cat) => _buildMyCatsItem(cat, key: ValueKey(cat.id)))
-              else
-                Container(
-                  padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: M3Shapes.shapeMedium,
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Nenhum gato cadastrado',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ),
-                  ),
-                ),
-              SizedBox(height: M3SpacingToken.space8.value),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => context.push(AppRouter.cats),
-                  child: Text(
-                    'Ver todos os gatos',
-                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildMyCatsItem(Cat cat, {Key? key}) {
-    return Container(
-      margin: EdgeInsets.only(bottom: M3SpacingToken.space8.value),
-      padding: const M3EdgeInsets.all(M3SpacingToken.space12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: M3Shapes.shapeMedium,
-      ),
-      child: Row(
-        children: [
-          _buildSmallCatAvatar(context, cat),
-          SizedBox(width: M3SpacingToken.space12.value),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  cat.name,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                Text(
-                  '${cat.currentWeight?.toStringAsFixed(1) ?? '4.5'}kg',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-
-  String _formatTime(DateTime dateTime) {
-    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
-
-  String _formatDate(DateTime dateTime) {
-    return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
-  }
 
   void _showFeedingBottomSheet() {
     final catsBloc = context.read<CatsBloc>();
@@ -1436,8 +476,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     if (catsState is! CatsLoaded || catsState.cats.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Nenhum gato cadastrado. Cadastre um gato primeiro.'),
+        SnackBar(
+          content: Text(context.l10n.home_no_cats_register_first),
         ),
       );
       return;
@@ -1469,118 +509,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ),
     );
   }
-
-  Widget _buildCatAvatar(BuildContext context, Cat cat) {
-    final theme = Theme.of(context);
-    
-    // Validar se a URL existe e é válida (começa com http)
-    final imageUrl = cat.imageUrl;
-    final hasValidImageUrl = imageUrl != null && 
-        imageUrl.isNotEmpty && 
-        imageUrl.trim().isNotEmpty &&
-        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
-    
-    if (hasValidImageUrl) {
-      final trimmedUrl = imageUrl.trim();
-      
-      return SizedBox(
-        width: 60,
-        height: 60,
-        child: ClipOval(
-          child: CachedNetworkImage(
-            imageUrl: trimmedUrl,
-            fit: BoxFit.cover,
-            placeholder: (context, url) => Container(
-              width: 60,
-              height: 60,
-              color: theme.colorScheme.surfaceContainerHighest,
-              child: Center(
-                child: Material3LoadingIndicator(size: 24.0),
-              ),
-            ),
-            errorWidget: (context, url, error) {
-              return Container(
-                width: 60,
-                height: 60,
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                child: Icon(
-                  Icons.pets,
-                  size: 30,
-                  color: theme.colorScheme.primary,
-                ),
-              );
-            },
-          ),
-        ),
-      );
-    }
-    
-    return CircleAvatar(
-      radius: 30,
-      backgroundColor: theme.colorScheme.surfaceContainerHighest,
-      child: Icon(
-        Icons.pets,
-        size: 30,
-        color: theme.colorScheme.onSurfaceVariant,
-      ),
-    );
-  }
-
-  Widget _buildSmallCatAvatar(BuildContext context, Cat cat) {
-    final theme = Theme.of(context);
-    
-    // Validar se a URL existe e é válida (começa com http)
-    final imageUrl = cat.imageUrl;
-    final hasValidImageUrl = imageUrl != null && 
-        imageUrl.isNotEmpty && 
-        imageUrl.trim().isNotEmpty &&
-        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
-    
-    if (hasValidImageUrl) {
-      final trimmedUrl = imageUrl.trim();
-      
-      return SizedBox(
-        width: 40,
-        height: 40,
-        child: ClipOval(
-          child: CachedNetworkImage(
-            imageUrl: trimmedUrl,
-            fit: BoxFit.cover,
-            placeholder: (context, url) => Container(
-              width: 40,
-              height: 40,
-              color: theme.colorScheme.surfaceContainerHighest,
-              child: Center(
-                child: Material3LoadingIndicator(size: 20.0),
-              ),
-            ),
-            errorWidget: (context, url, error) {
-              return Container(
-                width: 40,
-                height: 40,
-                color: theme.colorScheme.surfaceContainerHighest,
-                child: Icon(
-                  Icons.pets,
-                  size: 20,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              );
-            },
-          ),
-        ),
-      );
-    }
-    
-    return CircleAvatar(
-      radius: 20,
-      backgroundColor: theme.colorScheme.surfaceContainerHighest,
-      child: Icon(
-        Icons.pets,
-        size: 20,
-        color: theme.colorScheme.onSurfaceVariant,
-      ),
-    );
-  }
 }
 
 /// Widget para o avatar do usuário no header da home page
@@ -1592,7 +520,10 @@ class _UserAvatarButton extends ConsumerWidget {
     final user = SupabaseConfig.client.auth.currentUser;
     
     if (user == null) {
-      return GestureDetector(
+    return Semantics(
+      label: context.l10n.navigation_profile,
+      button: true,
+      child: GestureDetector(
         onTap: () {
           context.push(AppRouter.profile);
         },
@@ -1604,12 +535,16 @@ class _UserAvatarButton extends ConsumerWidget {
             color: Theme.of(context).colorScheme.onSecondary,
           ),
         ),
-      );
-    }
+      ),
+    );
+  }
 
-    final profileAsync = ref.watch(currentUserProfileProvider);
+  final profileAsync = ref.watch(currentUserProfileProvider);
 
-    return GestureDetector(
+  return Semantics(
+    label: context.l10n.navigation_profile,
+    button: true,
+    child: GestureDetector(
       onTap: () {
         context.push(AppRouter.profile);
       },
@@ -1691,79 +626,25 @@ class _UserAvatarButton extends ConsumerWidget {
             ),
           ),
         ),
-        error: (_, _) => GestureDetector(
-          onTap: () {
-            context.push(AppRouter.profile);
-          },
-          child: CircleAvatar(
-            radius: 20,
-            backgroundColor: Theme.of(context).colorScheme.secondary,
-            child: Icon(
-              Icons.person,
-              color: Theme.of(context).colorScheme.onSecondary,
+        error: (_, _) => Semantics(
+          label: context.l10n.navigation_profile,
+          button: true,
+          child: GestureDetector(
+            onTap: () {
+              context.push(AppRouter.profile);
+            },
+            child: CircleAvatar(
+              radius: 20,
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              child: Icon(
+                Icons.person,
+                color: Theme.of(context).colorScheme.onSecondary,
+              ),
             ),
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Widget que anima a entrada de cards de resumo com spring animation
-class _AnimatedSummaryCard extends StatefulWidget {
-  final Widget child;
-  final int delay;
-
-  const _AnimatedSummaryCard({
-    required this.child,
-    required this.delay,
-  });
-
-  @override
-  State<_AnimatedSummaryCard> createState() => _AnimatedSummaryCardState();
-}
-
-class _AnimatedSummaryCardState extends State<_AnimatedSummaryCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: M3MotionHelpers.standardDuration,
-    );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: M3MotionHelpers.standardCurve,
-    );
-    // Iniciar animação com delay
-    Future.delayed(Duration(milliseconds: widget.delay), () {
-      if (mounted) {
-        _controller.forward();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _animation,
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 0.1),
-          end: Offset.zero,
-        ).animate(_animation),
-        child: widget.child,
-      ),
+    ),
     );
   }
 }

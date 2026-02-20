@@ -30,6 +30,7 @@ class ProfileModel {
   final String? username;
   final String? fullName;
   final String? email;
+  final String? website;
   final String? avatarUrl;
   final String? timezone;
   @SafeDateTimeConverter()
@@ -42,6 +43,7 @@ class ProfileModel {
     this.username,
     this.fullName,
     this.email,
+    this.website,
     this.avatarUrl,
     this.timezone,
     this.createdAt,
@@ -59,6 +61,7 @@ class ProfileModel {
       username: username,
       fullName: fullName,
       email: email,
+      website: website,
       avatarUrl: avatarUrl,
       timezone: timezone,
       createdAt: createdAt,
@@ -72,6 +75,7 @@ class ProfileModel {
       username: profile.username,
       fullName: profile.fullName,
       email: profile.email,
+      website: profile.website,
       avatarUrl: profile.avatarUrl,
       timezone: profile.timezone,
       createdAt: profile.createdAt,
@@ -84,12 +88,14 @@ class ProfileModel {
 class ProfileInputModel {
   final String? username;
   final String? fullName;
+  final String? website;
   final String? avatarUrl;
   final String? timezone;
 
   const ProfileInputModel({
     this.username,
     this.fullName,
+    this.website,
     this.avatarUrl,
     this.timezone,
   });

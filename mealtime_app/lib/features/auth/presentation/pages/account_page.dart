@@ -1,33 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:m3e_collection/m3e_collection.dart';
 import 'package:material_design/material_design.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
-import 'package:mealtime_app/features/auth/data/models/user_profile.dart';
 import 'package:mealtime_app/features/auth/presentation/pages/login_page.dart';
+import 'package:mealtime_app/features/profile/domain/entities/profile.dart';
+import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
 import 'package:mealtime_app/shared/widgets/avatar_widget.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
-import 'package:mealtime_app/main.dart';
-import 'package:m3e_collection/m3e_collection.dart';
 
-class AccountPage extends StatefulWidget {
+class AccountPage extends ConsumerStatefulWidget {
   const AccountPage({super.key});
 
   @override
-  State<AccountPage> createState() => _AccountPageState();
+  ConsumerState<AccountPage> createState() => _AccountPageState();
 }
 
-class _AccountPageState extends State<AccountPage> {
+class _AccountPageState extends ConsumerState<AccountPage> {
   final _usernameController = TextEditingController();
   final _websiteController = TextEditingController();
   String? _avatarUrl;
-  var _loading = true;
-  UserProfile? _profile;
-
-  @override
-  void initState() {
-    super.initState();
-    _getProfile();
-  }
+  bool _isSaving = false;
 
   @override
   void dispose() {
@@ -36,184 +30,111 @@ class _AccountPageState extends State<AccountPage> {
     super.dispose();
   }
 
-  /// Carrega o perfil do usuário
-  Future<void> _getProfile() async {
-    setState(() {
-      _loading = true;
-    });
-
-    try {
-      final userId = SupabaseConfig.client.auth.currentSession?.user.id;
-      if (userId == null) {
-        _navigateToLogin();
-        return;
-      }
-
-      try {
-        final data = await SupabaseConfig.client
-            .from('profiles')
-            .select()
-            .eq('id', userId)
-            .maybeSingle();
-
-        if (data != null) {
-          _profile = UserProfile.fromJson(data);
-          _usernameController.text = _profile?.username ?? '';
-          _websiteController.text = _profile?.website ?? '';
-          _avatarUrl = _profile?.avatarUrl;
-        } else {
-          // Profile não existe, criar um padrão com dados do Auth
-          debugPrint('Profile não encontrado, usando dados do Auth');
-        }
-      } on PostgrestException catch (error) {
-        // Se a tabela profiles não existir ou houver erro,
-        // apenas continuar sem profile (usaremos dados do Auth)
-        if (mounted) {
-          debugPrint(
-            'Aviso: Não foi possível carregar profile: ${error.message}',
-          );
-        }
-      }
-    } catch (error) {
-      if (mounted) {
-        debugPrint('Erro ao carregar perfil: ${error.toString()}');
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
-    }
-  }
-
-  /// Atualiza o perfil do usuário
-  Future<void> _updateProfile() async {
-    setState(() {
-      _loading = true;
-    });
-
-    final userName = _usernameController.text.trim();
-    final website = _websiteController.text.trim();
-    final user = SupabaseConfig.client.auth.currentUser;
-
-    if (user == null) {
-      _navigateToLogin();
-      return;
-    }
-
-    final updates = {
-      'id': user.id,
-      'username': userName,
-      'website': website,
-      'updated_at': DateTime.now().toIso8601String(),
-    };
-
-    try {
-      await SupabaseConfig.client.from('profiles').upsert(updates);
-      if (mounted) {
-        context.showSnackBar('Perfil atualizado com sucesso!');
-      }
-    } on PostgrestException catch (error) {
-      if (mounted) {
-        context.showSnackBar(error.message, isError: true);
-      }
-    } catch (error) {
-      if (mounted) {
-        context.showSnackBar(
-          'Erro inesperado: ${error.toString()}',
-          isError: true,
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
-    }
-  }
-
-  /// Faz logout do usuário
-  Future<void> _signOut() async {
-    try {
-      await SupabaseConfig.client.auth.signOut();
-      _navigateToLogin();
-    } catch (error) {
-      if (mounted) {
-        context.showSnackBar(
-          'Erro ao fazer logout: ${error.toString()}',
-          isError: true,
-        );
-      }
-    }
-  }
-
-  /// Callback para upload de avatar
-  Future<void> _onUpload(String imageUrl) async {
-    try {
-      final userId = SupabaseConfig.client.auth.currentUser?.id;
-      if (userId == null) {
-        _navigateToLogin();
-        return;
-      }
-
-      await SupabaseConfig.client.from('profiles').upsert({
-        'id': userId,
-        'avatar_url': imageUrl,
-      });
-
-      if (mounted) {
-        context.showSnackBar('Foto de perfil atualizada!');
-      }
-    } on PostgrestException catch (error) {
-      if (mounted) {
-        context.showSnackBar(error.message, isError: true);
-      }
-    } catch (error) {
-      if (mounted) {
-        context.showSnackBar(
-          'Erro inesperado: ${error.toString()}',
-          isError: true,
-        );
-      }
-    }
-
-    if (!mounted) return;
-
-    setState(() {
-      _avatarUrl = imageUrl;
-    });
-  }
-
-  void _navigateToLogin() {
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage()));
-  }
-
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
+  void _navigateToLogin() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+    );
+  }
+
+  Future<void> _signOut() async {
+    try {
+      await SupabaseConfig.client.auth.signOut();
+      if (mounted) _navigateToLogin();
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${context.l10n.profile_logoutErrorGeneric}: $error',
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return Scaffold(
-        body: Center(
-          child: Material3LoadingIndicator(),
-        ),
+    final user = SupabaseConfig.client.auth.currentUser;
+    if (user == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _navigateToLogin());
+      return const Scaffold(
+        body: Center(child: Material3LoadingIndicator()),
       );
     }
 
+    final profileAsync = ref.watch(profileProvider(user.id));
+
+    ref.listen<AsyncValue<Profile?>>(profileProvider(user.id), (prev, next) {
+      next.whenOrNull(
+        data: (profile) {
+          if (profile != null && mounted) _populateFields(profile);
+        },
+        error: (err, _) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(err.toString()),
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+            );
+          }
+        },
+      );
+    });
+
+    return profileAsync.when(
+      data: (profile) {
+        if (profile != null && _usernameController.text.isEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _populateFields(profile);
+          });
+        }
+        return _buildBody(context, user, profile, _isSaving);
+      },
+      loading: () => const Scaffold(
+        body: Center(child: Material3LoadingIndicator()),
+      ),
+      error: (e, _) => Scaffold(
+        appBar: AppBar(title: Text(context.l10n.profile_title)),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('${context.l10n.error_loading}: $e'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  ref.invalidate(profileProvider(user.id));
+                },
+                child: Text(context.l10n.common_retry),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    dynamic user,
+    Profile? profile,
+    bool isLoading,
+  ) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Perfil'),
+        title: Text(context.l10n.profile_title),
         actions: [
           IconButtonM3E(
             onPressed: _signOut,
             icon: const Icon(Icons.logout),
-            tooltip: 'Sair',
+            tooltip: context.l10n.auth_logout,
           ),
         ],
       ),
@@ -223,11 +144,12 @@ class _AccountPageState extends State<AccountPage> {
           horizontal: M3SpacingToken.space12,
         ),
         children: [
-          // Avatar
-          AvatarWidget(imageUrl: _avatarUrl, onUpload: _onUpload, size: 120),
+          AvatarWidget(
+            imageUrl: _avatarUrl,
+            onImagePicked: (path) => _onUpload(context, user.id, path),
+            size: 120,
+          ),
           SizedBox(height: M3SpacingToken.space24.value),
-
-          // Informações do usuário
           Card(
             child: Padding(
               padding: const M3EdgeInsets.all(M3SpacingToken.space16),
@@ -235,128 +157,168 @@ class _AccountPageState extends State<AccountPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Informações do Usuário',
+                    context.l10n.profile_userInfo,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   SizedBox(height: M3SpacingToken.space16.value),
-
                   TextFormField(
                     controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nome de usuário',
-                      prefixIcon: Icon(Icons.person),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.profile_usernameLabel,
+                      prefixIcon: const Icon(Icons.person),
                     ),
+                    enabled: !isLoading,
                   ),
                   SizedBox(height: M3SpacingToken.space16.value),
-
                   TextFormField(
                     controller: _websiteController,
-                    decoration: const InputDecoration(
-                      labelText: 'Website',
-                      prefixIcon: Icon(Icons.web),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.profile_website,
+                      prefixIcon: const Icon(Icons.web),
                     ),
                     keyboardType: TextInputType.url,
+                    enabled: !isLoading,
                   ),
                 ],
               ),
             ),
           ),
           SizedBox(height: M3SpacingToken.space24.value),
-
-          // Botão de atualizar
           SizedBox(
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: _loading ? null : _updateProfile,
-              child: _loading
+              onPressed: isLoading ? null : () => _updateProfile(context, user.id),
+              child: isLoading
                   ? const Material3LoadingIndicator(size: 20.0)
-                  : const Text('Atualizar Perfil'),
+                  : Text(context.l10n.profile_updateProfile),
             ),
           ),
           SizedBox(height: M3SpacingToken.space16.value),
-
-          // Informações da conta
-          Card(
-            child: Padding(
-              padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Informações da Conta',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: M3SpacingToken.space16.value),
-
-                  ListTile(
-                    leading: const Icon(Icons.badge),
-                    title: const Text('ID do Usuário'),
-                    subtitle: Text(
-                      SupabaseConfig.client.auth.currentUser?.id ?? 'N/A',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ),
-
-                  ListTile(
-                    leading: const Icon(Icons.email),
-                    title: const Text('Email'),
-                    subtitle: Text(
-                      SupabaseConfig.client.auth.currentUser?.email ?? 'N/A',
-                    ),
-                  ),
-
-                  ListTile(
-                    leading: const Icon(Icons.verified),
-                    title: const Text('Status da Conta'),
-                    subtitle: Text(
-                      SupabaseConfig
-                                  .client
-                                  .auth
-                                  .currentUser
-                                  ?.emailConfirmedAt !=
-                              null
-                          ? 'Verificado'
-                          : 'Não verificado',
-                    ),
-                  ),
-
-                  ListTile(
-                    leading: const Icon(Icons.calendar_today),
-                    title: const Text('Conta criada em'),
-                    subtitle: Text(
-                      SupabaseConfig.client.auth.currentUser?.createdAt != null
-                          ? _formatDate(
-                              DateTime.parse(SupabaseConfig
-                                  .client.auth.currentUser!.createdAt),
-                            )
-                          : 'N/A',
-                    ),
-                  ),
-
-                  ListTile(
-                    leading: const Icon(Icons.login),
-                    title: const Text('Último acesso'),
-                    subtitle: Text(
-                      SupabaseConfig.client.auth.currentUser?.lastSignInAt !=
-                              null
-                          ? _formatDate(
-                              DateTime.parse(SupabaseConfig
-                                  .client.auth.currentUser!.lastSignInAt!),
-                            )
-                          : 'N/A',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          _buildAccountInfoCard(context, user),
         ],
       ),
     );
+  }
+
+  Widget _buildAccountInfoCard(BuildContext context, dynamic user) {
+    return Card(
+      child: Padding(
+        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.profile_accountInfo,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            SizedBox(height: M3SpacingToken.space16.value),
+            ListTile(
+              leading: const Icon(Icons.badge),
+              title: Text(context.l10n.profile_userId),
+              subtitle: Text(user.id, style: const TextStyle(fontSize: 12)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.email),
+              title: Text(context.l10n.common_email),
+              subtitle: Text(user.email ?? 'N/A'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.verified),
+              title: Text(context.l10n.profile_accountStatus),
+              subtitle: Text(
+                user.emailConfirmedAt != null
+                    ? context.l10n.profile_verified
+                    : context.l10n.profile_notVerified,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_today),
+              title: Text(context.l10n.profile_accountCreated),
+              subtitle: Text(
+                user.createdAt != null && user.createdAt.isNotEmpty
+                    ? _formatDate(DateTime.parse(user.createdAt))
+                    : 'N/A',
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.login),
+              title: Text(context.l10n.profile_lastAccess),
+              subtitle: Text(
+                user.lastSignInAt != null && user.lastSignInAt.isNotEmpty
+                    ? _formatDate(DateTime.parse(user.lastSignInAt!))
+                    : 'N/A',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _populateFields(Profile profile) {
+    if (_usernameController.text != (profile.username ?? '')) {
+      _usernameController.text = profile.username ?? '';
+    }
+    if (_websiteController.text != (profile.website ?? '')) {
+      _websiteController.text = profile.website ?? '';
+    }
+    if (_avatarUrl != profile.avatarUrl && mounted) {
+      setState(() => _avatarUrl = profile.avatarUrl);
+    }
+  }
+
+  Future<void> _onUpload(
+    BuildContext context,
+    String userId,
+    String filePath,
+  ) async {
+    final notifier = ref.read(profileProvider(userId).notifier);
+    final url = await notifier.uploadAvatar(filePath);
+    if (!mounted) return;
+    if (url != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.profile_profileUpdated)),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.profile_errorUpdating),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _updateProfile(BuildContext context, String userId) async {
+    final profileAsync = ref.read(profileProvider(userId));
+    final currentProfile = profileAsync.valueOrNull;
+    if (currentProfile == null) return;
+
+    final updatedProfile = currentProfile.copyWith(
+      username: _usernameController.text.trim(),
+      website: _websiteController.text.trim(),
+    );
+
+    setState(() => _isSaving = true);
+    final notifier = ref.read(profileProvider(userId).notifier);
+    final success = await notifier.updateProfile(updatedProfile);
+    if (mounted) setState(() => _isSaving = false);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? context.l10n.profile_profileUpdated
+              : context.l10n.profile_errorUpdating,
+        ),
+        backgroundColor: success ? null : Theme.of(context).colorScheme.error,
+      ),
+    );
+    if (success) _populateFields(updatedProfile);
   }
 }

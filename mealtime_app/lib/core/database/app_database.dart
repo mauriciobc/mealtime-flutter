@@ -43,8 +43,11 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(createDatabaseConnection());
 
+  /// Construtor para testes com executor in-memory (ex: NativeDatabase.memory()).
+  AppDatabase.withExecutor(QueryExecutor e) : super(e);
+
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -96,6 +99,11 @@ class AppDatabase extends _$AppDatabase {
           // Migração da versão 3 para 4
           // Adicionar campo food_type na tabela feeding_logs
           await m.addColumn(feedingLogs, feedingLogs.foodType);
+        }
+        if (from < 5) {
+          // Migração da versão 4 para 5
+          // Adicionar campo website na tabela profiles
+          await m.addColumn(profiles, profiles.website);
         }
       },
     );

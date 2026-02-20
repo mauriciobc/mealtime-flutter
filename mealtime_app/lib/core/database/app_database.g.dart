@@ -105,6 +105,17 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _websiteMeta = const VerificationMeta(
+    'website',
+  );
+  @override
+  late final GeneratedColumn<String> website = GeneratedColumn<String>(
+    'website',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _timezoneMeta = const VerificationMeta(
     'timezone',
   );
@@ -162,6 +173,7 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
     fullName,
     avatarUrl,
     email,
+    website,
     timezone,
     authId,
     householdId,
@@ -230,6 +242,12 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
       context.handle(
         _emailMeta,
         email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    }
+    if (data.containsKey('website')) {
+      context.handle(
+        _websiteMeta,
+        website.isAcceptableOrUnknown(data['website']!, _websiteMeta),
       );
     }
     if (data.containsKey('timezone')) {
@@ -307,6 +325,10 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
         DriftSqlType.string,
         data['${effectivePrefix}email'],
       ),
+      website: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}website'],
+      ),
       timezone: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}timezone'],
@@ -342,6 +364,7 @@ class Profile extends DataClass implements Insertable<Profile> {
   final String? fullName;
   final String? avatarUrl;
   final String? email;
+  final String? website;
   final String? timezone;
   final String? authId;
   final String? householdId;
@@ -356,6 +379,7 @@ class Profile extends DataClass implements Insertable<Profile> {
     this.fullName,
     this.avatarUrl,
     this.email,
+    this.website,
     this.timezone,
     this.authId,
     this.householdId,
@@ -386,6 +410,9 @@ class Profile extends DataClass implements Insertable<Profile> {
     }
     if (!nullToAbsent || email != null) {
       map['email'] = Variable<String>(email);
+    }
+    if (!nullToAbsent || website != null) {
+      map['website'] = Variable<String>(website);
     }
     if (!nullToAbsent || timezone != null) {
       map['timezone'] = Variable<String>(timezone);
@@ -425,6 +452,9 @@ class Profile extends DataClass implements Insertable<Profile> {
       email: email == null && nullToAbsent
           ? const Value.absent()
           : Value(email),
+      website: website == null && nullToAbsent
+          ? const Value.absent()
+          : Value(website),
       timezone: timezone == null && nullToAbsent
           ? const Value.absent()
           : Value(timezone),
@@ -453,6 +483,7 @@ class Profile extends DataClass implements Insertable<Profile> {
       fullName: serializer.fromJson<String?>(json['fullName']),
       avatarUrl: serializer.fromJson<String?>(json['avatarUrl']),
       email: serializer.fromJson<String?>(json['email']),
+      website: serializer.fromJson<String?>(json['website']),
       timezone: serializer.fromJson<String?>(json['timezone']),
       authId: serializer.fromJson<String?>(json['authId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
@@ -472,6 +503,7 @@ class Profile extends DataClass implements Insertable<Profile> {
       'fullName': serializer.toJson<String?>(fullName),
       'avatarUrl': serializer.toJson<String?>(avatarUrl),
       'email': serializer.toJson<String?>(email),
+      'website': serializer.toJson<String?>(website),
       'timezone': serializer.toJson<String?>(timezone),
       'authId': serializer.toJson<String?>(authId),
       'householdId': serializer.toJson<String?>(householdId),
@@ -489,6 +521,7 @@ class Profile extends DataClass implements Insertable<Profile> {
     Value<String?> fullName = const Value.absent(),
     Value<String?> avatarUrl = const Value.absent(),
     Value<String?> email = const Value.absent(),
+    Value<String?> website = const Value.absent(),
     Value<String?> timezone = const Value.absent(),
     Value<String?> authId = const Value.absent(),
     Value<String?> householdId = const Value.absent(),
@@ -503,6 +536,7 @@ class Profile extends DataClass implements Insertable<Profile> {
     fullName: fullName.present ? fullName.value : this.fullName,
     avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
     email: email.present ? email.value : this.email,
+    website: website.present ? website.value : this.website,
     timezone: timezone.present ? timezone.value : this.timezone,
     authId: authId.present ? authId.value : this.authId,
     householdId: householdId.present ? householdId.value : this.householdId,
@@ -519,6 +553,7 @@ class Profile extends DataClass implements Insertable<Profile> {
       fullName: data.fullName.present ? data.fullName.value : this.fullName,
       avatarUrl: data.avatarUrl.present ? data.avatarUrl.value : this.avatarUrl,
       email: data.email.present ? data.email.value : this.email,
+      website: data.website.present ? data.website.value : this.website,
       timezone: data.timezone.present ? data.timezone.value : this.timezone,
       authId: data.authId.present ? data.authId.value : this.authId,
       householdId: data.householdId.present
@@ -542,6 +577,7 @@ class Profile extends DataClass implements Insertable<Profile> {
           ..write('fullName: $fullName, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('email: $email, ')
+          ..write('website: $website, ')
           ..write('timezone: $timezone, ')
           ..write('authId: $authId, ')
           ..write('householdId: $householdId, ')
@@ -561,6 +597,7 @@ class Profile extends DataClass implements Insertable<Profile> {
     fullName,
     avatarUrl,
     email,
+    website,
     timezone,
     authId,
     householdId,
@@ -579,6 +616,7 @@ class Profile extends DataClass implements Insertable<Profile> {
           other.fullName == this.fullName &&
           other.avatarUrl == this.avatarUrl &&
           other.email == this.email &&
+          other.website == this.website &&
           other.timezone == this.timezone &&
           other.authId == this.authId &&
           other.householdId == this.householdId &&
@@ -595,6 +633,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
   final Value<String?> fullName;
   final Value<String?> avatarUrl;
   final Value<String?> email;
+  final Value<String?> website;
   final Value<String?> timezone;
   final Value<String?> authId;
   final Value<String?> householdId;
@@ -610,6 +649,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     this.fullName = const Value.absent(),
     this.avatarUrl = const Value.absent(),
     this.email = const Value.absent(),
+    this.website = const Value.absent(),
     this.timezone = const Value.absent(),
     this.authId = const Value.absent(),
     this.householdId = const Value.absent(),
@@ -626,6 +666,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     this.fullName = const Value.absent(),
     this.avatarUrl = const Value.absent(),
     this.email = const Value.absent(),
+    this.website = const Value.absent(),
     this.timezone = const Value.absent(),
     this.authId = const Value.absent(),
     this.householdId = const Value.absent(),
@@ -642,6 +683,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     Expression<String>? fullName,
     Expression<String>? avatarUrl,
     Expression<String>? email,
+    Expression<String>? website,
     Expression<String>? timezone,
     Expression<String>? authId,
     Expression<String>? householdId,
@@ -658,6 +700,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
       if (fullName != null) 'full_name': fullName,
       if (avatarUrl != null) 'avatar_url': avatarUrl,
       if (email != null) 'email': email,
+      if (website != null) 'website': website,
       if (timezone != null) 'timezone': timezone,
       if (authId != null) 'auth_id': authId,
       if (householdId != null) 'household_id': householdId,
@@ -676,6 +719,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     Value<String?>? fullName,
     Value<String?>? avatarUrl,
     Value<String?>? email,
+    Value<String?>? website,
     Value<String?>? timezone,
     Value<String?>? authId,
     Value<String?>? householdId,
@@ -692,6 +736,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
       fullName: fullName ?? this.fullName,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       email: email ?? this.email,
+      website: website ?? this.website,
       timezone: timezone ?? this.timezone,
       authId: authId ?? this.authId,
       householdId: householdId ?? this.householdId,
@@ -730,6 +775,9 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     if (email.present) {
       map['email'] = Variable<String>(email.value);
     }
+    if (website.present) {
+      map['website'] = Variable<String>(website.value);
+    }
     if (timezone.present) {
       map['timezone'] = Variable<String>(timezone.value);
     }
@@ -760,6 +808,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
           ..write('fullName: $fullName, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('email: $email, ')
+          ..write('website: $website, ')
           ..write('timezone: $timezone, ')
           ..write('authId: $authId, ')
           ..write('householdId: $householdId, ')
@@ -6377,6 +6426,7 @@ typedef $$ProfilesTableCreateCompanionBuilder =
       Value<String?> fullName,
       Value<String?> avatarUrl,
       Value<String?> email,
+      Value<String?> website,
       Value<String?> timezone,
       Value<String?> authId,
       Value<String?> householdId,
@@ -6394,6 +6444,7 @@ typedef $$ProfilesTableUpdateCompanionBuilder =
       Value<String?> fullName,
       Value<String?> avatarUrl,
       Value<String?> email,
+      Value<String?> website,
       Value<String?> timezone,
       Value<String?> authId,
       Value<String?> householdId,
@@ -6512,6 +6563,11 @@ class $$ProfilesTableFilterComposer
 
   ColumnFilters<String> get email => $composableBuilder(
     column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get website => $composableBuilder(
+    column: $table.website,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6665,6 +6721,11 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get website => $composableBuilder(
+    column: $table.website,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get timezone => $composableBuilder(
     column: $table.timezone,
     builder: (column) => ColumnOrderings(column),
@@ -6721,6 +6782,9 @@ class $$ProfilesTableAnnotationComposer
 
   GeneratedColumn<String> get email =>
       $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get website =>
+      $composableBuilder(column: $table.website, builder: (column) => column);
 
   GeneratedColumn<String> get timezone =>
       $composableBuilder(column: $table.timezone, builder: (column) => column);
@@ -6855,6 +6919,7 @@ class $$ProfilesTableTableManager
                 Value<String?> fullName = const Value.absent(),
                 Value<String?> avatarUrl = const Value.absent(),
                 Value<String?> email = const Value.absent(),
+                Value<String?> website = const Value.absent(),
                 Value<String?> timezone = const Value.absent(),
                 Value<String?> authId = const Value.absent(),
                 Value<String?> householdId = const Value.absent(),
@@ -6870,6 +6935,7 @@ class $$ProfilesTableTableManager
                 fullName: fullName,
                 avatarUrl: avatarUrl,
                 email: email,
+                website: website,
                 timezone: timezone,
                 authId: authId,
                 householdId: householdId,
@@ -6887,6 +6953,7 @@ class $$ProfilesTableTableManager
                 Value<String?> fullName = const Value.absent(),
                 Value<String?> avatarUrl = const Value.absent(),
                 Value<String?> email = const Value.absent(),
+                Value<String?> website = const Value.absent(),
                 Value<String?> timezone = const Value.absent(),
                 Value<String?> authId = const Value.absent(),
                 Value<String?> householdId = const Value.absent(),
@@ -6902,6 +6969,7 @@ class $$ProfilesTableTableManager
                 fullName: fullName,
                 avatarUrl: avatarUrl,
                 email: email,
+                website: website,
                 timezone: timezone,
                 authId: authId,
                 householdId: householdId,

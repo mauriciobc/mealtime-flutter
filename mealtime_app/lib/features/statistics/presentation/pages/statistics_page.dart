@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design/material_design.dart';
-import 'package:get_it/get_it.dart';
-import 'package:mealtime_app/core/database/app_database.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
-import 'package:mealtime_app/features/homes/data/datasources/homes_local_datasource.dart';
 import 'package:mealtime_app/features/statistics/domain/entities/period_filter.dart';
 import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_bloc.dart';
 import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_event.dart';
@@ -18,8 +15,8 @@ import 'package:mealtime_app/features/statistics/presentation/widgets/hourly_dis
 import 'package:mealtime_app/features/statistics/presentation/widgets/statistics_filters.dart';
 import 'package:mealtime_app/features/statistics/presentation/widgets/statistics_header.dart';
 import 'package:mealtime_app/features/statistics/presentation/widgets/statistics_summary_cards.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -29,7 +26,6 @@ class StatisticsPage extends StatefulWidget {
 }
 
 class _StatisticsPageState extends State<StatisticsPage> {
-  String? _householdId;
   bool _initialized = false;
 
   @override
@@ -41,38 +37,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
     }
   }
 
-  Future<void> _loadInitialData() async {
-    if (!mounted) return;
-
-    String? householdId;
-    try {
-      final homesLocalDataSource = HomesLocalDataSourceImpl(
-        database: GetIt.instance<AppDatabase>(),
-        sharedPreferences: GetIt.instance<SharedPreferences>(),
-      );
-      final activeHome = await homesLocalDataSource.getActiveHome();
-      householdId = activeHome?.id;
-
-      if (!mounted) return;
-      setState(() {
-        _householdId = householdId;
-      });
-    } catch (e) {
-      debugPrint('[StatisticsPage] Erro ao obter household: $e');
-      if (!mounted) return;
-      setState(() {
-        _householdId = null;
-      });
-    }
-
+  void _loadInitialData() {
     context.read<CatsBloc>().add(const LoadCats());
-
-    if (!mounted) return;
-
     context.read<StatisticsBloc>().add(
-          LoadStatistics(
+          const LoadStatistics(
             periodFilter: PeriodFilter.week,
-            householdId: householdId,
           ),
         );
   }
@@ -81,12 +50,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Estatísticas'),
+        title: Text(context.l10n.statistics_title),
       ),
       body: BlocBuilder<StatisticsBloc, StatisticsState>(
         builder: (context, state) {
           if (state is StatisticsLoading) {
-            return const LoadingWidget(message: 'Carregando estatísticas...');
+            return LoadingWidget(message: context.l10n.statistics_loading);
           }
 
           if (state is StatisticsError) {
@@ -97,14 +66,14 @@ class _StatisticsPageState extends State<StatisticsPage> {
             return _buildContent(state);
           }
 
-          return const LoadingWidget(message: 'Carregando estatísticas...');
+          return LoadingWidget(message: context.l10n.statistics_loading);
         },
       ),
     );
   }
 
   Widget _buildContent(StatisticsLoaded state) {
-    final householdId = state.householdId ?? _householdId;
+    final householdId = state.householdId;
 
     return SingleChildScrollView(
       padding: const M3EdgeInsets.all(M3SpacingToken.space16),
@@ -189,7 +158,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   ),
                   SizedBox(height: M3SpacingToken.space8.value),
                   Text(
-                    'Erro ao renderizar gráfico',
+                    context.l10n.statistics_chartError,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onErrorContainer,
                         ),
@@ -223,12 +192,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
             ),
             SizedBox(height: M3SpacingToken.space16.value),
             Text(
-              'Nenhum dado disponível',
+              context.l10n.statistics_noData,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             SizedBox(height: M3SpacingToken.space8.value),
             Text(
-              'Não há alimentações registradas no período selecionado.',
+              context.l10n.statistics_noDataPeriod,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -255,7 +224,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
             ),
             SizedBox(height: M3SpacingToken.space16.value),
             Text(
-              'Erro ao carregar estatísticas',
+              context.l10n.statistics_errorLoading,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             SizedBox(height: M3SpacingToken.space8.value),
@@ -270,14 +239,13 @@ class _StatisticsPageState extends State<StatisticsPage> {
             ElevatedButton.icon(
               onPressed: () {
                 context.read<StatisticsBloc>().add(
-                      LoadStatistics(
+                      const LoadStatistics(
                         periodFilter: PeriodFilter.week,
-                        householdId: _householdId,
                       ),
                     );
               },
               icon: const Icon(Icons.refresh),
-              label: const Text('Tentar novamente'),
+              label: Text(context.l10n.common_retry),
             ),
           ],
         ),

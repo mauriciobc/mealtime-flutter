@@ -52,6 +52,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       final request = ProfileInputModel(
         username: profile.username,
         fullName: profile.fullName,
+        website: profile.website,
         avatarUrl: profile.avatarUrl,
         timezone: profile.timezone,
       );

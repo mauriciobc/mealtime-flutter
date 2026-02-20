@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
 import 'package:mealtime_app/features/notifications/domain/entities/notification.dart'
     as notification_entity;
@@ -41,10 +42,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
       final user = supabase.auth.currentUser;
 
       if (user == null) {
-        setState(() {
-          _error = 'Usuário não autenticado';
-          _isLoading = false;
-        });
+      setState(() {
+        _error = 'user_not_authenticated';
+        _isLoading = false;
+      });
         return;
       }
 
@@ -65,7 +66,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       });
     } catch (e) {
       setState(() {
-        _error = 'Erro ao carregar notificações: $e';
+        _error = e.toString();
         _isLoading = false;
       });
     }
@@ -138,9 +139,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Notificação marcada como lida'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(context.l10n.notifications_markedAsRead),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -148,7 +149,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao marcar como lida: $e'),
+            content: Text(
+              context.l10n.notifications_errorMarkAsRead(e.toString()),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -207,9 +210,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Todas as notificações foram marcadas como lidas'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(context.l10n.notifications_allMarkedAsRead),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -217,7 +220,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao marcar todas como lidas: $e'),
+            content: Text(
+              context.l10n.notifications_errorMarkAllAsRead(e.toString()),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -245,9 +250,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Notificação removida'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(context.l10n.notifications_removed),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -255,7 +260,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao remover notificação: $e'),
+            content: Text(
+              context.l10n.notifications_errorRemove(e.toString()),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -267,12 +274,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notificações'),
+        title: Text(context.l10n.notifications_title),
         actions: [
           IconButtonM3E(
             icon: const Icon(Icons.refresh),
             onPressed: _loadNotifications,
-            tooltip: 'Atualizar',
+            tooltip: context.l10n.notifications_refresh,
           ),
         ],
       ),
@@ -286,6 +293,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
 
     if (_error != null) {
+      final message = _error! == 'user_not_authenticated'
+          ? context.l10n.notifications_userNotAuthenticated
+          : context.l10n.notifications_errorLoading(_error!);
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -297,7 +307,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              _error!,
+              message,
               style: Theme.of(context).textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
@@ -305,7 +315,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             ElevatedButton.icon(
               onPressed: _loadNotifications,
               icon: const Icon(Icons.refresh),
-              label: const Text('Tentar novamente'),
+              label: Text(context.l10n.notifications_tryAgain),
             ),
           ],
         ),
@@ -327,12 +337,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Nenhuma notificação',
+              context.l10n.notifications_empty,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
-              'Você está em dia!',
+              context.l10n.notifications_emptySubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context)
                         .colorScheme
@@ -361,7 +371,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             child: ElevatedButton.icon(
               onPressed: _markAllAsRead,
               icon: const Icon(Icons.done_all, size: 18),
-              label: const Text('Marcar todas como lidas'),
+              label: Text(context.l10n.notifications_markAllAsRead),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
@@ -529,7 +539,7 @@ class _NotificationItem extends StatelessWidget {
                 size: 20,
               ),
               onPressed: onDelete,
-              tooltip: 'Deletar notificação',
+              tooltip: context.l10n.notifications_delete,
             ),
           ],
         ),

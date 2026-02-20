@@ -12,6 +12,7 @@ class Profiles extends Table {
   TextColumn get fullName => text().nullable()();
   TextColumn get avatarUrl => text().nullable()();
   TextColumn get email => text().nullable()();
+  TextColumn get website => text().nullable()();
   TextColumn get timezone => text().nullable()();
   TextColumn get authId => text().nullable()();
   TextColumn get householdId => text().nullable()();

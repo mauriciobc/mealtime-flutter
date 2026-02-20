@@ -11,6 +11,7 @@ ProfileModel _$ProfileModelFromJson(Map<String, dynamic> json) => ProfileModel(
   username: json['username'] as String?,
   fullName: json['full_name'] as String?,
   email: json['email'] as String?,
+  website: json['website'] as String?,
   avatarUrl: json['avatar_url'] as String?,
   timezone: json['timezone'] as String?,
   createdAt: const SafeDateTimeConverter().fromJson(
@@ -27,6 +28,7 @@ Map<String, dynamic> _$ProfileModelToJson(ProfileModel instance) =>
       'username': instance.username,
       'full_name': instance.fullName,
       'email': instance.email,
+      'website': instance.website,
       'avatar_url': instance.avatarUrl,
       'timezone': instance.timezone,
       'created_at': const SafeDateTimeConverter().toJson(instance.createdAt),
@@ -37,6 +39,7 @@ ProfileInputModel _$ProfileInputModelFromJson(Map<String, dynamic> json) =>
     ProfileInputModel(
       username: json['username'] as String?,
       fullName: json['full_name'] as String?,
+      website: json['website'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       timezone: json['timezone'] as String?,
     );
@@ -45,6 +48,7 @@ Map<String, dynamic> _$ProfileInputModelToJson(ProfileInputModel instance) =>
     <String, dynamic>{
       'username': instance.username,
       'full_name': instance.fullName,
+      'website': instance.website,
       'avatar_url': instance.avatarUrl,
       'timezone': instance.timezone,
     };

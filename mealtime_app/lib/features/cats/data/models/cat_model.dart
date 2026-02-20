@@ -82,6 +82,9 @@ class CatModel {
       _$CatModelFromJson(json);
   Map<String, dynamic> toJson() => _$CatModelToJson(this);
 
+  /// Data sentinel quando API/JSON não informa nascimento (evita DateTime.now()).
+  static final DateTime _unknownBirthDate = DateTime(1970, 1, 1);
+
   factory CatModel.fromEntity(Cat cat) {
     return CatModel(
       id: cat.id,
@@ -90,7 +93,7 @@ class CatModel {
       weight: cat.currentWeight,
       photoUrl: cat.imageUrl,
       householdId: cat.homeId,
-      ownerId: cat.ownerId ?? '',  // ✅ NOVO
+      ownerId: cat.ownerId?.isNotEmpty == true ? cat.ownerId! : '',
       portionSize: cat.portionSize,  // ✅ NOVO
       portionUnit: cat.portionUnit,  // ✅ NOVO
       feedingInterval: cat.feedingInterval,  // ✅ NOVO
@@ -106,9 +109,9 @@ class CatModel {
       id: id,
       name: name,
       breed: null,  // Não está na API atual
-      birthDate: birthDate != null
+      birthDate: birthDate != null && birthDate!.isNotEmpty
           ? DateTime.parse(birthDate!)
-          : DateTime.now(),
+          : _unknownBirthDate,
       gender: null,  // Não está na API atual
       color: null,  // Não está na API atual
       description: notes,
@@ -116,7 +119,7 @@ class CatModel {
       currentWeight: weight,
       targetWeight: null,  // Não está na API atual
       homeId: householdId,
-      ownerId: ownerId,  // ✅ NOVO
+      ownerId: ownerId.isEmpty ? null : ownerId,
       portionSize: portionSize,  // ✅ NOVO
       portionUnit: portionUnit,  // ✅ NOVO
       feedingInterval: feedingInterval,  // ✅ NOVO

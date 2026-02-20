@@ -1,0 +1,15 @@
+{
+  "version": 3,
+  "skills": {
+    "flutter-expert": {
+      "source": "rmyndharis/antigravity-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/rmyndharis/antigravity-skills.git",
+      "skillPath": "skills/flutter-expert/SKILL.md",
+      "skillFolderHash": "6a0c3cd23c7b848e7e4d791aad1478d3917cd991",
+      "installedAt": "2026-02-19T22:24:07.310Z",
+      "updatedAt": "2026-02-19T22:24:07.310Z"
+    }
+  },
+  "dismissed": {}
+}

@@ -7,7 +7,7 @@ import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
-import 'package:mealtime_app/features/cats/presentation/widgets/cat_card.dart';
+import 'package:mealtime_app/features/cats/presentation/widgets/expressive_cat_card.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
@@ -23,7 +23,7 @@ class CatsListPage extends StatefulWidget {
 }
 
 class _CatsListPageState extends State<CatsListPage> {
-  CatsState? _lastState;
+  bool _requestedLoadFromCatLoaded = false;
 
   @override
   void initState() {
@@ -31,10 +31,8 @@ class _CatsListPageState extends State<CatsListPage> {
     context.read<CatsBloc>().add(const LoadCats());
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text(context.l10n.cats_title),
@@ -45,6 +43,7 @@ class _CatsListPageState extends State<CatsListPage> {
               context.read<CatsBloc>().add(const RefreshCats());
             },
             icon: const Icon(Icons.refresh),
+            tooltip: context.l10n.common_refresh,
           ),
         ],
       ),
@@ -71,34 +70,26 @@ class _CatsListPageState extends State<CatsListPage> {
                 backgroundColor: Theme.of(context).colorScheme.primary,
               ),
             );
+          } else if (state is CatLoaded) {
+            final route = ModalRoute.of(context);
+            if (route?.isCurrent == true && !_requestedLoadFromCatLoaded) {
+              _requestedLoadFromCatLoaded = true;
+              context.read<CatsBloc>().add(const LoadCats());
+            }
+          } else if (state is CatsLoaded) {
+            _requestedLoadFromCatLoaded = false;
           }
         },
         builder: (context, state) {
-          // Se o estado é CatLoaded, verifica se precisa recarregar
-          final route = ModalRoute.of(context);
           if (state is CatLoaded) {
-            // Se a rota está ativa (estamos na página de lista), recarrega
-            if (route?.isCurrent ?? false) {
-              // Marca que já processamos este estado
-              if (_lastState != state) {
-                _lastState = state;
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted && context.read<CatsBloc>().state is CatLoaded) {
-                    context.read<CatsBloc>().add(const LoadCats());
-                  }
-                });
-              }
-              // Mostra loading enquanto recarrega
+            final route = ModalRoute.of(context);
+            if (route?.isCurrent == true) {
               return const LoadingWidget();
             }
-            // Se a rota não está ativa (estamos na página de detalhes), não faz nada
-            // e não mostra nada (retorna vazio - não deveria acontecer mas é seguro)
             return const SizedBox.shrink();
           } else if (state is CatsLoading) {
-            _lastState = state;
             return const LoadingWidget();
           } else if (state is CatsError) {
-            _lastState = state;
             return CustomErrorWidget(
               message: state.failure.message,
               onRetry: () {
@@ -107,27 +98,25 @@ class _CatsListPageState extends State<CatsListPage> {
               },
             );
           } else if (state is CatsLoaded) {
-            _lastState = state;
             if (state.cats.isEmpty) {
               return _buildEmptyState();
             }
             return _buildCatsList(state.cats);
           } else if (state is CatOperationInProgress) {
-            _lastState = state;
             return Stack(
               children: [
                 _buildCatsList(state.cats),
                 Container(
                   color: const Color.fromRGBO(0, 0, 0, 0.3),
                   child: Center(
-                      child: Card(
-                        child: Padding(
-                          padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Material3LoadingIndicator(size: 32.0),
-                              SizedBox(height: M3SpacingToken.space16.value),
+                    child: Card(
+                      child: Padding(
+                        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Material3LoadingIndicator(size: 32.0),
+                            SizedBox(height: M3SpacingToken.space16.value),
                             Text(state.operation),
                           ],
                         ),
@@ -138,7 +127,6 @@ class _CatsListPageState extends State<CatsListPage> {
               ],
             );
           }
-          _lastState = state;
           return const LoadingWidget();
         },
       ),
@@ -180,7 +168,7 @@ class _CatsListPageState extends State<CatsListPage> {
             index: index,
             child: Padding(
               padding: EdgeInsets.only(bottom: M3SpacingToken.space12.value),
-              child: CatCard(
+              child: ExpressiveCatCard(
                 cat: cat,
                 onTap: () {
                   context.push('${AppRouter.catDetail}/${cat.id}');

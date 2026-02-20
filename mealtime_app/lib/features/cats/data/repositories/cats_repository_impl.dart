@@ -219,9 +219,8 @@ class CatsRepositoryImpl implements CatsRepository {
         // 3. Tentar deletar na API
         try {
           await remoteDataSource.deleteCat(catId);
-          // Se sucesso, remover do cache local
-          // O datasource já marca como deletado, então podemos limpar
-          await localDataSource.clearCache();
+          // Sucesso remoto: o gato já foi marcado como inativo/deletado
+          // localmente em cacheCat(deletedCat); não limpar cache global.
           return const Right(null);
         } catch (e) {
           // 4. Se falhar, adicionar à fila de sincronização

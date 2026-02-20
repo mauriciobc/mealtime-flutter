@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:m3e_collection/m3e_collection.dart';
 
 class AvatarWidget extends StatefulWidget {
   final String? imageUrl;
-  final Function(String) onUpload;
+  final Function(String) onImagePicked;
   final double size;
   final bool showEditButton;
 
   const AvatarWidget({
     super.key,
     this.imageUrl,
-    required this.onUpload,
+    required this.onImagePicked,
     this.size = 100,
     this.showEditButton = true,
   });
@@ -23,8 +22,6 @@ class AvatarWidget extends StatefulWidget {
 }
 
 class _AvatarWidgetState extends State<AvatarWidget> {
-  bool _isLoading = false;
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -56,14 +53,12 @@ class _AvatarWidgetState extends State<AvatarWidget> {
                   ),
                 ),
                 child: IconButtonM3E(
-                  icon: _isLoading
-                      ? Material3LoadingIndicator(size: 16.0)
-                      : Icon(
-                          Icons.camera_alt,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                  onPressed: _isLoading ? null : _pickImage,
+                  icon: Icon(
+                    Icons.camera_alt,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  onPressed: _pickImage,
                 ),
               ),
             ),
@@ -106,36 +101,6 @@ class _AvatarWidgetState extends State<AvatarWidget> {
 
     if (imageFile == null) return;
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // Simular upload - em uma implementação real, você chamaria o data source
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Por enquanto, vamos simular uma URL
-      final mockUrl = 'https://via.placeholder.com/300x300?text=Avatar';
-      widget.onUpload(mockUrl);
-    } catch (error, stackTrace) {
-      // Log completo para debugging
-      debugPrint('Avatar upload error: $error');
-      debugPrint('Stack trace: $stackTrace');
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Erro ao fazer upload. Tente novamente.'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    widget.onImagePicked(imageFile.path);
   }
 }

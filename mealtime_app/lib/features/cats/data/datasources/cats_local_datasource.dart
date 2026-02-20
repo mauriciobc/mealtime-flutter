@@ -57,7 +57,7 @@ class CatsLocalDataSourceImpl implements CatsLocalDataSource {
       cat,
       syncedAt: DateTime.now(),
       version: 1,
-      isDeleted: false,
+      isDeleted: !cat.isActive,
     );
     // Usar insertOnConflictUpdate com companion
     await database.into(database.cats).insertOnConflictUpdate(companion);

@@ -87,6 +87,17 @@ import 'package:mealtime_app/features/weight/domain/usecases/delete_weight_log.d
 import 'package:mealtime_app/features/weight/domain/usecases/get_goals.dart';
 import 'package:mealtime_app/features/weight/domain/usecases/get_active_goal_by_cat.dart';
 import 'package:mealtime_app/features/weight/domain/usecases/create_goal.dart';
+import 'package:mealtime_app/features/homes/domain/usecases/get_active_home.dart';
+
+// ... (existing imports)
+import 'package:mealtime_app/services/api/profile_api_service.dart';
+import 'package:mealtime_app/features/profile/data/datasources/profile_remote_datasource.dart';
+import 'package:mealtime_app/features/profile/data/datasources/profile_local_datasource.dart';
+import 'package:mealtime_app/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:mealtime_app/features/profile/domain/repositories/profile_repository.dart';
+import 'package:mealtime_app/features/profile/domain/usecases/get_profile.dart';
+import 'package:mealtime_app/features/profile/domain/usecases/update_profile.dart';
+import 'package:mealtime_app/features/profile/domain/usecases/upload_avatar.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart';
 
 final sl = GetIt.instance;
@@ -178,6 +189,9 @@ Future<void> init() async {
   // HomesApiService usa Dio V2 para garantir URL correta /api/v2/households
   // Usa Dio específico da V2 para evitar conflito de baseUrl
   sl.registerLazySingleton(() => HomesApiService(sl<Dio>(instanceName: 'dioV2')));
+  
+  // ProfileApiService usa Dio V2
+  sl.registerLazySingleton(() => ProfileApiService(sl<Dio>(instanceName: 'dioV2')));
 
   // Data Sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -216,6 +230,18 @@ Future<void> init() async {
     ),
   );
 
+  // Profile - Data Sources
+  sl.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(
+      apiService: sl(),
+      dio: sl<Dio>(instanceName: 'dioV2'),
+    ),
+  );
+
+  sl.registerLazySingleton<ProfileLocalDataSource>(
+    () => ProfileLocalDataSourceImpl(database: sl()),
+  );
+
   // Sync Service
   sl.registerLazySingleton<SyncService>(
     () => SyncService(
@@ -243,6 +269,13 @@ Future<void> init() async {
     () => HomesRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()),
   );
 
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
   // Use Cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
@@ -261,6 +294,12 @@ Future<void> init() async {
   sl.registerLazySingleton(() => UpdateHome(sl()));
   sl.registerLazySingleton(() => DeleteHome(sl()));
   sl.registerLazySingleton(() => SetActiveHome(sl()));
+  sl.registerLazySingleton(() => GetActiveHome(sl()));
+
+  // Profile - Use Cases
+  sl.registerLazySingleton(() => GetProfile(sl()));
+  sl.registerLazySingleton(() => UpdateProfile(sl()));
+  sl.registerLazySingleton(() => UploadAvatar(sl()));
 
   // BLoCs
   sl.registerFactory(
@@ -292,6 +331,8 @@ Future<void> init() async {
       setActiveHome: sl(),
     ),
   );
+
+  // Profile: estado via Riverpod (profile_providers), não Bloc.
 
   // FeedingLogs - API Service
   // Usa Dio V2 para garantir URL correta /api/v2/feedings
@@ -363,7 +404,10 @@ Future<void> init() async {
 
   // Statistics - BLoC
   sl.registerFactory(
-    () => StatisticsBloc(getStatistics: sl()),
+    () => StatisticsBloc(
+      getStatistics: sl(),
+      getActiveHome: sl(),
+    ),
   );
 
   // Notification Service

@@ -14,6 +14,9 @@ import 'package:mealtime_app/core/supabase/supabase_config.dart';
 
 part 'profile_providers.g.dart';
 
+/// Feature profile usa apenas Riverpod para estado (não Bloc).
+/// Infraestrutura (Dio, DB) segue via GetIt no core.
+
 // Repository Provider
 @Riverpod(keepAlive: true)
 ProfileRepository profileRepository(Ref ref) {
