@@ -338,7 +338,40 @@ class ExpressiveChartContainer extends StatelessWidget {
           SizedBox(height: M3SpacingToken.space16.value),
           Container(
             constraints: const BoxConstraints(minHeight: 180, maxHeight: 200),
-            child: chart,
+            child: hasData
+                ? chart
+                : _buildNoDataPlaceholder(
+                    context,
+                    containerAccentColor,
+                    theme,
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoDataPlaceholder(
+    BuildContext context,
+    Color accentColor,
+    ThemeData theme,
+  ) {
+    final colorScheme = theme.colorScheme;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.bar_chart_outlined,
+            size: 48,
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+          ),
+          SizedBox(height: M3SpacingToken.space8.value),
+          Text(
+            'No data',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+            ),
           ),
         ],
       ),

@@ -1,6 +1,9 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:m3e_collection/m3e_collection.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
@@ -22,6 +25,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   final _websiteController = TextEditingController();
   String? _avatarUrl;
   bool _isSaving = false;
+  bool _hasPopulatedInitially = false;
 
   @override
   void dispose() {
@@ -90,9 +94,12 @@ class _AccountPageState extends ConsumerState<AccountPage> {
 
     return profileAsync.when(
       data: (profile) {
-        if (profile != null && _usernameController.text.isEmpty) {
+        if (profile != null && !_hasPopulatedInitially) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) _populateFields(profile);
+            if (mounted) {
+              _populateFields(profile);
+              setState(() => _hasPopulatedInitially = true);
+            }
           });
         }
         return _buildBody(context, user, profile, _isSaving);
@@ -123,7 +130,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
 
   Widget _buildBody(
     BuildContext context,
-    dynamic user,
+    User user,
     Profile? profile,
     bool isLoading,
   ) {
@@ -203,7 +210,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
   }
 
-  Widget _buildAccountInfoCard(BuildContext context, dynamic user) {
+  Widget _buildAccountInfoCard(BuildContext context, User user) {
     return Card(
       child: Padding(
         padding: const M3EdgeInsets.all(M3SpacingToken.space16),
@@ -278,7 +285,20 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     String filePath,
   ) async {
     final notifier = ref.read(profileProvider(userId).notifier);
-    final url = await notifier.uploadAvatar(filePath);
+    String? url;
+    try {
+      url = await notifier.uploadAvatar(filePath);
+    } catch (e, st) {
+      developer.log('Avatar upload failed', error: e, stackTrace: st);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.profile_errorUpdating),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
     if (!mounted) return;
     if (url != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -306,8 +326,16 @@ class _AccountPageState extends ConsumerState<AccountPage> {
 
     setState(() => _isSaving = true);
     final notifier = ref.read(profileProvider(userId).notifier);
-    final success = await notifier.updateProfile(updatedProfile);
-    if (mounted) setState(() => _isSaving = false);
+    bool success = false;
+    try {
+      success = await notifier.updateProfile(updatedProfile);
+      if (success) _populateFields(updatedProfile);
+    } catch (e, st) {
+      developer.log('Profile update failed', error: e, stackTrace: st);
+      success = false;
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -319,6 +347,5 @@ class _AccountPageState extends ConsumerState<AccountPage> {
         backgroundColor: success ? null : Theme.of(context).colorScheme.error,
       ),
     );
-    if (success) _populateFields(updatedProfile);
   }
 }

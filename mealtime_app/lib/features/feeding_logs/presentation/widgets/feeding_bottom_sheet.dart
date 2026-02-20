@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/food_type.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_event.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
@@ -23,7 +24,7 @@ class FeedingFormData {
     required this.catId,
     this.portion = 10.0,
     this.status = 'Normal',
-    this.foodType = 'Ração Seca',
+    this.foodType = FoodTypeIds.dryFood,
     this.notes,
   });
 

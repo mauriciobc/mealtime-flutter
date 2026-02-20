@@ -626,21 +626,12 @@ class _UserAvatarButton extends ConsumerWidget {
             ),
           ),
         ),
-        error: (_, _) => Semantics(
-          label: context.l10n.navigation_profile,
-          button: true,
-          child: GestureDetector(
-            onTap: () {
-              context.push(AppRouter.profile);
-            },
-            child: CircleAvatar(
-              radius: 20,
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              child: Icon(
-                Icons.person,
-                color: Theme.of(context).colorScheme.onSecondary,
-              ),
-            ),
+        error: (_, _) => CircleAvatar(
+          radius: 20,
+          backgroundColor: Theme.of(context).colorScheme.secondary,
+          child: Icon(
+            Icons.person,
+            color: Theme.of(context).colorScheme.onSecondary,
           ),
         ),
       ),

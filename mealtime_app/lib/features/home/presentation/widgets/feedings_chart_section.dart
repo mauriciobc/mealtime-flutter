@@ -72,7 +72,7 @@ class FeedingsChartSection extends StatelessWidget {
                       ),
                     ),
                     child: !chartData.isEmpty
-                        ? _ChartWithErrorHandling(chartData: chartData)
+                        ? _ChartWidget(chartData: chartData)
                         : const _EmptyChart(),
                   ),
                 ],
@@ -167,20 +167,6 @@ class _ChartDataResult {
   bool get isEmpty =>
       (stackedData == null || stackedData!.isEmpty) &&
       (barData == null || barData!.isEmpty);
-}
-
-class _ChartWithErrorHandling extends StatelessWidget {
-  const _ChartWithErrorHandling({required this.chartData});
-  final _ChartDataResult chartData;
-
-  @override
-  Widget build(BuildContext context) {
-    try {
-      return _ChartWidget(chartData: chartData);
-    } catch (_) {
-      return const _EmptyChart();
-    }
-  }
 }
 
 class _ChartWidget extends StatelessWidget {

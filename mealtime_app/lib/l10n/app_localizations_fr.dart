@@ -392,6 +392,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get home_food_homemade => 'Comida Caseira';
 
   @override
+  String get home_food_sachet => 'Sachê';
+
+  @override
+  String get home_food_treat => 'Petisco';
+
+  @override
   String get home_food_not_specified => 'Alimento não especificado';
 
   @override
@@ -460,11 +466,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String home_fed_by_user(String name) {
-    return 'Alimentado por $name';
-  }
-
-  @override
   String get home_no_feeding_recorded => 'Nenhuma alimentação registrada';
 
   @override
@@ -477,6 +478,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String home_cat_weight(String weight) {
     return '${weight}kg';
   }
+
+  @override
+  String get home_cat_weight_unknown => 'Desconhecido';
 
   @override
   String get home_no_cats_register_first =>

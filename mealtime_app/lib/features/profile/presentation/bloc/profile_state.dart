@@ -10,15 +10,28 @@ abstract class ProfileState extends Equatable {
 
 class ProfileInitial extends ProfileState {}
 
-class ProfileLoading extends ProfileState {}
+class ProfileLoading extends ProfileState {
+  /// Temporary avatar URL from a recent upload, until reloaded profile has it.
+  final String? tempAvatarUrl;
+
+  const ProfileLoading({this.tempAvatarUrl});
+
+  @override
+  List<Object?> get props => [tempAvatarUrl];
+}
 
 class ProfileLoaded extends ProfileState {
   final Profile profile;
+  /// Prefer this over profile.avatarUrl until the persisted profile has the avatar.
+  final String? tempAvatarUrl;
 
-  const ProfileLoaded(this.profile);
+  const ProfileLoaded(this.profile, {this.tempAvatarUrl});
+
+  /// Use this in UI: tempAvatarUrl when present, otherwise profile.avatarUrl.
+  String? get effectiveAvatarUrl => tempAvatarUrl ?? profile.avatarUrl;
 
   @override
-  List<Object?> get props => [profile];
+  List<Object?> get props => [profile, tempAvatarUrl];
 }
 
 class ProfileError extends ProfileState {
@@ -32,11 +45,16 @@ class ProfileError extends ProfileState {
 
 class ProfileOperationInProgress extends ProfileState {
   final Profile? lastProfile;
+  /// Uploaded avatar URL when lastProfile is null (e.g. right after upload).
+  final String? tempAvatarUrl;
 
-  const ProfileOperationInProgress(this.lastProfile);
+  const ProfileOperationInProgress(this.lastProfile, {this.tempAvatarUrl});
+
+  /// Use this in UI: tempAvatarUrl when present, otherwise lastProfile?.avatarUrl.
+  String? get effectiveAvatarUrl => tempAvatarUrl ?? lastProfile?.avatarUrl;
 
   @override
-  List<Object?> get props => [lastProfile];
+  List<Object?> get props => [lastProfile, tempAvatarUrl];
 }
 
 class ProfileOperationSuccess extends ProfileState {

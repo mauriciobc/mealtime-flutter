@@ -136,6 +136,8 @@
   "home_food_dry": "Dry Food",
   "home_food_wet": "Wet Food",
   "home_food_homemade": "Homemade Food",
+  "home_food_sachet": "Sachet",
+  "home_food_treat": "Treat",
   "home_fed_by_you": "You",
   "home_fed_by_other": "Other user",
   "home_fed_by": "Fed by {name}",
@@ -171,12 +173,6 @@
       "foodType": { "type": "String" }
     }
   },
-  "home_fed_by_user": "Fed by {name}",
-  "@home_fed_by_user": {
-    "placeholders": {
-      "name": { "type": "String" }
-    }
-  },
   "home_no_feeding_recorded": "No feeding recorded",
   "home_cat_name_not_found": "Name not found",
   "home_my_cats": "My Cats",
@@ -186,6 +182,7 @@
       "weight": { "type": "String" }
     }
   },
+  "home_cat_weight_unknown": "Unknown",
   "home_no_cats_register_first": "No cats registered. Register a cat first.",
   "home_register_feeding": "Register Feeding",
   "auth_welcomeBack": "Welcome back!",

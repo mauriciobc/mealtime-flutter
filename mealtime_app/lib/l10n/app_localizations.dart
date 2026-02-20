@@ -856,6 +856,18 @@ abstract class AppLocalizations {
   /// **'Comida Caseira'**
   String get home_food_homemade;
 
+  /// No description provided for @home_food_sachet.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sachê'**
+  String get home_food_sachet;
+
+  /// No description provided for @home_food_treat.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Petisco'**
+  String get home_food_treat;
+
   /// No description provided for @home_food_not_specified.
   ///
   /// In pt_BR, this message translates to:
@@ -982,12 +994,6 @@ abstract class AppLocalizations {
   /// **'{amount}g de {foodType}'**
   String home_amount_food_type(String amount, String foodType);
 
-  /// No description provided for @home_fed_by_user.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Alimentado por {name}'**
-  String home_fed_by_user(String name);
-
   /// No description provided for @home_no_feeding_recorded.
   ///
   /// In pt_BR, this message translates to:
@@ -1011,6 +1017,12 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'{weight}kg'**
   String home_cat_weight(String weight);
+
+  /// No description provided for @home_cat_weight_unknown.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Desconhecido'**
+  String get home_cat_weight_unknown;
 
   /// No description provided for @home_no_cats_register_first.
   ///

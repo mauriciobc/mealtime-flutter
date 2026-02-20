@@ -104,7 +104,7 @@ class M3ExpressiveColors {
       background: scheme.surface,
       onBackground: scheme.onSurface,
       inverseSurface: scheme.inverseSurface,
-      inverseOnSurface: scheme.inverseSurface.withValues(alpha: 0.87),
+      inverseOnSurface: scheme.onInverseSurface.withValues(alpha: 0.87),
       inversePrimary: scheme.inversePrimary,
       surfaceContainerHighest: scheme.surfaceContainerHighest,
       surfaceContainerHigh: scheme.surfaceContainerHigh,
@@ -356,8 +356,13 @@ class M3ExpressiveElevation {
     this.level5 = 5.0,
   });
 
-  static M3ExpressiveElevation get none =>
-      const M3ExpressiveElevation(level1: 0);
+  static M3ExpressiveElevation get none => const M3ExpressiveElevation(
+    level1: 0,
+    level2: 0,
+    level3: 0,
+    level4: 0,
+    level5: 0,
+  );
 
   static M3ExpressiveElevation get subtle => const M3ExpressiveElevation(
     level1: 1.0,

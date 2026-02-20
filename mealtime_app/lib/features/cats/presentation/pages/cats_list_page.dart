@@ -50,6 +50,7 @@ class _CatsListPageState extends State<CatsListPage> {
       body: BlocConsumer<CatsBloc, CatsState>(
         listener: (context, state) {
           if (state is CatsError) {
+            _requestedLoadFromCatLoaded = false;
             HapticsService.error();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

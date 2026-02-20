@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/food_type.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/widgets/feeding_bottom_sheet.dart';
 
 class FeedingFormFields extends StatelessWidget {
@@ -19,12 +20,8 @@ class FeedingFormFields extends StatelessWidget {
     'Exigente',
   ];
 
-  static const List<String> foodTypeOptions = [
-    'Ração Seca',
-    'Ração Úmida',
-    'Sachê',
-    'Petisco',
-  ];
+  /// Valores são identificadores de domínio (dry_food, etc.); rótulos vêm da l10n.
+  static List<String> get foodTypeIds => FoodTypeIds.all;
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +111,7 @@ class FeedingFormFields extends StatelessWidget {
 
   Widget _buildFoodTypeField(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: data.foodType,
+      value: normalizeToFoodTypeId(data.foodType) ?? FoodTypeIds.dryFood,
       decoration: const InputDecoration(
         labelText: 'Tipo',
         border: OutlineInputBorder(),
@@ -124,11 +121,11 @@ class FeedingFormFields extends StatelessWidget {
           vertical: 8,
         ),
       ),
-      items: foodTypeOptions.map((type) {
-        return DropdownMenuItem(
-          value: type,
+      items: foodTypeIds.map((id) {
+        return DropdownMenuItem<String>(
+          value: id,
           child: Text(
-            type,
+            localizedFoodType(context, id) ?? id,
             style: const TextStyle(fontSize: 13),
             overflow: TextOverflow.ellipsis,
           ),

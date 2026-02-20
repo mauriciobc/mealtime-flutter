@@ -48,7 +48,24 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
     // Se não houver householdId, tenta obter o ativo
     if (householdId == null) {
       final result = await getActiveHome(NoParams());
-      householdId = result.fold((_) => null, (home) => home?.id);
+      final ok = result.fold<bool>(
+        (failure) {
+          debugPrint(
+            '[StatisticsBloc] getActiveHome falhou: ${failure.message}',
+          );
+          emit(StatisticsError(failure));
+          return false;
+        },
+        (home) {
+          householdId = home?.id;
+          debugPrint(
+            '[StatisticsBloc] getActiveHome ok: '
+            'householdId=${householdId ?? "nenhum"}',
+          );
+          return true;
+        },
+      );
+      if (!ok) return;
     }
 
     // Atualizar filtros atuais

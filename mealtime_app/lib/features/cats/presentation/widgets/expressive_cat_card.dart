@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:material_design/material_design.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
@@ -321,7 +322,12 @@ class _ExpressiveCatCardState extends State<ExpressiveCatCard>
               ),
               SizedBox(width: M3SpacingToken.space8.value),
               Text(
-                '${widget.cat.currentWeight!.toStringAsFixed(1)} kg',
+                context.l10n.home_cat_weight(
+                  NumberFormat(
+                    '0.0',
+                    Localizations.localeOf(context).toString(),
+                  ).format(widget.cat.currentWeight!),
+                ),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colorScheme.onSurface,
@@ -370,13 +376,17 @@ class _ExpressiveCatCardState extends State<ExpressiveCatCard>
           ),
         ),
       ],
-      child: Container(
-        padding: const M3EdgeInsets.all(M3SpacingToken.space8),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          shape: BoxShape.circle,
+      child: Semantics(
+        label: 'More options',
+        button: true,
+        child: Container(
+          padding: const M3EdgeInsets.all(M3SpacingToken.space8),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
         ),
-        child: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
       ),
     );
   }

@@ -20,11 +20,11 @@ class MyCatsSection extends StatelessWidget {
       buildWhen: (previous, current) {
         if (previous.runtimeType != current.runtimeType) return true;
         if (previous is CatsLoaded && current is CatsLoaded) {
-          final prevIds = previous.cats.take(3).map((e) => e.id).toList();
-          final currIds = current.cats.take(3).map((e) => e.id).toList();
-          if (prevIds.length != currIds.length) return true;
-          for (int i = 0; i < prevIds.length; i++) {
-            if (prevIds[i] != currIds[i]) return true;
+          final prevCats = previous.cats.take(3).toList();
+          final currCats = current.cats.take(3).toList();
+          if (prevCats.length != currCats.length) return true;
+          for (int i = 0; i < prevCats.length; i++) {
+            if (prevCats[i] != currCats[i]) return true;
           }
         }
         return false;
@@ -117,7 +117,9 @@ class _CatItem extends StatelessWidget {
                 ),
                 Text(
                   context.l10n.home_cat_weight(
-                    cat.currentWeight?.toStringAsFixed(1) ?? '4.5',
+                    cat.currentWeight != null
+                        ? cat.currentWeight!.toStringAsFixed(1)
+                        : context.l10n.home_cat_weight_unknown,
                   ),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,

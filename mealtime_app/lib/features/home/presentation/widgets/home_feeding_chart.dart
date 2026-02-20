@@ -24,7 +24,7 @@ class HomeFeedingChart extends StatelessWidget {
       return _buildEmptyState(context);
     }
 
-    final chartData = _prepareChartData();
+    final chartData = _prepareChartData(context);
 
     if (chartData.isEmpty) {
       return _buildEmptyState(context);
@@ -173,14 +173,16 @@ class HomeFeedingChart extends StatelessWidget {
     );
   }
 
-  List<BarChartData> _prepareChartData() {
+  List<BarChartData> _prepareChartData(BuildContext context) {
     final now = DateTime.now();
     final List<BarChartData> chartData = [];
+    final locale = Localizations.localeOf(context).toString();
 
     for (int i = 6; i >= 0; i--) {
       final date = now.subtract(Duration(days: i));
       final dateKey = DateFormat('yyyy-MM-dd').format(date);
-      final dayLabel = DateFormat('E', 'pt_BR').format(date).substring(0, 3);
+      final dayLabel =
+          DateFormat('E', locale).format(date).substring(0, 3);
 
       final dayFeedings = feedingLogs.where((log) {
         final logDateKey = DateFormat('yyyy-MM-dd').format(log.fedAt);

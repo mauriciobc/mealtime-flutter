@@ -123,12 +123,30 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
 
   @override
   Future<domain.Profile?> getCachedProfile(String idOrUsername) async {
-    final query = database.select(database.profiles)
-      ..where((p) => p.id.equals(idOrUsername) | p.username.equals(idOrUsername));
-    final profileData = await query.getSingleOrNull();
-    
+    // Primeiro tenta por ID (único); getSingleOrNull é seguro aqui.
+    final byId = database.select(database.profiles)
+      ..where((p) => p.id.equals(idOrUsername));
+    final idHit = await byId.getSingleOrNull();
+    if (idHit != null) {
+      return domain.Profile(
+        id: idHit.id,
+        username: idHit.username,
+        fullName: idHit.fullName,
+        email: idHit.email,
+        website: idHit.website,
+        avatarUrl: idHit.avatarUrl,
+        timezone: idHit.timezone,
+        createdAt: idHit.createdAt,
+        updatedAt: idHit.updatedAt,
+      );
+    }
+    // Fallback: busca por username; limit 1 evita exceção por múltiplos matches.
+    final byUsername = database.select(database.profiles)
+      ..where((p) => p.username.equals(idOrUsername))
+      ..limit(1);
+    final usernameResults = await byUsername.get();
+    final profileData = usernameResults.isNotEmpty ? usernameResults.first : null;
     if (profileData == null) return null;
-    
     return domain.Profile(
       id: profileData.id,
       username: profileData.username,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/food_type.dart';
 import 'package:mealtime_app/features/statistics/domain/entities/statistics_data.dart';
 
 /// Gráfico de distribuição por gato usando gráfico de pizza (pie chart)
@@ -133,9 +134,13 @@ class CatDistributionChart extends StatelessWidget {
                 final index = entry.key;
                 final dataEntry = entry.value;
                 final consumption = dataEntry.key;
-                // Criar label com gato e tipo de comida
-                final label = consumption.foodType != null
-                    ? '${consumption.catName} - ${consumption.foodType}'
+                // Criar label com gato e tipo de comida (localizado)
+                final foodLabel = consumption.foodType != null
+                    ? (localizedFoodType(context, consumption.foodType)
+                        ?? consumption.foodType)
+                    : null;
+                final label = foodLabel != null
+                    ? '${consumption.catName} - $foodLabel'
                     : consumption.catName;
                 return Row(
                   mainAxisSize: MainAxisSize.min,

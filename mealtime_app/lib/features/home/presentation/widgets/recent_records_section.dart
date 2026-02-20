@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
@@ -8,6 +9,7 @@ import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/food_type.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
 import 'package:mealtime_app/features/home/presentation/widgets/cat_avatar.dart';
@@ -107,7 +109,7 @@ class _RecentRecordItem extends StatelessWidget {
           cat = catsState.getCatById(feeding.catId);
         }
 
-        final foodTypeText = _translateFoodType(context, feeding.foodType);
+        final foodTypeText = localizedFoodType(context, feeding.foodType);
         final notSpecified = context.l10n.home_food_not_specified;
         final amountText = feeding.amount != null
             ? context.l10n.home_amount_food_type(
@@ -160,7 +162,7 @@ class _RecentRecordItem extends StatelessWidget {
                 ),
               ),
               Text(
-                _formatTime(feeding.fedAt),
+                _formatTime(context, feeding.fedAt),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -172,20 +174,6 @@ class _RecentRecordItem extends StatelessWidget {
     );
   }
 
-  String? _translateFoodType(BuildContext context, String? foodType) {
-    if (foodType == null) return null;
-    switch (foodType) {
-      case 'Ração Seca':
-        return context.l10n.home_food_dry;
-      case 'Ração Úmida':
-        return context.l10n.home_food_wet;
-      case 'Comida Caseira':
-        return context.l10n.home_food_homemade;
-      default:
-        return foodType;
-    }
-  }
-
-  String _formatTime(DateTime dt) =>
-      '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  String _formatTime(BuildContext context, DateTime dt) =>
+      DateFormat.jm(Localizations.localeOf(context).toString()).format(dt);
 }

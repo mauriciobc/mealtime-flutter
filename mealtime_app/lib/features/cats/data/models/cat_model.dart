@@ -110,7 +110,7 @@ class CatModel {
       name: name,
       breed: null,  // Não está na API atual
       birthDate: birthDate != null && birthDate!.isNotEmpty
-          ? DateTime.parse(birthDate!)
+          ? (DateTime.tryParse(birthDate!) ?? _unknownBirthDate)
           : _unknownBirthDate,
       gender: null,  // Não está na API atual
       color: null,  // Não está na API atual

@@ -31,7 +31,7 @@ class ExpressiveBottomSheet extends StatefulWidget {
     HapticsService.mediumImpact();
     return showModalBottomSheet<T>(
       context: context,
-      showDragHandle: showDragHandle,
+      showDragHandle: false,
       isDismissible: isDismissible,
       backgroundColor: Colors.transparent,
       builder: (context) => ExpressiveBottomSheet(
@@ -405,7 +405,9 @@ Future<void> showExpressiveConfirmation({
                       confirmText,
                       style: TextStyle(
                         color: confirmColor != null
-                            ? Colors.white
+                            ? (confirmColor!.computeLuminance() > 0.5
+                                ? Colors.black
+                                : Colors.white)
                             : (isDestructive
                                   ? colorScheme.onError
                                   : colorScheme.onPrimary),

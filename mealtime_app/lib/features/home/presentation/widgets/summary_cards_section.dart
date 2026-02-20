@@ -27,17 +27,21 @@ class SummaryCardsSection extends StatelessWidget {
         return BlocBuilder<FeedingLogsBloc, FeedingLogsState>(
           buildWhen: (previous, current) {
             if (previous.runtimeType != current.runtimeType) return true;
-            
+
             final prevLogs = _getFeedingLogsFromState(previous);
             final currLogs = _getFeedingLogsFromState(current);
             if (prevLogs.length != currLogs.length) return true;
-            
+
             if (prevLogs.isNotEmpty && currLogs.isNotEmpty) {
               final prevIds = prevLogs.map((e) => e.id).toSet();
               final currIds = currLogs.map((e) => e.id).toSet();
-              return prevIds != currIds;
+              if (prevIds != currIds) return true;
+              // Compare content so in-place edits (amount, fedAt) trigger rebuild
+              final prevSigs = prevLogs.map(_feedingLogContentSignature).toSet();
+              final currSigs = currLogs.map(_feedingLogContentSignature).toSet();
+              if (prevSigs != currSigs) return true;
             }
-            
+
             return false;
           },
           builder: (context, feedingLogsState) {
@@ -144,6 +148,11 @@ class SummaryCardsSection extends StatelessWidget {
       },
     );
   }
+
+  /// Content signature for a log so buildWhen can detect in-place edits
+  /// (amount or fedAt) that affect Average Portion and Last Feeding Time cards.
+  static String _feedingLogContentSignature(FeedingLog log) =>
+      '${log.id}|${log.amount}|${log.fedAt.millisecondsSinceEpoch}';
 
   // Helper methods copied from HomePage to be self-contained or reused
   List<FeedingLog> _getFeedingLogsFromState(FeedingLogsState state) {

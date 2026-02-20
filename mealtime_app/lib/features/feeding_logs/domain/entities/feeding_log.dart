@@ -10,7 +10,7 @@ class FeedingLog extends Equatable {
   final String catId;
   final String householdId;  // ✅ Alterado de homeId para householdId
   final MealType mealType;  // ✅ Renomeado de type para mealType
-  final String? foodType;  // 'Ração Seca', 'Ração Úmida', 'Sachê', 'Petisco'
+  final String? foodType;  // ids: dry_food, wet_food, sachet, treat, homemade_food
   final double? amount;
   final String? unit;
   final String? notes;

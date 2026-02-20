@@ -26,13 +26,20 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     LoadProfile event,
     Emitter<ProfileState> emit,
   ) async {
-    emit(ProfileLoading());
+    final prev = state;
+    final tempAvatarUrl = prev is ProfileOperationInProgress
+        ? prev.tempAvatarUrl
+        : (prev is ProfileLoading ? prev.tempAvatarUrl : null);
+    emit(ProfileLoading(tempAvatarUrl: tempAvatarUrl));
 
     final result = await getProfile(GetProfileParams(idOrUsername: event.idOrUsername));
 
     result.fold(
       (failure) => emit(ProfileError(_mapFailureToMessage(failure))),
-      (profile) => emit(ProfileLoaded(profile)),
+      (profile) => emit(ProfileLoaded(
+        profile,
+        tempAvatarUrl: profile.avatarUrl != null ? null : tempAvatarUrl,
+      )),
     );
   }
 
@@ -56,13 +63,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ));
 
     result.fold(
-      (failure) {
-        if (currentProfile != null) {
-          emit(ProfileError(_mapFailureToMessage(failure)));
-        } else {
-           emit(ProfileError(_mapFailureToMessage(failure)));
-        }
-      },
+      (failure) => emit(ProfileError(_mapFailureToMessage(failure))),
       (updatedProfile) => emit(
         ProfileOperationSuccess(updatedProfile, 'Perfil atualizado com sucesso!'),
       ),
@@ -100,11 +101,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         if (currentProfile != null) {
           final updatedProfile = currentProfile.copyWith(avatarUrl: url);
           emit(ProfileOperationSuccess(
-            updatedProfile, 
-            'Avatar atualizado com sucesso!'
+            updatedProfile,
+            'Avatar atualizado com sucesso!',
           ));
         } else {
-          // Se nao tinha profile (estranho para upload), dispara load
+          emit(ProfileOperationInProgress(null, tempAvatarUrl: url));
           add(LoadProfile(event.idOrUsername));
         }
       },

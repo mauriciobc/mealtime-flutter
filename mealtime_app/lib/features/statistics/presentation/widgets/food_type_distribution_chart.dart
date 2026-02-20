@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/food_type.dart';
 import 'package:mealtime_app/features/statistics/domain/entities/statistics_data.dart';
 
 /// Gráfico de distribuição por tipo de comida usando gráfico de pizza
@@ -172,7 +173,8 @@ class FoodTypeDistributionChart extends StatelessWidget {
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
-                        '$foodType: ${percentage.toStringAsFixed(1)}%',
+                        '${localizedFoodType(context, foodType) ?? foodType}: '
+                        '${percentage.toStringAsFixed(1)}%',
                         style: theme.textTheme.bodySmall,
                         overflow: TextOverflow.ellipsis,
                       ),

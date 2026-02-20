@@ -9,6 +9,7 @@ import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
+import 'package:mealtime_app/features/feeding_logs/domain/food_type.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_state.dart';
 import 'package:mealtime_app/features/home/presentation/widgets/cat_avatar.dart';
@@ -114,7 +115,7 @@ class _FeedingCard extends StatelessWidget {
         : context.l10n.home_fed_by_other;
 
     final foodType = lastFeeding.foodType;
-    final translatedFoodType = _translateFoodType(context, foodType);
+    final translatedFoodType = localizedFoodType(context, foodType);
     final amountText = lastFeeding.amount != null
         ? context.l10n.home_amount_food_type(
             lastFeeding.amount!.toStringAsFixed(0),
@@ -158,7 +159,7 @@ class _FeedingCard extends StatelessWidget {
                 ),
                 SizedBox(height: M3SpacingToken.space4.value),
                 Text(
-                  context.l10n.home_fed_by_user(fedByText),
+                  context.l10n.home_fed_by(fedByText),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -180,20 +181,6 @@ class _FeedingCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String? _translateFoodType(BuildContext context, String? foodType) {
-    if (foodType == null) return null;
-    switch (foodType) {
-      case 'Ração Seca':
-        return context.l10n.home_food_dry;
-      case 'Ração Úmida':
-        return context.l10n.home_food_wet;
-      case 'Comida Caseira':
-        return context.l10n.home_food_homemade;
-      default:
-        return foodType;
-    }
   }
 
   String _formatTime(DateTime dt) =>

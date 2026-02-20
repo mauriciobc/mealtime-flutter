@@ -26,7 +26,7 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
 
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
-  late Animation<double> _slideAnimation;
+  late Animation<Offset> _offsetAnimation;
   late Animation<double> _scaleAnimation;
 
   @override
@@ -42,10 +42,12 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
-    _slideAnimation = Tween<double>(
-      begin: 30.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _offsetAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.30),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
 
     _scaleAnimation = Tween<double>(
       begin: 0.95,
@@ -97,10 +99,7 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
                 return FadeTransition(
                   opacity: _fadeAnimation,
                   child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: Offset(0, _slideAnimation.value / 100),
-                      end: Offset.zero,
-                    ).animate(_controller),
+                    position: _offsetAnimation,
                     child: ScaleTransition(
                       scale: _scaleAnimation,
                       child: child,
@@ -336,9 +335,7 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
                       _isSignUp ? context.l10n.auth_register : context.l10n.auth_signIn,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: isLoading
-                            ? colorScheme.onSurfaceVariant
-                            : colorScheme.onPrimary,
+                        color: colorScheme.onPrimary,
                       ),
                     ),
             ),

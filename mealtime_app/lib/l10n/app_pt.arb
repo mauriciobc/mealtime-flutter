@@ -136,6 +136,8 @@
   "home_food_dry": "Ração Seca",
   "home_food_wet": "Ração Úmida",
   "home_food_homemade": "Comida Caseira",
+  "home_food_sachet": "Sachê",
+  "home_food_treat": "Petisco",
   "home_fed_by_you": "Você",
   "home_fed_by_other": "Outro usuário",
   "home_fed_by": "Alimentado por {name}",
@@ -171,12 +173,6 @@
       "foodType": { "type": "String" }
     }
   },
-  "home_fed_by_user": "Alimentado por {name}",
-  "@home_fed_by_user": {
-    "placeholders": {
-      "name": { "type": "String" }
-    }
-  },
   "home_no_feeding_recorded": "Nenhuma alimentação registrada",
   "home_cat_name_not_found": "Nome não encontrado",
   "home_my_cats": "Meus Gatos",
@@ -186,6 +182,7 @@
       "weight": { "type": "String" }
     }
   },
+  "home_cat_weight_unknown": "Desconhecido",
   "home_no_cats_register_first": "Nenhum gato cadastrado. Cadastre um gato primeiro.",
   "home_register_feeding": "Registrar Alimentação",
   "auth_welcomeBack": "Bem-vindo de volta!",
