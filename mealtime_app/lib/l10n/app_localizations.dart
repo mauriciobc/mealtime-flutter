@@ -304,6 +304,12 @@ abstract class AppLocalizations {
   /// **'Ações'**
   String get common_actions;
 
+  /// No description provided for @common_moreOptions.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Mais opções'**
+  String get common_moreOptions;
+
   /// No description provided for @navigation_home.
   ///
   /// In pt_BR, this message translates to:

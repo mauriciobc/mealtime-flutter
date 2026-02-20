@@ -52,7 +52,7 @@ class _PeriodFilterDropdown extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return DropdownButtonFormField<PeriodFilter>(
-      value: selectedPeriod,
+      initialValue: selectedPeriod,
       decoration: InputDecoration(
         labelText: 'Período',
         labelStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -113,7 +113,7 @@ class _CatFilterDropdown extends StatelessWidget {
           final theme = Theme.of(context);
           final colorScheme = theme.colorScheme;
           return DropdownButtonFormField<String>(
-            value: selectedCatId,
+            initialValue: selectedCatId,
             decoration: InputDecoration(
               labelText: 'Gato',
               labelStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -178,7 +178,7 @@ class _CatFilterDropdown extends StatelessWidget {
           final theme = Theme.of(context);
           final colorScheme = theme.colorScheme;
           return DropdownButtonFormField<String>(
-            value: selectedCatId,
+            initialValue: selectedCatId,
             decoration: InputDecoration(
               labelText: 'Gato',
               hintText: 'Carregando...',

@@ -9,6 +9,8 @@ import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/core/constants/m3_animation.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
+import 'package:mealtime_app/core/theme/text_theme_extensions.dart';
+import 'package:mealtime_app/shared/widgets/themed_svg.dart';
 
 class ExpressiveLoginPage extends StatefulWidget {
   const ExpressiveLoginPage({super.key});
@@ -151,46 +153,41 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
           width: 100,
           height: 100,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                colorScheme.primaryContainer,
-                colorScheme.primary.withValues(alpha: 0.2),
-              ],
-            ),
+            color: colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: colorScheme.primary.withValues(alpha: 0.2),
+                color: colorScheme.primaryContainer.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
             ],
           ),
-          child: Icon(Icons.pets, size: 56, color: colorScheme.primary),
+          child: ThemedSvg(
+            assetPath: 'assets/images/mealtime-symbol.svg',
+            size: 56,
+            colorSchemeColor: colorScheme.onPrimaryContainer,
+          ),
         ),
         SizedBox(height: M3SpacingToken.space24.value),
         Text(
           'MealTime',
-          style: theme.textTheme.displaySmall?.copyWith(
-            fontWeight: FontWeight.bold,
+          style: theme.textTheme.displayLargeEmphasized?.copyWith(
             color: colorScheme.primary,
-            letterSpacing: -0.5,
           ),
         ),
         SizedBox(height: M3SpacingToken.space8.value),
         Text(
           _isSignUp ? context.l10n.auth_register : context.l10n.auth_welcomeBack,
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: colorScheme.onSurfaceVariant,
+          style: theme.textTheme.headlineMediumEmphasized?.copyWith(
+            color: colorScheme.onSurface,
           ),
         ),
         SizedBox(height: M3SpacingToken.space8.value),
         Text(
           context.l10n.auth_managementDescription,
           style: theme.textTheme.bodyLarge?.copyWith(
-            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+            color: colorScheme.onSurfaceVariant,
           ),
           textAlign: TextAlign.center,
         ),
@@ -205,16 +202,9 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
     return Container(
       padding: const M3EdgeInsets.all(M3SpacingToken.space24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            colorScheme.surfaceContainer,
-            colorScheme.surfaceContainerLow,
-          ],
-        ),
+        color: colorScheme.surfaceContainerHigh,
         borderRadius: M3Shapes.shapeLarge,
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -266,22 +256,23 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
         prefixIcon: Container(
           padding: const M3EdgeInsets.all(M3SpacingToken.space12),
           child: Icon(icon, color: colorScheme.primary, size: 22),
         ),
         filled: true,
-        fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        fillColor: colorScheme.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: M3Shapes.shapeMedium,
           borderSide: BorderSide(
-            color: colorScheme.outline.withValues(alpha: 0.3),
+            color: colorScheme.outlineVariant,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: M3Shapes.shapeMedium,
           borderSide: BorderSide(
-            color: colorScheme.outline.withValues(alpha: 0.2),
+            color: colorScheme.outlineVariant,
           ),
         ),
         focusedBorder: OutlineInputBorder(
@@ -301,7 +292,6 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
 
   Widget _buildSubmitButton(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return BlocBuilder<SimpleAuthBloc, SimpleAuthState>(
       builder: (context, state) {
@@ -310,49 +300,25 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
         return SizedBox(
           width: double.infinity,
           height: 56,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isLoading
-                    ? [colorScheme.outline, colorScheme.outlineVariant]
-                    : [colorScheme.primary, colorScheme.primaryContainer],
+          child: FilledButton(
+            onPressed: isLoading ? null : _handleAuth,
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: M3Shapes.shapeXLarge,
               ),
-              borderRadius: M3Shapes.shapeXLarge,
-              boxShadow: [
-                if (!isLoading)
-                  BoxShadow(
-                    color: colorScheme.primary.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-              ],
             ),
-            child: ElevatedButton(
-              onPressed: isLoading ? null : _handleAuth,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: M3Shapes.shapeXLarge,
-                ),
-              ),
-              child: isLoading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: Material3LoadingIndicator(size: 20),
-                    )
-                  : Text(
-                      _isSignUp ? context.l10n.auth_register : context.l10n.auth_signIn,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onPrimary,
-                      ),
+            child: isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Material3LoadingIndicator(size: 20),
+                  )
+                : Text(
+                    _isSignUp ? context.l10n.auth_register : context.l10n.auth_signIn,
+                    style: theme.textTheme.titleMediumEmphasized?.copyWith(
+                      color: theme.colorScheme.onPrimary,
                     ),
-            ),
+                  ),
           ),
         );
       },
@@ -374,15 +340,14 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
       child: RichText(
         text: TextSpan(
           text: _isSignUp ? context.l10n.auth_alreadyHaveAccount : context.l10n.auth_noAccount,
-          style: theme.textTheme.bodyMedium?.copyWith(
+          style: theme.textTheme.bodyLargeEmphasized?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
           children: [
             TextSpan(
               text: _isSignUp ? context.l10n.auth_signInShort : context.l10n.auth_registerShort,
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodyLargeEmphasized?.copyWith(
                 color: colorScheme.primary,
-                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -398,7 +363,7 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
       },
       child: Text(
         context.l10n.auth_forgotPassword,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        style: Theme.of(context).textTheme.bodyLargeEmphasized?.copyWith(
           color: Theme.of(context).colorScheme.primary,
         ),
       ),

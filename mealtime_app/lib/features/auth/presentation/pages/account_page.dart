@@ -2,12 +2,12 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:m3e_collection/m3e_collection.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
-import 'package:mealtime_app/features/auth/presentation/pages/login_page.dart';
 import 'package:mealtime_app/features/profile/domain/entities/profile.dart';
 import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
 import 'package:mealtime_app/shared/widgets/avatar_widget.dart';
@@ -39,9 +39,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _navigateToLogin() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-    );
+    context.go('/login');
   }
 
   Future<void> _signOut() async {

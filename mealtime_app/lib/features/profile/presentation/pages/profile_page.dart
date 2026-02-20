@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mealtime_app/core/supabase/supabase_config.dart';
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
 import 'package:mealtime_app/core/utils/haptics_service.dart';
@@ -200,7 +201,7 @@ class ProfilePage extends ConsumerWidget {
         try {
           await SupabaseConfig.client.auth.signOut();
           if (context.mounted) {
-            Navigator.of(context).pushReplacementNamed('/login');
+            context.go('/login');
           }
         } catch (error, stackTrace) {
           developer.log(

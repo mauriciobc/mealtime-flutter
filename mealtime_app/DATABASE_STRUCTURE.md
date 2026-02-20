@@ -142,6 +142,7 @@ Esta tabela é referenciada por:
 | `feeding_interval` | INTEGER | ✅ | Intervalo entre alimentações (horas) |
 | `notes` | TEXT | ✅ | Notas sobre o gato |
 | `restrictions` | TEXT | ✅ | Restrições alimentares |
+| `gender` | TEXT | ✅ | Sexo do gato (ex: "male", "female") — ver [Alterações de schema](#-alterações-de-schema) |
 
 ---
 
@@ -527,6 +528,32 @@ Future<User> getCurrentUser({bool forceRefresh = false}) async {
 
 ---
 
+## 📋 Alterações de schema
+
+### Adição da coluna `gender` na tabela `cats`
+
+**Data:** 2026-02-20
+
+**Objetivo:** Permitir armazenar o sexo do gato (ex.: macho/fêmea) para uso na UI e em relatórios.
+
+**Alteração:**
+
+- **Tabela:** `cats`
+- **Coluna:** `gender`
+- **Tipo:** `TEXT` (nullable)
+- **Descrição:** Sexo do gato. Valores típicos: `"male"`, `"female"` ou `null` quando não informado.
+
+**Exemplo de migração SQL (Supabase/PostgreSQL):**
+
+```sql
+ALTER TABLE public.cats
+  ADD COLUMN IF NOT EXISTS gender TEXT;
+```
+
+**Impacto no app:** O app já utiliza o campo no modelo local (Drift); a coluna no Supabase deve existir para sincronização. A UI usa o valor para cor/ícone por gênero (ex.: `cats_genderMale`, `cats_genderFemale` na l10n).
+
+---
+
 ## 📝 Migrações e Versionamento
 
 ### Tabela: `_prisma_migrations`
@@ -565,6 +592,6 @@ Alternativa de controle de migrações:
 ---
 
 **Documentação gerada via Cursor AI + Supabase MCP**  
-*Última atualização: 12/10/2025*
+*Última atualização: 20/02/2026*
 
 

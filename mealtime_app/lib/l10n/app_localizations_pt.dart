@@ -108,6 +108,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get common_actions => 'Ações';
 
   @override
+  String get common_moreOptions => 'Mais opções';
+
+  @override
   String get navigation_home => 'Início';
 
   @override
@@ -613,7 +616,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get notifications_refresh => 'Atualizar';
 
   @override
-  String get notifications_delete => 'Deletar notificação';
+  String get notifications_delete => 'Excluir notificação';
 
   @override
   String get notifications_userNotAuthenticated => 'Usuário não autenticado';
@@ -735,6 +738,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get common_actions => 'Ações';
+
+  @override
+  String get common_moreOptions => 'Mais opções';
 
   @override
   String get navigation_home => 'Início';

@@ -108,6 +108,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_actions => 'Actions';
 
   @override
+  String get common_moreOptions => 'More options';
+
+  @override
   String get navigation_home => 'Home';
 
   @override
@@ -734,6 +737,9 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get common_actions => 'Actions';
+
+  @override
+  String get common_moreOptions => 'More options';
 
   @override
   String get navigation_home => 'Home';
