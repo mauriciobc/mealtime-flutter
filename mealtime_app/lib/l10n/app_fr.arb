@@ -131,6 +131,122 @@
   "error_notFound": "Non trouvé",
   "error_unauthorized": "Non autorisé",
   "error_validation": "Erreur de validation",
-  "error_tryAgain": "Réessayer"
+  "error_tryAgain": "Réessayer",
+  "home_hello": "Bonjour",
+  "home_food_dry": "Nourriture sèche",
+  "home_food_wet": "Nourriture humide",
+  "home_food_homemade": "Nourriture maison",
+  "home_food_sachet": "Sachet",
+  "home_food_treat": "Friandise",
+  "home_food_not_specified": "Aliment non spécifié",
+  "home_fed_by_you": "Vous",
+  "home_fed_by_other": "Autre utilisateur",
+  "home_fed_by": "Nourri par {name}",
+  "@home_fed_by": {
+    "description": "Libellé nourri par",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "home_no_feeding_records": "Aucun enregistrement d'alimentation",
+  "home_last_7_days": "7 derniers jours",
+  "home_register_feeding_chart": "Enregistrez des repas pour voir le graphique des 7 derniers jours",
+  "home_recent_records": "Enregistrements récents",
+  "home_no_recent_records": "Aucun enregistrement récent",
+  "home_see_all_cats": "Voir tous les chats",
+  "home_no_cats_registered": "Aucun chat enregistré",
+  "home_feedings_title": "Repas",
+  "home_last_feeding_title": "Dernier repas",
+  "home_average_portion": "Portion moyenne",
+  "home_today": "Aujourd'hui",
+  "home_total_cats": "Total des chats",
+  "home_last_time": "Dernière fois",
+  "home_active_cats": "Actifs",
+  "home_average_portion_subtitle": "7 derniers jours",
+  "home_last_time_subtitle": "Dernier enregistrement",
+  "home_amount_food_type": "{amount}g de {foodType}",
+  "@home_amount_food_type": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "foodType": {"type": "String"}
+    }
+  },
+  "home_no_feeding_recorded": "Aucun repas enregistré",
+  "home_cat_name_not_found": "Nom non trouvé",
+  "home_my_cats": "Mes chats",
+  "home_cat_weight": "{weight}kg",
+  "@home_cat_weight": {
+    "placeholders": {
+      "weight": {"type": "String"}
+    }
+  },
+  "home_cat_weight_unknown": "Inconnu",
+  "home_no_cats_register_first": "Aucun chat enregistré. Enregistrez un chat d'abord.",
+  "home_register_feeding": "Enregistrer un repas",
+  "auth_welcomeBack": "Bon retour !",
+  "auth_managementDescription": "Gestion de l'alimentation des chats",
+  "auth_passwordPlaceholder": "Mot de passe",
+  "auth_alreadyHaveAccount": "Vous avez déjà un compte ? ",
+  "auth_noAccount": "Vous n'avez pas de compte ? ",
+  "auth_signInShort": "Se connecter",
+  "auth_registerShort": "Créer un compte",
+  "auth_featureInDevelopment": "Fonctionnalité en cours de développement",
+  "auth_registerInDevelopment": "Fonctionnalité d'inscription en développement",
+  "profile_accountInfo": "Informations du compte",
+  "profile_userInfo": "Informations utilisateur",
+  "profile_usernameLabel": "Nom d'utilisateur",
+  "profile_website": "Site web",
+  "profile_updateProfile": "Mettre à jour le profil",
+  "profile_userId": "ID utilisateur",
+  "profile_accountStatus": "État du compte",
+  "profile_verified": "Vérifié",
+  "profile_notVerified": "Non vérifié",
+  "profile_accountCreated": "Compte créé le",
+  "profile_lastAccess": "Dernier accès",
+  "profile_logoutErrorGeneric": "Erreur lors de la déconnexion",
+  "statistics_title": "Statistiques",
+  "statistics_loading": "Chargement des statistiques...",
+  "statistics_errorLoading": "Erreur lors du chargement des statistiques",
+  "statistics_noData": "Aucune donnée disponible",
+  "statistics_noDataPeriod": "Aucun repas enregistré pour la période sélectionnée.",
+  "statistics_chartError": "Erreur lors du rendu du graphique",
+  "notifications_title": "Notifications",
+  "notifications_markedAsRead": "Notification marquée comme lue",
+  "notifications_errorMarkAsRead": "Erreur lors du marquage comme lue : {error}",
+  "@notifications_errorMarkAsRead": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "notifications_allMarkedAsRead": "Toutes les notifications ont été marquées comme lues",
+  "notifications_errorMarkAllAsRead": "Erreur lors du marquage de toutes comme lues : {error}",
+  "@notifications_errorMarkAllAsRead": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "notifications_removed": "Notification supprimée",
+  "notifications_errorRemove": "Erreur lors de la suppression de la notification : {error}",
+  "@notifications_errorRemove": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "notifications_tryAgain": "Réessayer",
+  "notifications_markAllAsRead": "Tout marquer comme lu",
+  "notifications_empty": "Aucune notification",
+  "notifications_emptySubtitle": "Vous êtes à jour !",
+  "notifications_refresh": "Actualiser",
+  "notifications_delete": "Supprimer la notification",
+  "notifications_userNotAuthenticated": "Utilisateur non authentifié",
+  "notifications_errorLoading": "Erreur lors du chargement des notifications : {error}",
+  "@notifications_errorLoading": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "auth_pleaseEnterEmail": "Veuillez entrer votre email",
+  "auth_pleaseEnterPassword": "Veuillez entrer votre mot de passe",
+  "auth_pleaseEnterFullName": "Veuillez entrer votre nom complet"
 }
 

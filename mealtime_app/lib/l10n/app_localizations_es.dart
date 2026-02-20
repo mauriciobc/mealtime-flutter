@@ -378,31 +378,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get error_tryAgain => 'Intentar de Nuevo';
 
   @override
-  String get home_hello => 'Olá';
+  String get home_hello => 'Hola';
 
   @override
-  String get home_food_dry => 'Ração Seca';
+  String get home_food_dry => 'Comida Seca';
 
   @override
-  String get home_food_wet => 'Ração Úmida';
+  String get home_food_wet => 'Comida Húmeda';
 
   @override
-  String get home_food_homemade => 'Comida Caseira';
+  String get home_food_homemade => 'Comida Casera';
 
   @override
-  String get home_food_sachet => 'Sachê';
+  String get home_food_sachet => 'Sobrecito';
 
   @override
-  String get home_food_treat => 'Petisco';
+  String get home_food_treat => 'Golosina';
 
   @override
-  String get home_food_not_specified => 'Alimento não especificado';
+  String get home_food_not_specified => 'Alimento no especificado';
 
   @override
-  String get home_fed_by_you => 'Você';
+  String get home_fed_by_you => 'Tú';
 
   @override
-  String get home_fed_by_other => 'Outro usuário';
+  String get home_fed_by_other => 'Otro usuario';
 
   @override
   String home_fed_by(String name) {
@@ -410,38 +410,38 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get home_no_feeding_records => 'Nenhum registro de alimentação';
+  String get home_no_feeding_records => 'No hay registros de alimentación';
 
   @override
-  String get home_last_7_days => 'Últimos 7 dias';
+  String get home_last_7_days => 'Últimos 7 días';
 
   @override
   String get home_register_feeding_chart =>
-      'Registre alimentações para ver o gráfico dos últimos 7 dias';
+      'Registra alimentaciones para ver el gráfico de los últimos 7 días';
 
   @override
-  String get home_recent_records => 'Registros Recentes';
+  String get home_recent_records => 'Registros Recientes';
 
   @override
-  String get home_no_recent_records => 'Nenhum registro recente';
+  String get home_no_recent_records => 'No hay registros recientes';
 
   @override
-  String get home_see_all_cats => 'Ver todos os gatos';
+  String get home_see_all_cats => 'Ver todos los gatos';
 
   @override
-  String get home_no_cats_registered => 'Nenhum gato cadastrado';
+  String get home_no_cats_registered => 'No hay gatos registrados';
 
   @override
-  String get home_feedings_title => 'Alimentações';
+  String get home_feedings_title => 'Alimentaciones';
 
   @override
-  String get home_last_feeding_title => 'Última Alimentação';
+  String get home_last_feeding_title => 'Última Alimentación';
 
   @override
-  String get home_average_portion => 'Porção Média';
+  String get home_average_portion => 'Porción Promedio';
 
   @override
-  String get home_today => 'Hoje';
+  String get home_today => 'Hoy';
 
   @override
   String get home_total_cats => 'Total de Gatos';
@@ -450,10 +450,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get home_last_time => 'Última Vez';
 
   @override
-  String get home_active_cats => 'Ativos';
+  String get home_active_cats => 'Activos';
 
   @override
-  String get home_average_portion_subtitle => 'Últimos 7 dias';
+  String get home_average_portion_subtitle => 'Últimos 7 días';
 
   @override
   String get home_last_time_subtitle => 'Último registro';
@@ -464,13 +464,13 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get home_no_feeding_recorded => 'Nenhuma alimentação registrada';
+  String get home_no_feeding_recorded => 'No hay alimentación registrada';
 
   @override
-  String get home_cat_name_not_found => 'Nome não encontrado';
+  String get home_cat_name_not_found => 'Nombre no encontrado';
 
   @override
-  String get home_my_cats => 'Meus Gatos';
+  String get home_my_cats => 'Mis Gatos';
 
   @override
   String home_cat_weight(String weight) {
@@ -478,161 +478,161 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get home_cat_weight_unknown => 'Desconhecido';
+  String get home_cat_weight_unknown => 'Desconocido';
 
   @override
   String get home_no_cats_register_first =>
-      'Nenhum gato cadastrado. Cadastre um gato primeiro.';
+      'No hay gatos registrados. Registra un gato primero.';
 
   @override
-  String get home_register_feeding => 'Registrar Alimentação';
+  String get home_register_feeding => 'Registrar Alimentación';
 
   @override
-  String get auth_welcomeBack => 'Bem-vindo de volta!';
+  String get auth_welcomeBack => '¡Bienvenido de nuevo!';
 
   @override
-  String get auth_managementDescription =>
-      'Gerenciamento de alimentação para gatos';
+  String get auth_managementDescription => 'Gestión de alimentación para gatos';
 
   @override
-  String get auth_passwordPlaceholder => 'Senha';
+  String get auth_passwordPlaceholder => 'Contraseña';
 
   @override
-  String get auth_alreadyHaveAccount => 'Já tem uma conta? ';
+  String get auth_alreadyHaveAccount => '¿Ya tienes una cuenta? ';
 
   @override
-  String get auth_noAccount => 'Não tem uma conta? ';
+  String get auth_noAccount => '¿No tienes una cuenta? ';
 
   @override
-  String get auth_signInShort => 'Entrar';
+  String get auth_signInShort => 'Iniciar sesión';
 
   @override
-  String get auth_registerShort => 'Criar conta';
+  String get auth_registerShort => 'Crear cuenta';
 
   @override
-  String get auth_featureInDevelopment => 'Funcionalidade em desenvolvimento';
+  String get auth_featureInDevelopment => 'Función en desarrollo';
 
   @override
-  String get auth_registerInDevelopment =>
-      'Funcionalidade de cadastro em desenvolvimento';
+  String get auth_registerInDevelopment => 'Función de registro en desarrollo';
 
   @override
-  String get profile_accountInfo => 'Informações da Conta';
+  String get profile_accountInfo => 'Información de la Cuenta';
 
   @override
-  String get profile_userInfo => 'Informações do Usuário';
+  String get profile_userInfo => 'Información del Usuario';
 
   @override
-  String get profile_usernameLabel => 'Nome de usuário';
+  String get profile_usernameLabel => 'Nombre de usuario';
 
   @override
-  String get profile_website => 'Website';
+  String get profile_website => 'Sitio web';
 
   @override
-  String get profile_updateProfile => 'Atualizar Perfil';
+  String get profile_updateProfile => 'Actualizar Perfil';
 
   @override
-  String get profile_userId => 'ID do Usuário';
+  String get profile_userId => 'ID de Usuario';
 
   @override
-  String get profile_accountStatus => 'Status da Conta';
+  String get profile_accountStatus => 'Estado de la Cuenta';
 
   @override
   String get profile_verified => 'Verificado';
 
   @override
-  String get profile_notVerified => 'Não verificado';
+  String get profile_notVerified => 'No verificado';
 
   @override
-  String get profile_accountCreated => 'Conta criada em';
+  String get profile_accountCreated => 'Cuenta creada el';
 
   @override
-  String get profile_lastAccess => 'Último acesso';
+  String get profile_lastAccess => 'Último acceso';
 
   @override
-  String get profile_logoutErrorGeneric => 'Erro ao fazer logout';
+  String get profile_logoutErrorGeneric => 'Error al cerrar sesión';
 
   @override
-  String get statistics_title => 'Estatísticas';
+  String get statistics_title => 'Estadísticas';
 
   @override
-  String get statistics_loading => 'Carregando estatísticas...';
+  String get statistics_loading => 'Cargando estadísticas...';
 
   @override
-  String get statistics_errorLoading => 'Erro ao carregar estatísticas';
+  String get statistics_errorLoading => 'Error al cargar estadísticas';
 
   @override
-  String get statistics_noData => 'Nenhum dado disponível';
+  String get statistics_noData => 'No hay datos disponibles';
 
   @override
   String get statistics_noDataPeriod =>
-      'Não há alimentações registradas no período selecionado.';
+      'No hay alimentaciones registradas en el período seleccionado.';
 
   @override
-  String get statistics_chartError => 'Erro ao renderizar gráfico';
+  String get statistics_chartError => 'Error al renderizar el gráfico';
 
   @override
-  String get notifications_title => 'Notificações';
+  String get notifications_title => 'Notificaciones';
 
   @override
-  String get notifications_markedAsRead => 'Notificação marcada como lida';
+  String get notifications_markedAsRead => 'Notificación marcada como leída';
 
   @override
   String notifications_errorMarkAsRead(String error) {
-    return 'Erro ao marcar como lida: $error';
+    return 'Error al marcar como leída: $error';
   }
 
   @override
   String get notifications_allMarkedAsRead =>
-      'Todas as notificações foram marcadas como lidas';
+      'Todas las notificaciones marcadas como leídas';
 
   @override
   String notifications_errorMarkAllAsRead(String error) {
-    return 'Erro ao marcar todas como lidas: $error';
+    return 'Error al marcar todas como leídas: $error';
   }
 
   @override
-  String get notifications_removed => 'Notificação removida';
+  String get notifications_removed => 'Notificación eliminada';
 
   @override
   String notifications_errorRemove(String error) {
-    return 'Erro ao remover notificação: $error';
+    return 'Error al eliminar notificación: $error';
   }
 
   @override
-  String get notifications_tryAgain => 'Tentar novamente';
+  String get notifications_tryAgain => 'Intentar de nuevo';
 
   @override
-  String get notifications_markAllAsRead => 'Marcar todas como lidas';
+  String get notifications_markAllAsRead => 'Marcar todas como leídas';
 
   @override
-  String get notifications_empty => 'Nenhuma notificação';
+  String get notifications_empty => 'Sin notificaciones';
 
   @override
-  String get notifications_emptySubtitle => 'Você está em dia!';
+  String get notifications_emptySubtitle => '¡Estás al día!';
 
   @override
-  String get notifications_refresh => 'Atualizar';
+  String get notifications_refresh => 'Actualizar';
 
   @override
-  String get notifications_delete => 'Deletar notificação';
+  String get notifications_delete => 'Eliminar notificación';
 
   @override
-  String get notifications_userNotAuthenticated => 'Usuário não autenticado';
+  String get notifications_userNotAuthenticated => 'Usuario no autenticado';
 
   @override
   String notifications_errorLoading(String error) {
-    return 'Erro ao carregar notificações: $error';
+    return 'Error al cargar notificaciones: $error';
   }
 
   @override
-  String get auth_pleaseEnterEmail => 'Por favor, digite seu email';
+  String get auth_pleaseEnterEmail =>
+      'Por favor, ingresa tu correo electrónico';
 
   @override
-  String get auth_pleaseEnterPassword => 'Por favor, digite sua senha';
+  String get auth_pleaseEnterPassword => 'Por favor, ingresa tu contraseña';
 
   @override
-  String get auth_pleaseEnterFullName => 'Por favor, digite seu nome completo';
+  String get auth_pleaseEnterFullName =>
+      'Por favor, ingresa tu nombre completo';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -1007,4 +1007,261 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get error_tryAgain => 'Intentar de Nuevo';
+
+  @override
+  String get home_hello => 'Hola';
+
+  @override
+  String get home_food_dry => 'Comida Seca';
+
+  @override
+  String get home_food_wet => 'Comida Húmeda';
+
+  @override
+  String get home_food_homemade => 'Comida Casera';
+
+  @override
+  String get home_food_sachet => 'Sobrecito';
+
+  @override
+  String get home_food_treat => 'Golosina';
+
+  @override
+  String get home_food_not_specified => 'Alimento no especificado';
+
+  @override
+  String get home_fed_by_you => 'Tú';
+
+  @override
+  String get home_fed_by_other => 'Otro usuario';
+
+  @override
+  String home_fed_by(String name) {
+    return 'Alimentado por $name';
+  }
+
+  @override
+  String get home_no_feeding_records => 'No hay registros de alimentación';
+
+  @override
+  String get home_last_7_days => 'Últimos 7 días';
+
+  @override
+  String get home_register_feeding_chart =>
+      'Registra alimentaciones para ver el gráfico de los últimos 7 días';
+
+  @override
+  String get home_recent_records => 'Registros Recientes';
+
+  @override
+  String get home_no_recent_records => 'No hay registros recientes';
+
+  @override
+  String get home_see_all_cats => 'Ver todos los gatos';
+
+  @override
+  String get home_no_cats_registered => 'No hay gatos registrados';
+
+  @override
+  String get home_feedings_title => 'Alimentaciones';
+
+  @override
+  String get home_last_feeding_title => 'Última Alimentación';
+
+  @override
+  String get home_average_portion => 'Porción Promedio';
+
+  @override
+  String get home_today => 'Hoy';
+
+  @override
+  String get home_total_cats => 'Total de Gatos';
+
+  @override
+  String get home_last_time => 'Última Vez';
+
+  @override
+  String get home_active_cats => 'Activos';
+
+  @override
+  String get home_average_portion_subtitle => 'Últimos 7 días';
+
+  @override
+  String get home_last_time_subtitle => 'Último registro';
+
+  @override
+  String home_amount_food_type(String amount, String foodType) {
+    return '${amount}g de $foodType';
+  }
+
+  @override
+  String get home_no_feeding_recorded => 'No hay alimentación registrada';
+
+  @override
+  String get home_cat_name_not_found => 'Nombre no encontrado';
+
+  @override
+  String get home_my_cats => 'Mis Gatos';
+
+  @override
+  String home_cat_weight(String weight) {
+    return '${weight}kg';
+  }
+
+  @override
+  String get home_cat_weight_unknown => 'Desconocido';
+
+  @override
+  String get home_no_cats_register_first =>
+      'No hay gatos registrados. Registra un gato primero.';
+
+  @override
+  String get home_register_feeding => 'Registrar Alimentación';
+
+  @override
+  String get auth_welcomeBack => '¡Bienvenido de nuevo!';
+
+  @override
+  String get auth_managementDescription => 'Gestión de alimentación para gatos';
+
+  @override
+  String get auth_passwordPlaceholder => 'Contraseña';
+
+  @override
+  String get auth_alreadyHaveAccount => '¿Ya tienes una cuenta? ';
+
+  @override
+  String get auth_noAccount => '¿No tienes una cuenta? ';
+
+  @override
+  String get auth_signInShort => 'Iniciar sesión';
+
+  @override
+  String get auth_registerShort => 'Crear cuenta';
+
+  @override
+  String get auth_featureInDevelopment => 'Función en desarrollo';
+
+  @override
+  String get auth_registerInDevelopment => 'Función de registro en desarrollo';
+
+  @override
+  String get profile_accountInfo => 'Información de la Cuenta';
+
+  @override
+  String get profile_userInfo => 'Información del Usuario';
+
+  @override
+  String get profile_usernameLabel => 'Nombre de usuario';
+
+  @override
+  String get profile_website => 'Sitio web';
+
+  @override
+  String get profile_updateProfile => 'Actualizar Perfil';
+
+  @override
+  String get profile_userId => 'ID de Usuario';
+
+  @override
+  String get profile_accountStatus => 'Estado de la Cuenta';
+
+  @override
+  String get profile_verified => 'Verificado';
+
+  @override
+  String get profile_notVerified => 'No verificado';
+
+  @override
+  String get profile_accountCreated => 'Cuenta creada el';
+
+  @override
+  String get profile_lastAccess => 'Último acceso';
+
+  @override
+  String get profile_logoutErrorGeneric => 'Error al cerrar sesión';
+
+  @override
+  String get statistics_title => 'Estadísticas';
+
+  @override
+  String get statistics_loading => 'Cargando estadísticas...';
+
+  @override
+  String get statistics_errorLoading => 'Error al cargar estadísticas';
+
+  @override
+  String get statistics_noData => 'No hay datos disponibles';
+
+  @override
+  String get statistics_noDataPeriod =>
+      'No hay alimentaciones registradas en el período seleccionado.';
+
+  @override
+  String get statistics_chartError => 'Error al renderizar el gráfico';
+
+  @override
+  String get notifications_title => 'Notificaciones';
+
+  @override
+  String get notifications_markedAsRead => 'Notificación marcada como leída';
+
+  @override
+  String notifications_errorMarkAsRead(String error) {
+    return 'Error al marcar como leída: $error';
+  }
+
+  @override
+  String get notifications_allMarkedAsRead =>
+      'Todas las notificaciones marcadas como leídas';
+
+  @override
+  String notifications_errorMarkAllAsRead(String error) {
+    return 'Error al marcar todas como leídas: $error';
+  }
+
+  @override
+  String get notifications_removed => 'Notificación eliminada';
+
+  @override
+  String notifications_errorRemove(String error) {
+    return 'Error al eliminar notificación: $error';
+  }
+
+  @override
+  String get notifications_tryAgain => 'Intentar de nuevo';
+
+  @override
+  String get notifications_markAllAsRead => 'Marcar todas como leídas';
+
+  @override
+  String get notifications_empty => 'Sin notificaciones';
+
+  @override
+  String get notifications_emptySubtitle => '¡Estás al día!';
+
+  @override
+  String get notifications_refresh => 'Actualizar';
+
+  @override
+  String get notifications_delete => 'Eliminar notificación';
+
+  @override
+  String get notifications_userNotAuthenticated => 'Usuario no autenticado';
+
+  @override
+  String notifications_errorLoading(String error) {
+    return 'Error al cargar notificaciones: $error';
+  }
+
+  @override
+  String get auth_pleaseEnterEmail =>
+      'Por favor, ingresa tu correo electrónico';
+
+  @override
+  String get auth_pleaseEnterPassword => 'Por favor, ingresa tu contraseña';
+
+  @override
+  String get auth_pleaseEnterFullName =>
+      'Por favor, ingresa tu nombre completo';
 }

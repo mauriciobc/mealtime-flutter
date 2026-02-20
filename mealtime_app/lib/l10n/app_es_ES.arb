@@ -131,6 +131,122 @@
   "error_notFound": "No encontrado",
   "error_unauthorized": "No autorizado",
   "error_validation": "Error de validación",
-  "error_tryAgain": "Intentar de Nuevo"
+  "error_tryAgain": "Intentar de Nuevo",
+  "home_hello": "Hola",
+  "home_food_dry": "Comida Seca",
+  "home_food_wet": "Comida Húmeda",
+  "home_food_homemade": "Comida Casera",
+  "home_food_sachet": "Sobrecito",
+  "home_food_treat": "Golosina",
+  "home_food_not_specified": "Alimento no especificado",
+  "home_fed_by_you": "Tú",
+  "home_fed_by_other": "Otro usuario",
+  "home_fed_by": "Alimentado por {name}",
+  "@home_fed_by": {
+    "description": "Etiqueta de alimentado por",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "home_no_feeding_records": "No hay registros de alimentación",
+  "home_last_7_days": "Últimos 7 días",
+  "home_register_feeding_chart": "Registra alimentaciones para ver el gráfico de los últimos 7 días",
+  "home_recent_records": "Registros Recientes",
+  "home_no_recent_records": "No hay registros recientes",
+  "home_see_all_cats": "Ver todos los gatos",
+  "home_no_cats_registered": "No hay gatos registrados",
+  "home_feedings_title": "Alimentaciones",
+  "home_last_feeding_title": "Última Alimentación",
+  "home_average_portion": "Porción Promedio",
+  "home_today": "Hoy",
+  "home_total_cats": "Total de Gatos",
+  "home_last_time": "Última Vez",
+  "home_active_cats": "Activos",
+  "home_average_portion_subtitle": "Últimos 7 días",
+  "home_last_time_subtitle": "Último registro",
+  "home_amount_food_type": "{amount}g de {foodType}",
+  "@home_amount_food_type": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "foodType": {"type": "String"}
+    }
+  },
+  "home_no_feeding_recorded": "No hay alimentación registrada",
+  "home_cat_name_not_found": "Nombre no encontrado",
+  "home_my_cats": "Mis Gatos",
+  "home_cat_weight": "{weight}kg",
+  "@home_cat_weight": {
+    "placeholders": {
+      "weight": {"type": "String"}
+    }
+  },
+  "home_cat_weight_unknown": "Desconocido",
+  "home_no_cats_register_first": "No hay gatos registrados. Registra un gato primero.",
+  "home_register_feeding": "Registrar Alimentación",
+  "auth_welcomeBack": "¡Bienvenido de nuevo!",
+  "auth_managementDescription": "Gestión de alimentación para gatos",
+  "auth_passwordPlaceholder": "Contraseña",
+  "auth_alreadyHaveAccount": "¿Ya tienes una cuenta? ",
+  "auth_noAccount": "¿No tienes una cuenta? ",
+  "auth_signInShort": "Iniciar sesión",
+  "auth_registerShort": "Crear cuenta",
+  "auth_featureInDevelopment": "Función en desarrollo",
+  "auth_registerInDevelopment": "Función de registro en desarrollo",
+  "profile_accountInfo": "Información de la Cuenta",
+  "profile_userInfo": "Información del Usuario",
+  "profile_usernameLabel": "Nombre de usuario",
+  "profile_website": "Sitio web",
+  "profile_updateProfile": "Actualizar Perfil",
+  "profile_userId": "ID de Usuario",
+  "profile_accountStatus": "Estado de la Cuenta",
+  "profile_verified": "Verificado",
+  "profile_notVerified": "No verificado",
+  "profile_accountCreated": "Cuenta creada el",
+  "profile_lastAccess": "Último acceso",
+  "profile_logoutErrorGeneric": "Error al cerrar sesión",
+  "statistics_title": "Estadísticas",
+  "statistics_loading": "Cargando estadísticas...",
+  "statistics_errorLoading": "Error al cargar estadísticas",
+  "statistics_noData": "No hay datos disponibles",
+  "statistics_noDataPeriod": "No hay alimentaciones registradas en el período seleccionado.",
+  "statistics_chartError": "Error al renderizar el gráfico",
+  "notifications_title": "Notificaciones",
+  "notifications_markedAsRead": "Notificación marcada como leída",
+  "notifications_errorMarkAsRead": "Error al marcar como leída: {error}",
+  "@notifications_errorMarkAsRead": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "notifications_allMarkedAsRead": "Todas las notificaciones marcadas como leídas",
+  "notifications_errorMarkAllAsRead": "Error al marcar todas como leídas: {error}",
+  "@notifications_errorMarkAllAsRead": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "notifications_removed": "Notificación eliminada",
+  "notifications_errorRemove": "Error al eliminar notificación: {error}",
+  "@notifications_errorRemove": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "notifications_tryAgain": "Intentar de nuevo",
+  "notifications_markAllAsRead": "Marcar todas como leídas",
+  "notifications_empty": "Sin notificaciones",
+  "notifications_emptySubtitle": "¡Estás al día!",
+  "notifications_refresh": "Actualizar",
+  "notifications_delete": "Eliminar notificación",
+  "notifications_userNotAuthenticated": "Usuario no autenticado",
+  "notifications_errorLoading": "Error al cargar notificaciones: {error}",
+  "@notifications_errorLoading": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "auth_pleaseEnterEmail": "Por favor, ingresa tu correo electrónico",
+  "auth_pleaseEnterPassword": "Por favor, ingresa tu contraseña",
+  "auth_pleaseEnterFullName": "Por favor, ingresa tu nombre completo"
 }
 

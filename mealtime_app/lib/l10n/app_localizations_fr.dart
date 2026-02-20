@@ -380,85 +380,85 @@ class AppLocalizationsFr extends AppLocalizations {
   String get error_tryAgain => 'Réessayer';
 
   @override
-  String get home_hello => 'Olá';
+  String get home_hello => 'Bonjour';
 
   @override
-  String get home_food_dry => 'Ração Seca';
+  String get home_food_dry => 'Nourriture sèche';
 
   @override
-  String get home_food_wet => 'Ração Úmida';
+  String get home_food_wet => 'Nourriture humide';
 
   @override
-  String get home_food_homemade => 'Comida Caseira';
+  String get home_food_homemade => 'Nourriture maison';
 
   @override
-  String get home_food_sachet => 'Sachê';
+  String get home_food_sachet => 'Sachet';
 
   @override
-  String get home_food_treat => 'Petisco';
+  String get home_food_treat => 'Friandise';
 
   @override
-  String get home_food_not_specified => 'Alimento não especificado';
+  String get home_food_not_specified => 'Aliment non spécifié';
 
   @override
-  String get home_fed_by_you => 'Você';
+  String get home_fed_by_you => 'Vous';
 
   @override
-  String get home_fed_by_other => 'Outro usuário';
+  String get home_fed_by_other => 'Autre utilisateur';
 
   @override
   String home_fed_by(String name) {
-    return 'Alimentado por $name';
+    return 'Nourri par $name';
   }
 
   @override
-  String get home_no_feeding_records => 'Nenhum registro de alimentação';
+  String get home_no_feeding_records => 'Aucun enregistrement d\'alimentation';
 
   @override
-  String get home_last_7_days => 'Últimos 7 dias';
+  String get home_last_7_days => '7 derniers jours';
 
   @override
   String get home_register_feeding_chart =>
-      'Registre alimentações para ver o gráfico dos últimos 7 dias';
+      'Enregistrez des repas pour voir le graphique des 7 derniers jours';
 
   @override
-  String get home_recent_records => 'Registros Recentes';
+  String get home_recent_records => 'Enregistrements récents';
 
   @override
-  String get home_no_recent_records => 'Nenhum registro recente';
+  String get home_no_recent_records => 'Aucun enregistrement récent';
 
   @override
-  String get home_see_all_cats => 'Ver todos os gatos';
+  String get home_see_all_cats => 'Voir tous les chats';
 
   @override
-  String get home_no_cats_registered => 'Nenhum gato cadastrado';
+  String get home_no_cats_registered => 'Aucun chat enregistré';
 
   @override
-  String get home_feedings_title => 'Alimentações';
+  String get home_feedings_title => 'Repas';
 
   @override
-  String get home_last_feeding_title => 'Última Alimentação';
+  String get home_last_feeding_title => 'Dernier repas';
 
   @override
-  String get home_average_portion => 'Porção Média';
+  String get home_average_portion => 'Portion moyenne';
 
   @override
-  String get home_today => 'Hoje';
+  String get home_today => 'Aujourd\'hui';
 
   @override
-  String get home_total_cats => 'Total de Gatos';
+  String get home_total_cats => 'Total des chats';
 
   @override
-  String get home_last_time => 'Última Vez';
+  String get home_last_time => 'Dernière fois';
 
   @override
-  String get home_active_cats => 'Ativos';
+  String get home_active_cats => 'Actifs';
 
   @override
-  String get home_average_portion_subtitle => 'Últimos 7 dias';
+  String get home_average_portion_subtitle => '7 derniers jours';
 
   @override
-  String get home_last_time_subtitle => 'Último registro';
+  String get home_last_time_subtitle => 'Dernier enregistrement';
 
   @override
   String home_amount_food_type(String amount, String foodType) {
@@ -466,13 +466,13 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get home_no_feeding_recorded => 'Nenhuma alimentação registrada';
+  String get home_no_feeding_recorded => 'Aucun repas enregistré';
 
   @override
-  String get home_cat_name_not_found => 'Nome não encontrado';
+  String get home_cat_name_not_found => 'Nom non trouvé';
 
   @override
-  String get home_my_cats => 'Meus Gatos';
+  String get home_my_cats => 'Mes chats';
 
   @override
   String home_cat_weight(String weight) {
@@ -480,161 +480,164 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get home_cat_weight_unknown => 'Desconhecido';
+  String get home_cat_weight_unknown => 'Inconnu';
 
   @override
   String get home_no_cats_register_first =>
-      'Nenhum gato cadastrado. Cadastre um gato primeiro.';
+      'Aucun chat enregistré. Enregistrez un chat d\'abord.';
 
   @override
-  String get home_register_feeding => 'Registrar Alimentação';
+  String get home_register_feeding => 'Enregistrer un repas';
 
   @override
-  String get auth_welcomeBack => 'Bem-vindo de volta!';
+  String get auth_welcomeBack => 'Bon retour !';
 
   @override
   String get auth_managementDescription =>
-      'Gerenciamento de alimentação para gatos';
+      'Gestion de l\'alimentation des chats';
 
   @override
-  String get auth_passwordPlaceholder => 'Senha';
+  String get auth_passwordPlaceholder => 'Mot de passe';
 
   @override
-  String get auth_alreadyHaveAccount => 'Já tem uma conta? ';
+  String get auth_alreadyHaveAccount => 'Vous avez déjà un compte ? ';
 
   @override
-  String get auth_noAccount => 'Não tem uma conta? ';
+  String get auth_noAccount => 'Vous n\'avez pas de compte ? ';
 
   @override
-  String get auth_signInShort => 'Entrar';
+  String get auth_signInShort => 'Se connecter';
 
   @override
-  String get auth_registerShort => 'Criar conta';
+  String get auth_registerShort => 'Créer un compte';
 
   @override
-  String get auth_featureInDevelopment => 'Funcionalidade em desenvolvimento';
+  String get auth_featureInDevelopment =>
+      'Fonctionnalité en cours de développement';
 
   @override
   String get auth_registerInDevelopment =>
-      'Funcionalidade de cadastro em desenvolvimento';
+      'Fonctionnalité d\'inscription en développement';
 
   @override
-  String get profile_accountInfo => 'Informações da Conta';
+  String get profile_accountInfo => 'Informations du compte';
 
   @override
-  String get profile_userInfo => 'Informações do Usuário';
+  String get profile_userInfo => 'Informations utilisateur';
 
   @override
-  String get profile_usernameLabel => 'Nome de usuário';
+  String get profile_usernameLabel => 'Nom d\'utilisateur';
 
   @override
-  String get profile_website => 'Website';
+  String get profile_website => 'Site web';
 
   @override
-  String get profile_updateProfile => 'Atualizar Perfil';
+  String get profile_updateProfile => 'Mettre à jour le profil';
 
   @override
-  String get profile_userId => 'ID do Usuário';
+  String get profile_userId => 'ID utilisateur';
 
   @override
-  String get profile_accountStatus => 'Status da Conta';
+  String get profile_accountStatus => 'État du compte';
 
   @override
-  String get profile_verified => 'Verificado';
+  String get profile_verified => 'Vérifié';
 
   @override
-  String get profile_notVerified => 'Não verificado';
+  String get profile_notVerified => 'Non vérifié';
 
   @override
-  String get profile_accountCreated => 'Conta criada em';
+  String get profile_accountCreated => 'Compte créé le';
 
   @override
-  String get profile_lastAccess => 'Último acesso';
+  String get profile_lastAccess => 'Dernier accès';
 
   @override
-  String get profile_logoutErrorGeneric => 'Erro ao fazer logout';
+  String get profile_logoutErrorGeneric => 'Erreur lors de la déconnexion';
 
   @override
-  String get statistics_title => 'Estatísticas';
+  String get statistics_title => 'Statistiques';
 
   @override
-  String get statistics_loading => 'Carregando estatísticas...';
+  String get statistics_loading => 'Chargement des statistiques...';
 
   @override
-  String get statistics_errorLoading => 'Erro ao carregar estatísticas';
+  String get statistics_errorLoading =>
+      'Erreur lors du chargement des statistiques';
 
   @override
-  String get statistics_noData => 'Nenhum dado disponível';
+  String get statistics_noData => 'Aucune donnée disponible';
 
   @override
   String get statistics_noDataPeriod =>
-      'Não há alimentações registradas no período selecionado.';
+      'Aucun repas enregistré pour la période sélectionnée.';
 
   @override
-  String get statistics_chartError => 'Erro ao renderizar gráfico';
+  String get statistics_chartError => 'Erreur lors du rendu du graphique';
 
   @override
-  String get notifications_title => 'Notificações';
+  String get notifications_title => 'Notifications';
 
   @override
-  String get notifications_markedAsRead => 'Notificação marcada como lida';
+  String get notifications_markedAsRead => 'Notification marquée comme lue';
 
   @override
   String notifications_errorMarkAsRead(String error) {
-    return 'Erro ao marcar como lida: $error';
+    return 'Erreur lors du marquage comme lue : $error';
   }
 
   @override
   String get notifications_allMarkedAsRead =>
-      'Todas as notificações foram marcadas como lidas';
+      'Toutes les notifications ont été marquées comme lues';
 
   @override
   String notifications_errorMarkAllAsRead(String error) {
-    return 'Erro ao marcar todas como lidas: $error';
+    return 'Erreur lors du marquage de toutes comme lues : $error';
   }
 
   @override
-  String get notifications_removed => 'Notificação removida';
+  String get notifications_removed => 'Notification supprimée';
 
   @override
   String notifications_errorRemove(String error) {
-    return 'Erro ao remover notificação: $error';
+    return 'Erreur lors de la suppression de la notification : $error';
   }
 
   @override
-  String get notifications_tryAgain => 'Tentar novamente';
+  String get notifications_tryAgain => 'Réessayer';
 
   @override
-  String get notifications_markAllAsRead => 'Marcar todas como lidas';
+  String get notifications_markAllAsRead => 'Tout marquer comme lu';
 
   @override
-  String get notifications_empty => 'Nenhuma notificação';
+  String get notifications_empty => 'Aucune notification';
 
   @override
-  String get notifications_emptySubtitle => 'Você está em dia!';
+  String get notifications_emptySubtitle => 'Vous êtes à jour !';
 
   @override
-  String get notifications_refresh => 'Atualizar';
+  String get notifications_refresh => 'Actualiser';
 
   @override
-  String get notifications_delete => 'Deletar notificação';
+  String get notifications_delete => 'Supprimer la notification';
 
   @override
-  String get notifications_userNotAuthenticated => 'Usuário não autenticado';
+  String get notifications_userNotAuthenticated =>
+      'Utilisateur non authentifié';
 
   @override
   String notifications_errorLoading(String error) {
-    return 'Erro ao carregar notificações: $error';
+    return 'Erreur lors du chargement des notifications : $error';
   }
 
   @override
-  String get auth_pleaseEnterEmail => 'Por favor, digite seu email';
+  String get auth_pleaseEnterEmail => 'Veuillez entrer votre email';
 
   @override
-  String get auth_pleaseEnterPassword => 'Por favor, digite sua senha';
+  String get auth_pleaseEnterPassword => 'Veuillez entrer votre mot de passe';
 
   @override
-  String get auth_pleaseEnterFullName => 'Por favor, digite seu nome completo';
+  String get auth_pleaseEnterFullName => 'Veuillez entrer votre nom complet';
 }
 
 /// The translations for French, as used in France (`fr_FR`).
@@ -1011,4 +1014,264 @@ class AppLocalizationsFrFr extends AppLocalizationsFr {
 
   @override
   String get error_tryAgain => 'Réessayer';
+
+  @override
+  String get home_hello => 'Bonjour';
+
+  @override
+  String get home_food_dry => 'Nourriture sèche';
+
+  @override
+  String get home_food_wet => 'Nourriture humide';
+
+  @override
+  String get home_food_homemade => 'Nourriture maison';
+
+  @override
+  String get home_food_sachet => 'Sachet';
+
+  @override
+  String get home_food_treat => 'Friandise';
+
+  @override
+  String get home_food_not_specified => 'Aliment non spécifié';
+
+  @override
+  String get home_fed_by_you => 'Vous';
+
+  @override
+  String get home_fed_by_other => 'Autre utilisateur';
+
+  @override
+  String home_fed_by(String name) {
+    return 'Nourri par $name';
+  }
+
+  @override
+  String get home_no_feeding_records => 'Aucun enregistrement d\'alimentation';
+
+  @override
+  String get home_last_7_days => '7 derniers jours';
+
+  @override
+  String get home_register_feeding_chart =>
+      'Enregistrez des repas pour voir le graphique des 7 derniers jours';
+
+  @override
+  String get home_recent_records => 'Enregistrements récents';
+
+  @override
+  String get home_no_recent_records => 'Aucun enregistrement récent';
+
+  @override
+  String get home_see_all_cats => 'Voir tous les chats';
+
+  @override
+  String get home_no_cats_registered => 'Aucun chat enregistré';
+
+  @override
+  String get home_feedings_title => 'Repas';
+
+  @override
+  String get home_last_feeding_title => 'Dernier repas';
+
+  @override
+  String get home_average_portion => 'Portion moyenne';
+
+  @override
+  String get home_today => 'Aujourd\'hui';
+
+  @override
+  String get home_total_cats => 'Total des chats';
+
+  @override
+  String get home_last_time => 'Dernière fois';
+
+  @override
+  String get home_active_cats => 'Actifs';
+
+  @override
+  String get home_average_portion_subtitle => '7 derniers jours';
+
+  @override
+  String get home_last_time_subtitle => 'Dernier enregistrement';
+
+  @override
+  String home_amount_food_type(String amount, String foodType) {
+    return '${amount}g de $foodType';
+  }
+
+  @override
+  String get home_no_feeding_recorded => 'Aucun repas enregistré';
+
+  @override
+  String get home_cat_name_not_found => 'Nom non trouvé';
+
+  @override
+  String get home_my_cats => 'Mes chats';
+
+  @override
+  String home_cat_weight(String weight) {
+    return '${weight}kg';
+  }
+
+  @override
+  String get home_cat_weight_unknown => 'Inconnu';
+
+  @override
+  String get home_no_cats_register_first =>
+      'Aucun chat enregistré. Enregistrez un chat d\'abord.';
+
+  @override
+  String get home_register_feeding => 'Enregistrer un repas';
+
+  @override
+  String get auth_welcomeBack => 'Bon retour !';
+
+  @override
+  String get auth_managementDescription =>
+      'Gestion de l\'alimentation des chats';
+
+  @override
+  String get auth_passwordPlaceholder => 'Mot de passe';
+
+  @override
+  String get auth_alreadyHaveAccount => 'Vous avez déjà un compte ? ';
+
+  @override
+  String get auth_noAccount => 'Vous n\'avez pas de compte ? ';
+
+  @override
+  String get auth_signInShort => 'Se connecter';
+
+  @override
+  String get auth_registerShort => 'Créer un compte';
+
+  @override
+  String get auth_featureInDevelopment =>
+      'Fonctionnalité en cours de développement';
+
+  @override
+  String get auth_registerInDevelopment =>
+      'Fonctionnalité d\'inscription en développement';
+
+  @override
+  String get profile_accountInfo => 'Informations du compte';
+
+  @override
+  String get profile_userInfo => 'Informations utilisateur';
+
+  @override
+  String get profile_usernameLabel => 'Nom d\'utilisateur';
+
+  @override
+  String get profile_website => 'Site web';
+
+  @override
+  String get profile_updateProfile => 'Mettre à jour le profil';
+
+  @override
+  String get profile_userId => 'ID utilisateur';
+
+  @override
+  String get profile_accountStatus => 'État du compte';
+
+  @override
+  String get profile_verified => 'Vérifié';
+
+  @override
+  String get profile_notVerified => 'Non vérifié';
+
+  @override
+  String get profile_accountCreated => 'Compte créé le';
+
+  @override
+  String get profile_lastAccess => 'Dernier accès';
+
+  @override
+  String get profile_logoutErrorGeneric => 'Erreur lors de la déconnexion';
+
+  @override
+  String get statistics_title => 'Statistiques';
+
+  @override
+  String get statistics_loading => 'Chargement des statistiques...';
+
+  @override
+  String get statistics_errorLoading =>
+      'Erreur lors du chargement des statistiques';
+
+  @override
+  String get statistics_noData => 'Aucune donnée disponible';
+
+  @override
+  String get statistics_noDataPeriod =>
+      'Aucun repas enregistré pour la période sélectionnée.';
+
+  @override
+  String get statistics_chartError => 'Erreur lors du rendu du graphique';
+
+  @override
+  String get notifications_title => 'Notifications';
+
+  @override
+  String get notifications_markedAsRead => 'Notification marquée comme lue';
+
+  @override
+  String notifications_errorMarkAsRead(String error) {
+    return 'Erreur lors du marquage comme lue : $error';
+  }
+
+  @override
+  String get notifications_allMarkedAsRead =>
+      'Toutes les notifications ont été marquées comme lues';
+
+  @override
+  String notifications_errorMarkAllAsRead(String error) {
+    return 'Erreur lors du marquage de toutes comme lues : $error';
+  }
+
+  @override
+  String get notifications_removed => 'Notification supprimée';
+
+  @override
+  String notifications_errorRemove(String error) {
+    return 'Erreur lors de la suppression de la notification : $error';
+  }
+
+  @override
+  String get notifications_tryAgain => 'Réessayer';
+
+  @override
+  String get notifications_markAllAsRead => 'Tout marquer comme lu';
+
+  @override
+  String get notifications_empty => 'Aucune notification';
+
+  @override
+  String get notifications_emptySubtitle => 'Vous êtes à jour !';
+
+  @override
+  String get notifications_refresh => 'Actualiser';
+
+  @override
+  String get notifications_delete => 'Supprimer la notification';
+
+  @override
+  String get notifications_userNotAuthenticated =>
+      'Utilisateur non authentifié';
+
+  @override
+  String notifications_errorLoading(String error) {
+    return 'Erreur lors du chargement des notifications : $error';
+  }
+
+  @override
+  String get auth_pleaseEnterEmail => 'Veuillez entrer votre email';
+
+  @override
+  String get auth_pleaseEnterPassword => 'Veuillez entrer votre mot de passe';
+
+  @override
+  String get auth_pleaseEnterFullName => 'Veuillez entrer votre nom complet';
 }

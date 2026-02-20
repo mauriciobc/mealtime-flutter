@@ -211,6 +211,44 @@
   "statistics_errorLoading": "Erro ao carregar estatísticas",
   "statistics_noData": "Nenhum dado disponível",
   "statistics_noDataPeriod": "Não há alimentações registradas no período selecionado.",
-  "statistics_chartError": "Erro ao renderizar gráfico"
+  "statistics_chartError": "Erro ao renderizar gráfico",
+  "notifications_title": "Notificações",
+  "notifications_markedAsRead": "Notificação marcada como lida",
+  "notifications_errorMarkAsRead": "Erro ao marcar como lida: {error}",
+  "@notifications_errorMarkAsRead": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "notifications_allMarkedAsRead": "Todas as notificações foram marcadas como lidas",
+  "notifications_errorMarkAllAsRead": "Erro ao marcar todas como lidas: {error}",
+  "@notifications_errorMarkAllAsRead": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "notifications_removed": "Notificação removida",
+  "notifications_errorRemove": "Erro ao remover notificação: {error}",
+  "@notifications_errorRemove": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "notifications_tryAgain": "Tentar novamente",
+  "notifications_markAllAsRead": "Marcar todas como lidas",
+  "notifications_empty": "Nenhuma notificação",
+  "notifications_emptySubtitle": "Você está em dia!",
+  "notifications_refresh": "Atualizar",
+  "notifications_delete": "Deletar notificação",
+  "notifications_userNotAuthenticated": "Usuário não autenticado",
+  "notifications_errorLoading": "Erro ao carregar notificações: {error}",
+  "@notifications_errorLoading": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "auth_pleaseEnterEmail": "Por favor, digite seu email",
+  "auth_pleaseEnterPassword": "Por favor, digite sua senha",
+  "auth_pleaseEnterFullName": "Por favor, digite seu nome completo"
 }
 
