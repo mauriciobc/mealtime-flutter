@@ -297,6 +297,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cats_selectDate => 'Select date';
 
   @override
+  String get cats_birthDateNotInformed => 'Not informed';
+
+  @override
   String get cats_invalidWeight => 'Invalid weight';
 
   @override
@@ -515,6 +518,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get auth_registerInDevelopment =>
       'Registration feature in development';
+
+  @override
+  String get auth_signInWithGoogle => 'Sign in with Google';
 
   @override
   String get profile_accountInfo => 'Account Information';
@@ -928,6 +934,9 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   String get cats_selectDate => 'Select date';
 
   @override
+  String get cats_birthDateNotInformed => 'Not informed';
+
+  @override
   String get cats_invalidWeight => 'Invalid weight';
 
   @override
@@ -1146,6 +1155,9 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   @override
   String get auth_registerInDevelopment =>
       'Registration feature in development';
+
+  @override
+  String get auth_signInWithGoogle => 'Sign in with Google';
 
   @override
   String get profile_accountInfo => 'Account Information';

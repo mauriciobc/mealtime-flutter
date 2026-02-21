@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show AuthException;
 import 'package:mealtime_app/core/auth/simple_auth_manager.dart';
 import 'package:mealtime_app/core/errors/failures.dart';
 import 'package:mealtime_app/features/auth/domain/entities/user.dart';
@@ -93,6 +94,19 @@ class SimpleAuthRepository {
       return Right(null);
     } catch (e) {
       return Left(ServerFailure('Erro no logout: ${e.toString()}'));
+    }
+  }
+
+  /// Inicia login com Google (OAuth). Retorna Right quando o fluxo foi
+  /// iniciado; a sessão chega depois via deep link e authStateChanges.
+  Future<Either<Failure, void>> loginWithGoogle() async {
+    try {
+      await SimpleAuthManager.signInWithGoogle();
+      return const Right(null);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure('Erro ao entrar com Google: ${e.toString()}'));
     }
   }
 

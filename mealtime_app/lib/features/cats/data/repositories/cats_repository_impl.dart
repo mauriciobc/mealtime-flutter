@@ -90,7 +90,8 @@ class CatsRepositoryImpl implements CatsRepository {
         'id': localCat.id,
         'name': localCat.name,
         'breed': localCat.breed,
-        'birthDate': localCat.birthDate.toIso8601String(),
+        if (localCat.birthDate != null)
+          'birthDate': localCat.birthDate!.toIso8601String(),
         'gender': localCat.gender,
         'color': localCat.color,
         'description': localCat.description,
@@ -150,7 +151,8 @@ class CatsRepositoryImpl implements CatsRepository {
         'id': updatedCat.id,
         'name': updatedCat.name,
         'breed': updatedCat.breed,
-        'birthDate': updatedCat.birthDate.toIso8601String(),
+        if (updatedCat.birthDate != null)
+          'birthDate': updatedCat.birthDate!.toIso8601String(),
         'gender': updatedCat.gender,
         'color': updatedCat.color,
         'description': updatedCat.description,
@@ -210,7 +212,7 @@ class CatsRepositoryImpl implements CatsRepository {
         final payload = {
           'id': cat.id,
           'name': cat.name,
-          'birthDate': cat.birthDate.toIso8601String(),
+          if (cat.birthDate != null) 'birthDate': cat.birthDate!.toIso8601String(),
           'homeId': cat.homeId,
           'createdAt': cat.createdAt.toIso8601String(),
           'updatedAt': DateTime.now().toIso8601String(),

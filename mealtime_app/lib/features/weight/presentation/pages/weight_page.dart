@@ -51,105 +51,103 @@ class _WeightPageState extends State<WeightPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Painel de Peso'),
-      ),
-      body: BlocListener<CatsBloc, CatsState>(
-        listener: (context, catsState) {
-          debugPrint('[WeightPage] 📢 CatsBloc emitido: ${catsState.runtimeType}');
-          
-          List<cat_entity.Cat>? cats;
-          if (catsState is CatsLoaded) {
-            cats = catsState.cats;
-            debugPrint('[WeightPage] ✅ CatsLoaded com ${cats.length} gatos');
-          } else if (catsState is CatOperationSuccess) {
-            cats = catsState.cats;
-            debugPrint('[WeightPage] ✅ CatOperationSuccess com ${cats.length} gatos');
+    return BlocListener<CatsBloc, CatsState>(
+      listener: (context, catsState) {
+        debugPrint('[WeightPage] 📢 CatsBloc emitido: ${catsState.runtimeType}');
+        List<cat_entity.Cat>? cats;
+        if (catsState is CatsLoaded) {
+          cats = catsState.cats;
+          debugPrint('[WeightPage] ✅ CatsLoaded com ${cats.length} gatos');
+        } else if (catsState is CatOperationSuccess) {
+          cats = catsState.cats;
+          debugPrint('[WeightPage] ✅ CatOperationSuccess com ${cats.length} gatos');
+        }
+        if (cats != null) {
+          final weightState = context.read<WeightBloc>().state;
+          debugPrint('[WeightPage] 📊 WeightBloc estado atual: ${weightState.runtimeType}');
+          if (weightState is WeightInitial ||
+              (weightState is WeightLoaded && weightState.cats.isEmpty)) {
+            debugPrint('[WeightPage] 🎯 Inicializando WeightBloc com ${cats.length} gatos');
+            context.read<WeightBloc>().add(
+                  InitializeWeight(
+                    cats: cats,
+                    catId: cats.isNotEmpty ? cats.first.id : null,
+                  ),
+                );
           }
-
-          if (cats != null) {
-            final weightState = context.read<WeightBloc>().state;
-            debugPrint('[WeightPage] 📊 WeightBloc estado atual: ${weightState.runtimeType}');
-            
-            if (weightState is WeightInitial || 
-                (weightState is WeightLoaded && weightState.cats.isEmpty)) {
-              debugPrint('[WeightPage] 🎯 Inicializando WeightBloc com ${cats.length} gatos');
-              context.read<WeightBloc>().add(
-                    InitializeWeight(
-                      cats: cats,
-                      catId: cats.isNotEmpty ? cats.first.id : null,
+        }
+      },
+      child: BlocBuilder<WeightBloc, WeightState>(
+        builder: (context, weightState) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Painel de Peso'),
+              actions: [
+                if (weightState is WeightLoaded)
+                  _buildNewGoalButton(weightState, weightState.cats),
+              ],
+            ),
+            body: _buildBody(context, weightState),
+            floatingActionButton: FabM3E(
+              onPressed: () {
+                HapticsService.mediumImpact();
+                final weightState = context.read<WeightBloc>().state;
+                if (weightState is WeightLoaded) {
+                  if (weightState.selectedCat == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Selecione um gato primeiro'),
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: M3Shapes.shapeMedium,
+                        ),
+                        action: SnackBarAction(
+                          label: 'OK',
+                          onPressed: () {},
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    showDragHandle: true,
+                    builder: (context) => AddWeightBottomSheet(
+                      selectedCat: weightState.selectedCat,
                     ),
                   );
-            }
-          }
+                }
+              },
+              icon: const Icon(Icons.add),
+              tooltip: 'Registrar Peso',
+            ),
+          );
         },
-        child: BlocBuilder<WeightBloc, WeightState>(
-          builder: (context, weightState) {
-            if (weightState is WeightLoading) {
-              return const LoadingWidget(
-                message: 'Carregando dados de peso...',
-              );
-            }
-
-            if (weightState is WeightError) {
-              HapticsService.error();
-              return shared.CustomErrorWidget(
-                message: weightState.failure.message,
-                onRetry: () {
-                  context.read<WeightBloc>().add(const RefreshWeightData());
-                },
-              );
-            }
-
-            if (weightState is WeightLoaded) {
-              return _buildContent(
-                weightState,
-                weightState.cats,
-              );
-            }
-
-            return const LoadingWidget(
-              message: 'Carregando dados...',
-            );
-          },
-        ),
       ),
-      floatingActionButton: FabM3E(
-        onPressed: () {
-          HapticsService.mediumImpact();
-          final weightState = context.read<WeightBloc>().state;
-          if (weightState is WeightLoaded) {
-            if (weightState.selectedCat == null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Selecione um gato primeiro'),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: M3Shapes.shapeMedium,
-                  ),
-                  action: SnackBarAction(
-                    label: 'OK',
-                    onPressed: () {},
-                  ),
-                ),
-              );
-              return;
-            }
-            
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              showDragHandle: true,
-              builder: (context) => AddWeightBottomSheet(
-                selectedCat: weightState.selectedCat,
-              ),
-            );
-          }
+    );
+  }
+
+  Widget _buildBody(BuildContext context, WeightState weightState) {
+    if (weightState is WeightLoading) {
+      return const LoadingWidget(
+        message: 'Carregando dados de peso...',
+      );
+    }
+    if (weightState is WeightError) {
+      HapticsService.error();
+      return shared.CustomErrorWidget(
+        message: weightState.failure.message,
+        onRetry: () {
+          context.read<WeightBloc>().add(const RefreshWeightData());
         },
-        icon: const Icon(Icons.add),
-        tooltip: 'Registrar Peso',
-      ),
+      );
+    }
+    if (weightState is WeightLoaded) {
+      return _buildContent(weightState, weightState.cats);
+    }
+    return const LoadingWidget(
+      message: 'Carregando dados...',
     );
   }
 
@@ -165,10 +163,15 @@ class _WeightPageState extends State<WeightPage> {
           '${weightState.filteredWeightLogs.length}-'
           '${weightState.activeGoal?.id ?? 'none'}',
         ),
-        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
+        padding: const M3EdgeInsets.fromLTRB(
+          M3SpacingToken.space16,
+          M3SpacingToken.space8,
+          M3SpacingToken.space16,
+          M3SpacingToken.space16,
+        ),
         children: <Widget>[
             // Header
-            StaggeredEntranceBuilder(index: 0, child: _buildHeader(weightState, cats)),
+            StaggeredEntranceBuilder(index: 0, child: _buildHeader()),
             SizedBox(height: M3SpacingToken.space24.value),
             
             // Estado vazio quando não há gatos
@@ -253,11 +256,10 @@ class _WeightPageState extends State<WeightPage> {
     );
   }
 
-  Widget _buildHeader(WeightLoaded weightState, List<cat_entity.Cat> cats) {
+  Widget _buildHeader() {
     return ExpressiveSectionHeader(
-      title: 'Painel de Peso',
+      title: 'Visão geral',
       subtitle: 'Acompanhe a saúde do seu gato',
-      action: _buildNewGoalButton(weightState, cats),
       hasDivider: false,
     );
   }
@@ -284,7 +286,7 @@ class _WeightPageState extends State<WeightPage> {
         weightState.selectedCat == null ||
         weightState.activeGoal != null;
 
-    return ElevatedButton.icon(
+    return IconButton(
       key: const ValueKey('new-goal-button'),
       onPressed: isDisabled
           ? null
@@ -306,7 +308,6 @@ class _WeightPageState extends State<WeightPage> {
                 );
                 return;
               }
-              
               showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
@@ -318,7 +319,7 @@ class _WeightPageState extends State<WeightPage> {
               );
             },
       icon: const Icon(Icons.flag),
-      label: const Text('Nova Meta'),
+      tooltip: 'Nova Meta',
     );
   }
 

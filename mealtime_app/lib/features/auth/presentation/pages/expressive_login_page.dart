@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
@@ -130,6 +132,8 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
                       return const SizedBox.shrink();
                     },
                   ),
+                  SizedBox(height: M3SpacingToken.space24.value),
+                  _buildGoogleSignInButton(context),
                   SizedBox(height: M3SpacingToken.space24.value),
                   _buildToggleButton(context),
                   SizedBox(height: M3SpacingToken.space16.value),
@@ -325,6 +329,87 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
     );
   }
 
+  Widget _buildGoogleSignInButton(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    // Google branding guidelines: Light fill #FFFFFF stroke #747775 text #1F1F1F;
+    // Dark fill #131314 stroke #8E918F text #E3E3E3. Roboto Medium 14px.
+    const Color lightFill = Color(0xFFFFFFFF);
+    const Color lightStroke = Color(0xFF747775);
+    const Color lightText = Color(0xFF1F1F1F);
+    const Color darkFill = Color(0xFF131314);
+    const Color darkStroke = Color(0xFF8E918F);
+    const Color darkText = Color(0xFFE3E3E3);
+
+    final fillColor = isDark ? darkFill : lightFill;
+    final borderColor = isDark ? darkStroke : lightStroke;
+    final textColor = isDark ? darkText : lightText;
+
+    return BlocBuilder<SimpleAuthBloc, SimpleAuthState>(
+      buildWhen: (prev, curr) =>
+          curr is SimpleAuthLoading || prev is SimpleAuthLoading,
+      builder: (context, state) {
+        final isLoading = state is SimpleAuthLoading;
+        return SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: Material(
+            color: fillColor,
+            borderRadius: BorderRadius.circular(4),
+            child: InkWell(
+              onTap: isLoading
+                  ? null
+                  : () {
+                      context
+                          .read<SimpleAuthBloc>()
+                          .add(const SimpleAuthGoogleSignInRequested());
+                    },
+              borderRadius: BorderRadius.circular(4),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: borderColor, width: 1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: isLoading
+                    ? const Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: Material3LoadingIndicator(size: 20),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _GoogleLogo(size: 24),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Text(
+                              context.l10n.auth_signInWithGoogle,
+                              style: GoogleFonts.roboto(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: textColor,
+                                height: 20 / 14,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildToggleButton(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -421,6 +506,23 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: M3Shapes.shapeMedium),
       ),
+    );
+  }
+}
+
+/// Ícone oficial do Google "G" (diretrizes de marca).
+class _GoogleLogo extends StatelessWidget {
+  const _GoogleLogo({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(
+      'assets/images/google_logo.svg',
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
     );
   }
 }

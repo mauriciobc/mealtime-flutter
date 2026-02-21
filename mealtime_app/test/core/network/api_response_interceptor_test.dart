@@ -60,7 +60,7 @@ void main() {
     });
 
     test('NÃO deve transformar resposta que já é ApiResponse', () async {
-      // Arrange - Simula resposta de /auth/mobile
+      // Arrange - Simula resposta de /auth/mobile (interceptor envolve em 'data')
       dio.httpClientAdapter = _MockAdapter(
         responseBody: {
           'success': true,
@@ -74,13 +74,13 @@ void main() {
       // Act
       final response = await dio.post('/auth/mobile');
 
-      // Assert
+      // Assert - /auth/mobile é envolvido em ApiResponse com user/tokens em data
       expect(response.data, isA<Map<String, dynamic>>());
       expect(response.data['success'], true);
-      expect(response.data['user'], isNotNull);
-      expect(response.data['access_token'], 'jwt_token_here');
-      // Não deve ter campo 'data' adicional
-      expect(response.data.containsKey('data'), false);
+      expect(response.data['data'], isNotNull);
+      expect(response.data['data']['user'], isNotNull);
+      expect(response.data['data']['access_token'], 'jwt_token_here');
+      expect(response.data['error'], isNull);
     });
 
     test('deve transformar erro disfarçado (status 200 + error)', () async {

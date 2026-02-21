@@ -7,7 +7,7 @@ void main() {
     final knownDateTime = DateTime(2020, 5, 15);
 
     group('toEntity', () {
-      test('quando birthDate é null usa data sentinel (1970-01-01)', () {
+      test('quando birthDate é null retorna null na entidade', () {
         final model = CatModel(
           id: '1',
           name: 'Test',
@@ -18,10 +18,10 @@ void main() {
           updatedAt: DateTime(2021, 1, 1),
         );
         final entity = model.toEntity();
-        expect(entity.birthDate, DateTime(1970, 1, 1));
+        expect(entity.birthDate, isNull);
       });
 
-      test('quando birthDate é string vazia usa data sentinel', () {
+      test('quando birthDate é string vazia retorna null na entidade', () {
         final model = CatModel(
           id: '1',
           name: 'Test',
@@ -32,7 +32,7 @@ void main() {
           updatedAt: DateTime(2021, 1, 1),
         );
         final entity = model.toEntity();
-        expect(entity.birthDate, DateTime(1970, 1, 1));
+        expect(entity.birthDate, isNull);
       });
 
       test('quando birthDate é válido parseia corretamente', () {

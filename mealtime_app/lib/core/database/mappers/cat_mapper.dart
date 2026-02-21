@@ -45,7 +45,7 @@ class CatMapper {
       id: driftCat.id,
       name: driftCat.name,
       breed: driftCat.breed,
-      birthDate: driftCat.birthDate ?? DateTime.now(),
+      birthDate: driftCat.birthDate,
       gender: driftCat.gender,
       color: driftCat.color,
       description: driftCat.description,

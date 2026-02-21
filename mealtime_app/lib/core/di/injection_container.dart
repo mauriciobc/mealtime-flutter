@@ -425,6 +425,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SimpleRegisterUseCase(sl()));
   sl.registerLazySingleton(() => SimpleLogoutUseCase(sl()));
   sl.registerLazySingleton(() => SimpleGetCurrentUserUseCase(sl()));
+  sl.registerLazySingleton(() => SimpleLoginWithGoogleUseCase(sl()));
 
   // SimpleAuth - BLoC
   sl.registerFactory(
@@ -433,6 +434,7 @@ Future<void> init() async {
       registerUseCase: sl(),
       logoutUseCase: sl(),
       getCurrentUserUseCase: sl(),
+      loginWithGoogleUseCase: sl(),
     ),
   );
 

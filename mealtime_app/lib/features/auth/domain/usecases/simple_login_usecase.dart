@@ -49,3 +49,14 @@ class SimpleLogoutUseCase implements UseCase<void, NoParams> {
     return await repository.logout();
   }
 }
+
+class SimpleLoginWithGoogleUseCase implements UseCase<void, NoParams> {
+  final SimpleAuthRepository repository;
+
+  SimpleLoginWithGoogleUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, void>> call(NoParams params) async {
+    return await repository.loginWithGoogle();
+  }
+}

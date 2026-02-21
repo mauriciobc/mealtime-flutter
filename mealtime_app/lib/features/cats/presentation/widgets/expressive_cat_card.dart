@@ -73,7 +73,7 @@ class _ExpressiveCatCardState extends State<ExpressiveCatCard>
 
   Color _getGenderColor(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return widget.cat.gender == 'M'
+    return widget.cat.gender == 'male'
         ? colorScheme.primary
         : colorScheme.tertiary;
   }
@@ -268,7 +268,7 @@ class _ExpressiveCatCardState extends State<ExpressiveCatCard>
             Row(
               children: [
                 Icon(
-                  widget.cat.gender == 'M'
+                  widget.cat.gender == 'male'
                       ? Icons.male
                       : Icons.female,
                   size: 14,
@@ -277,7 +277,7 @@ class _ExpressiveCatCardState extends State<ExpressiveCatCard>
                 SizedBox(width: M3SpacingToken.space4.value),
                 Flexible(
                   child: Text(
-                    widget.cat.gender == 'M'
+                    widget.cat.gender == 'male'
                         ? context.l10n.cats_genderMale
                         : context.l10n.cats_genderFemale,
                     style: theme.textTheme.labelMedium?.copyWith(
@@ -302,7 +302,9 @@ class _ExpressiveCatCardState extends State<ExpressiveCatCard>
                 SizedBox(width: M3SpacingToken.space4.value),
                 Flexible(
                   child: Text(
-                    widget.cat.ageDescription,
+                    widget.cat.birthDate == null
+                        ? context.l10n.cats_birthDateNotInformed
+                        : widget.cat.ageDescription,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant
                           .withValues(alpha: 0.8),

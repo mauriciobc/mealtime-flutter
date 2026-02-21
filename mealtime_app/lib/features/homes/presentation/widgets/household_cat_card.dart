@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_design/material_design.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:m3e_collection/m3e_collection.dart';
@@ -166,7 +167,9 @@ class HouseholdCatCard extends StatelessWidget {
         _buildInfoChip(
           context,
           Icons.cake,
-          cat.ageDescription,
+          cat.birthDate == null
+              ? context.l10n.cats_birthDateNotInformed
+              : cat.ageDescription,
         ),
         
         // Peso

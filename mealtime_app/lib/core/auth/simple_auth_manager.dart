@@ -49,6 +49,15 @@ class SimpleAuthManager {
     await _supabase.auth.signOut();
   }
 
+  /// Inicia login com Google (OAuth). Abre o navegador; a sessão
+  /// chega quando o usuário retorna ao app via deep link.
+  static Future<void> signInWithGoogle() async {
+    await _supabase.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: SupabaseConfig.deepLinkUrl,
+    );
+  }
+
   /// Stream de mudanças de autenticação
   static Stream<AuthState> get authStateChanges {
     return _supabase.auth.onAuthStateChange;

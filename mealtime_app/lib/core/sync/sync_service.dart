@@ -193,7 +193,9 @@ class SyncService {
           id: operation.localId,
           name: catData['name'] as String,
           breed: catData['breed'] as String?,
-          birthDate: DateTime.parse(catData['birthDate'] as String),
+          birthDate: catData['birthDate'] != null
+              ? DateTime.parse(catData['birthDate'] as String)
+              : null,
           gender: catData['gender'] as String?,
           color: catData['color'] as String?,
           description: catData['description'] as String?,
@@ -229,7 +231,9 @@ class SyncService {
           id: operation.localId,
           name: catData['name'] as String,
           breed: catData['breed'] as String?,
-          birthDate: DateTime.parse(catData['birthDate'] as String),
+          birthDate: catData['birthDate'] != null
+              ? DateTime.parse(catData['birthDate'] as String)
+              : null,
           gender: catData['gender'] as String?,
           color: catData['color'] as String?,
           description: catData['description'] as String?,

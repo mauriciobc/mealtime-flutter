@@ -42,3 +42,12 @@ class SimpleAuthLogoutRequested extends SimpleAuthEvent {
 class SimpleAuthCheckRequested extends SimpleAuthEvent {
   const SimpleAuthCheckRequested();
 }
+
+class SimpleAuthGoogleSignInRequested extends SimpleAuthEvent {
+  const SimpleAuthGoogleSignInRequested();
+}
+
+/// Evento interno quando o stream de auth detecta sessão (ex.: retorno do OAuth).
+class SimpleAuthSessionDetected extends SimpleAuthEvent {
+  const SimpleAuthSessionDetected();
+}

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_design/material_design.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_event.dart';
@@ -237,7 +238,9 @@ class _CatDetailPageState extends State<CatDetailPage> {
                       ),
                       SizedBox(width: M3SpacingToken.space4.value),
                       Text(
-                        cat.ageDescription,
+                        cat.birthDate == null
+                            ? context.l10n.cats_birthDateNotInformed
+                            : cat.ageDescription,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
@@ -245,15 +248,15 @@ class _CatDetailPageState extends State<CatDetailPage> {
                       if (cat.gender != null) ...[
                         SizedBox(width: M3SpacingToken.space16.value),
                         Icon(
-                          cat.gender == 'M' ? Icons.male : Icons.female,
+                          cat.gender == 'male' ? Icons.male : Icons.female,
                           size: 16,
-                          color: cat.gender == 'M'
+                          color: cat.gender == 'male'
                               ? colorScheme.primary
                               : colorScheme.tertiary,
                         ),
                         SizedBox(width: M3SpacingToken.space4.value),
                         Text(
-                          cat.gender == 'M' ? 'Macho' : 'Fêmea',
+                          cat.gender == 'male' ? 'Macho' : 'Fêmea',
                           style: theme.textTheme.bodyMedium
                               ?.copyWith(
                                 color: colorScheme.onSurface.withValues(alpha: 0.6),
@@ -291,14 +294,22 @@ class _CatDetailPageState extends State<CatDetailPage> {
             _buildInfoRow(
               context,
               'Data de Nascimento',
-              '${cat.birthDate.day}/${cat.birthDate.month}/${cat.birthDate.year}',
+              cat.birthDate != null
+                  ? '${cat.birthDate!.day}/${cat.birthDate!.month}/${cat.birthDate!.year}'
+                  : context.l10n.cats_birthDateNotInformed,
             ),
-            _buildInfoRow(context, 'Idade', cat.ageDescription),
+            _buildInfoRow(
+              context,
+              'Idade',
+              cat.birthDate == null
+                  ? context.l10n.cats_birthDateNotInformed
+                  : cat.ageDescription,
+            ),
             if (cat.gender != null)
               _buildInfoRow(
                 context,
                 'Sexo',
-                cat.gender == 'M' ? 'Macho' : 'Fêmea',
+                cat.gender == 'male' ? 'Macho' : 'Fêmea',
               ),
           ],
         ),

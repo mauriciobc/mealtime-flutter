@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_design/material_design.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
@@ -138,7 +139,9 @@ class CatCard extends StatelessWidget {
             ),
             SizedBox(width: M3SpacingToken.space4.value),
             Text(
-              cat.ageDescription,
+              cat.birthDate == null
+                  ? context.l10n.cats_birthDateNotInformed
+                  : cat.ageDescription,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
@@ -146,15 +149,15 @@ class CatCard extends StatelessWidget {
             if (cat.gender != null) ...[
               SizedBox(width: M3SpacingToken.space16.value),
               Icon(
-                cat.gender == 'M' ? Icons.male : Icons.female,
+                cat.gender == 'male' ? Icons.male : Icons.female,
                 size: 16,
-                color: cat.gender == 'M' 
+                color: cat.gender == 'male'
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.tertiary,
               ),
               SizedBox(width: M3SpacingToken.space4.value),
               Text(
-                cat.gender == 'M' ? 'Macho' : 'Fêmea',
+                cat.gender == 'male' ? 'Macho' : 'Fêmea',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(
                     context,

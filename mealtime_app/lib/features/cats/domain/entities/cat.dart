@@ -4,7 +4,7 @@ class Cat extends Equatable {
   final String id;
   final String name;
   final String? breed;
-  final DateTime birthDate;
+  final DateTime? birthDate;
   final String? gender;
   final String? color;
   final String? description;
@@ -25,7 +25,7 @@ class Cat extends Equatable {
     required this.id,
     required this.name,
     this.breed,
-    required this.birthDate,
+    this.birthDate,
     this.gender,
     this.color,
     this.description,
@@ -110,14 +110,16 @@ class Cat extends Equatable {
     );
   }
 
-  int get ageInMonths {
+  int? get ageInMonths {
+    if (birthDate == null) return null;
     final now = DateTime.now();
-    final age = now.difference(birthDate);
+    final age = now.difference(birthDate!);
     return (age.inDays / 30).round();
   }
 
   String get ageDescription {
     final months = ageInMonths;
+    if (months == null) return '';
     if (months < 12) {
       return '$months ${months == 1 ? 'mês' : 'meses'}';
     } else {

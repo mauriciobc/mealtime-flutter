@@ -27,6 +27,21 @@ class AppRouter {
   // Router configurado com todas as rotas incluindo /notifications
   static final GoRouter _router = GoRouter(
     initialLocation: '/splash',
+    redirect: (context, state) {
+      final path = state.uri.path;
+      // Path raiz (ex.: após logout na web ou link para mealtime.app.br/)
+      // não tem rota → redirecionar para splash (checa auth e vai para login ou home).
+      if (path.isEmpty || path == '/') {
+        return '/splash';
+      }
+      // Deep link OAuth callback: io.mealtime.app://login-callback/... → path é
+      // /login-callback ou /login-callback/. Supabase já processou a sessão;
+      // redirecionar para home para evitar "Page not found".
+      if (path == '/login-callback' || path == '/login-callback/') {
+        return home;
+      }
+      return null;
+    },
     routes: [
       // Rotas públicas (sem bottomNav)
       GoRoute(

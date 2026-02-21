@@ -56,6 +56,7 @@ class CatModel {
   final String? portionUnit;  // ✅ NOVO: Unidade da porção
   @IntConverter()
   final int? feedingInterval;  // ✅ NOVO: Intervalo entre alimentações (horas)
+  final String? gender;  // Sexo: "male", "female" ou null
   final String? notes;  // ✅ NOVO: Notas sobre o gato
   final String? restrictions;  // ✅ NOVO: Restrições alimentares
   final DateTime createdAt;
@@ -72,6 +73,7 @@ class CatModel {
     this.portionSize,
     this.portionUnit,
     this.feedingInterval,
+    this.gender,
     this.notes,
     this.restrictions,
     required this.createdAt,
@@ -82,14 +84,11 @@ class CatModel {
       _$CatModelFromJson(json);
   Map<String, dynamic> toJson() => _$CatModelToJson(this);
 
-  /// Data sentinel quando API/JSON não informa nascimento (evita DateTime.now()).
-  static final DateTime _unknownBirthDate = DateTime(1970, 1, 1);
-
   factory CatModel.fromEntity(Cat cat) {
     return CatModel(
       id: cat.id,
       name: cat.name,
-      birthDate: cat.birthDate.toIso8601String(),
+      birthDate: cat.birthDate?.toIso8601String(),
       weight: cat.currentWeight,
       photoUrl: cat.imageUrl,
       householdId: cat.homeId,
@@ -97,6 +96,7 @@ class CatModel {
       portionSize: cat.portionSize,  // ✅ NOVO
       portionUnit: cat.portionUnit,  // ✅ NOVO
       feedingInterval: cat.feedingInterval,  // ✅ NOVO
+      gender: cat.gender,
       notes: cat.description,  // Mapear description para notes
       restrictions: cat.restrictions,  // ✅ NOVO
       createdAt: cat.createdAt,
@@ -110,9 +110,9 @@ class CatModel {
       name: name,
       breed: null,  // Não está na API atual
       birthDate: birthDate != null && birthDate!.isNotEmpty
-          ? (DateTime.tryParse(birthDate!) ?? _unknownBirthDate)
-          : _unknownBirthDate,
-      gender: null,  // Não está na API atual
+          ? DateTime.tryParse(birthDate!)
+          : null,
+      gender: gender,
       color: null,  // Não está na API atual
       description: notes,
       imageUrl: photoUrl,

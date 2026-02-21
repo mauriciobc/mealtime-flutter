@@ -676,6 +676,12 @@ abstract class AppLocalizations {
   /// **'Selecione a data'**
   String get cats_selectDate;
 
+  /// No description provided for @cats_birthDateNotInformed.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Não informada'**
+  String get cats_birthDateNotInformed;
+
   /// No description provided for @cats_invalidWeight.
   ///
   /// In pt_BR, this message translates to:
@@ -1095,6 +1101,12 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Funcionalidade de cadastro em desenvolvimento'**
   String get auth_registerInDevelopment;
+
+  /// No description provided for @auth_signInWithGoogle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Entrar com Google'**
+  String get auth_signInWithGoogle;
 
   /// No description provided for @profile_accountInfo.
   ///

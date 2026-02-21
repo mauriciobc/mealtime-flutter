@@ -40,8 +40,6 @@ class _CatFormState extends State<CatForm> {
     super.initState();
     if (widget.initialCat != null) {
       _populateForm(widget.initialCat!);
-    } else {
-      _selectedBirthDate = DateTime.now().subtract(const Duration(days: 365));
     }
   }
 
@@ -135,8 +133,14 @@ class _CatFormState extends State<CatForm> {
         border: const OutlineInputBorder(),
       ),
       items: [
-        DropdownMenuItem(value: 'M', child: Text(context.l10n.cats_genderMale)),
-        DropdownMenuItem(value: 'F', child: Text(context.l10n.cats_genderFemale)),
+        DropdownMenuItem(
+          value: 'male',
+          child: Text(context.l10n.cats_genderMale),
+        ),
+        DropdownMenuItem(
+          value: 'female',
+          child: Text(context.l10n.cats_genderFemale),
+        ),
       ],
       onChanged: (value) {
         setState(() {
@@ -163,7 +167,7 @@ class _CatFormState extends State<CatForm> {
       onTap: _selectBirthDate,
       child: InputDecorator(
         decoration: InputDecoration(
-          labelText: context.l10n.cats_birthDateRequired,
+          labelText: context.l10n.cats_birthDate,
           border: const OutlineInputBorder(),
         ),
         child: Text(
@@ -258,14 +262,14 @@ class _CatFormState extends State<CatForm> {
   }
 
   void _submitForm() {
-    if (_formKey.currentState!.validate() && _selectedBirthDate != null) {
+    if (_formKey.currentState!.validate()) {
       final cat = Cat(
         id: widget.initialCat?.id ?? '',
         name: _nameController.text.trim(),
         breed: _breedController.text.trim().isEmpty
             ? null
             : _breedController.text.trim(),
-        birthDate: _selectedBirthDate!,
+        birthDate: _selectedBirthDate,
         gender: _selectedGender,
         color: _colorController.text.trim().isEmpty
             ? null

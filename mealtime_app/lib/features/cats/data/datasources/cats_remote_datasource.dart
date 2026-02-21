@@ -51,6 +51,7 @@ class CatsRemoteDataSourceImpl implements CatsRemoteDataSource {
         birthdate: cat.birthDate,  // mudou de birthDate
         weight: cat.currentWeight,
         feedingInterval: cat.feedingInterval,
+        gender: cat.gender,
       );
       final apiResponse = await apiService.createCat(request);
 
@@ -76,6 +77,7 @@ class CatsRemoteDataSourceImpl implements CatsRemoteDataSource {
         birthdate: cat.birthDate,
         weight: cat.currentWeight,
         feedingInterval: cat.feedingInterval,
+        gender: cat.gender,
       );
       final apiResponse = await apiService.updateCat(cat.id, request);
 

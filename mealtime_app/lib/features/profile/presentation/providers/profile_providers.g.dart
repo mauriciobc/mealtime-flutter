@@ -8,9 +8,16 @@ part of 'profile_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Feature profile usa apenas Riverpod para estado (não Bloc).
+/// Infraestrutura (Dio, DB) segue via GetIt no core.
+// Repository Provider
 
 @ProviderFor(profileRepository)
 const profileRepositoryProvider = ProfileRepositoryProvider._();
+
+/// Feature profile usa apenas Riverpod para estado (não Bloc).
+/// Infraestrutura (Dio, DB) segue via GetIt no core.
+// Repository Provider
 
 final class ProfileRepositoryProvider
     extends
@@ -20,6 +27,9 @@ final class ProfileRepositoryProvider
           ProfileRepository
         >
     with $Provider<ProfileRepository> {
+  /// Feature profile usa apenas Riverpod para estado (não Bloc).
+  /// Infraestrutura (Dio, DB) segue via GetIt no core.
+  // Repository Provider
   const ProfileRepositoryProvider._()
     : super(
         from: null,

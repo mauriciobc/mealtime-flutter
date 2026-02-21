@@ -41,26 +41,29 @@ class CreateCatRequestV2 {
   final String name;
   final String householdId;  // mudou de homeId
   final String? photoUrl;    // mudou de imageUrl
-  final DateTime birthdate;  // mudou de birthDate
+  final DateTime? birthdate;  // mudou de birthDate
   final double? weight;
   final int? feedingInterval; // novo campo
+  final String? gender;      // "male", "female" ou null
 
   CreateCatRequestV2({
     required this.name,
     required this.householdId,
     this.photoUrl,
-    required this.birthdate,
+    this.birthdate,
     this.weight,
     this.feedingInterval,
+    this.gender,
   });
 
   Map<String, dynamic> toJson() => {
     'name': name,
     'householdId': householdId,
     if (photoUrl != null) 'photoUrl': photoUrl,
-    'birthdate': birthdate.toIso8601String(),
+    if (birthdate != null) 'birthdate': birthdate!.toIso8601String(),
     if (weight != null) 'weight': weight,
     if (feedingInterval != null) 'feeding_interval': feedingInterval,
+    if (gender != null) 'gender': gender,
   };
 }
 
@@ -72,6 +75,7 @@ class UpdateCatRequestV2 {
   final DateTime? birthdate;
   final double? weight;
   final int? feedingInterval;
+  final String? gender;  // "male", "female" ou null
 
   UpdateCatRequestV2({
     this.name,
@@ -80,6 +84,7 @@ class UpdateCatRequestV2 {
     this.birthdate,
     this.weight,
     this.feedingInterval,
+    this.gender,
   });
 
   Map<String, dynamic> toJson() => {
@@ -89,6 +94,7 @@ class UpdateCatRequestV2 {
     if (birthdate != null) 'birthdate': birthdate!.toIso8601String(),
     if (weight != null) 'weight': weight,
     if (feedingInterval != null) 'feeding_interval': feedingInterval,
+    if (gender != null) 'gender': gender,
   };
 }
 
