@@ -266,6 +266,11 @@ class ExpressiveChartContainer extends StatelessWidget {
   final Widget chart;
   final bool hasData;
   final Color? accentColor;
+  /// Minimum height for the chart area. Defaults to 180.
+  final double minChartHeight;
+  /// Optional max height. When null (default), the chart area grows with content
+  /// so complex charts (period selectors + plot) are not clipped.
+  final double? maxChartHeight;
 
   const ExpressiveChartContainer({
     super.key,
@@ -274,6 +279,8 @@ class ExpressiveChartContainer extends StatelessWidget {
     required this.chart,
     required this.hasData,
     this.accentColor,
+    this.minChartHeight = 180,
+    this.maxChartHeight,
   });
 
   @override
@@ -339,8 +346,15 @@ class ExpressiveChartContainer extends StatelessWidget {
             ],
           ),
           SizedBox(height: M3SpacingToken.space16.value),
-          Container(
-            constraints: const BoxConstraints(minHeight: 180, maxHeight: 200),
+          // Empty state keeps a compact fixed band; with data, size to content
+          // so nested controls + plot (e.g. weight trend) are not overflowed.
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: minChartHeight,
+              maxHeight: hasData
+                  ? (maxChartHeight ?? double.infinity)
+                  : (maxChartHeight ?? 200),
+            ),
             child: hasData
                 ? chart
                 : _buildNoDataPlaceholder(

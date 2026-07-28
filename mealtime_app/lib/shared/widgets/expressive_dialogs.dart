@@ -79,52 +79,58 @@ class ExpressiveBottomSheet extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (title != null || leading != null)
-          Padding(
-            padding: const M3EdgeInsets.symmetric(
-              horizontal: M3SpacingToken.space16,
-              vertical: M3SpacingToken.space16,
-            ),
-            child: Row(
-              children: [
-                if (leading != null) leading!,
-                if (leading != null)
-                  SizedBox(width: M3SpacingToken.space12.value),
-                if (title != null)
-                  Expanded(
-                    child: Text(
-                      title!,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
+    // M3EBottomSheet does not provide a Material ancestor. Material widgets
+    // inside the sheet (TextButton, InkWell, Checkbox, etc.) require one.
+    return Material(
+      color: colorScheme.surface,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (title != null || leading != null)
+            Padding(
+              padding: const M3EdgeInsets.symmetric(
+                horizontal: M3SpacingToken.space16,
+                vertical: M3SpacingToken.space16,
+              ),
+              child: Row(
+                children: [
+                  if (leading != null) leading!,
+                  if (leading != null)
+                    SizedBox(width: M3SpacingToken.space12.value),
+                  if (title != null)
+                    Expanded(
+                      child: Text(
+                        title!,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textScaler: TextScaler.noScaling,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textScaler: TextScaler.noScaling,
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
-        if (scrollable)
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-              child: child,
+          if (scrollable)
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const M3EdgeInsets.all(M3SpacingToken.space16),
+                child: child,
+              ),
+            )
+          else
+            Flexible(
+              child: Padding(
+                padding: const M3EdgeInsets.all(M3SpacingToken.space16),
+                child: child,
+              ),
             ),
-          )
-        else
-          Flexible(
-            child: Padding(
-              padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-              child: child,
-            ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

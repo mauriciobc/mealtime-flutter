@@ -288,40 +288,25 @@ class _HomeDetailPageState extends State<HomeDetailPage> {
               onPressed: _inviteMember,
             )
           else
-            Card(
-              elevation: 0,
-              color: theme.colorScheme.surfaceContainerLowest,
-              shape: RoundedRectangleBorder(
-                borderRadius: M3Shapes.shapeLarge,
-                side: BorderSide(color: theme.colorScheme.outlineVariant),
+            // M3ECardList owns the surface + item padding so M3EListItem
+            // embeds cleanly (no nested cards / missing horizontal insets).
+            M3ECardList(
+              itemCount: members.length,
+              gap: M3SpacingToken.space8.value,
+              padding: EdgeInsets.symmetric(
+                horizontal: M3SpacingToken.space16.value,
+                vertical: M3SpacingToken.space12.value,
               ),
-              child: Padding(
-                padding: const M3EdgeInsets.symmetric(
-                  vertical: M3SpacingToken.space8,
-                ),
-                child: Column(
-                  children: members.map((member) {
-                    final isLast = member == members.last;
-                    return Column(
-                      children: [
-                        MemberListItem(
-                          member: member,
-                          isCurrentUser: member.userId == _currentUserId,
-                          onPromote: () => _promoteMember(member),
-                          onRemove: () => _removeMemberBottomSheet(member),
-                        ),
-                        if (!isLast)
-                          Divider(
-                            height: 1,
-                            indent: M3SpacingToken.space16.value,
-                            endIndent: M3SpacingToken.space16.value,
-                            color: theme.colorScheme.surfaceContainerHighest,
-                          ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
+              color: theme.colorScheme.surfaceContainerHigh,
+              itemBuilder: (context, index) {
+                final member = members[index];
+                return MemberListItem(
+                  member: member,
+                  isCurrentUser: member.userId == _currentUserId,
+                  onPromote: () => _promoteMember(member),
+                  onRemove: () => _removeMemberBottomSheet(member),
+                );
+              },
             ),
         ],
       ),

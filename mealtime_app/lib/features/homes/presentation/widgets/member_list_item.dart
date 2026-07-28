@@ -34,7 +34,15 @@ class MemberListItem extends StatelessWidget {
       leading: _buildAvatar(context),
       trailing: showActions
           ? PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 40,
+                minHeight: 40,
+              ),
+              icon: Icon(
+                Icons.more_vert,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
               tooltip: 'Ações para ${member.user.fullName}',
               onSelected: (value) {
                 if (value == 'promote' && onPromote != null) {
@@ -88,11 +96,11 @@ class MemberListItem extends StatelessWidget {
     final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
     return CircleAvatar(
-      radius: 24,
+      radius: 20,
       backgroundColor: theme.colorScheme.primaryContainer,
       child: Text(
         initial,
-        style: theme.textTheme.titleLarge?.copyWith(
+        style: theme.textTheme.titleMedium?.copyWith(
           color: theme.colorScheme.onPrimaryContainer,
           fontWeight: FontWeight.bold,
         ),

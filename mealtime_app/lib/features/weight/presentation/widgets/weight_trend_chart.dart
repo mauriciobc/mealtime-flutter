@@ -56,7 +56,9 @@ class WeightTrendChart extends StatelessWidget {
       title: 'Tendência de Peso',
       subtitle: 'Evolução do peso ao longo do tempo',
       hasData: true,
+      minChartHeight: 280,
       chart: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -89,7 +91,8 @@ class WeightTrendChart extends StatelessWidget {
               } else {
                 chartWidth = 400.0;
               }
-              final chartHeight = 250.0;
+              // Plot height only — period controls live above this box.
+              const chartHeight = 220.0;
 
               final validData = chartData.where((data) {
                 return data.value.isFinite &&
