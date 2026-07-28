@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_design/material_design.dart';
 import 'package:material_charts/material_charts.dart';
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
@@ -65,11 +66,11 @@ class WeightTrendChart extends StatelessWidget {
             ),
           ),
           SizedBox(height: M3SpacingToken.space8.value),
-          SegmentedButton<int>(
+          M3ESegmentedButton<int>(
             segments: const [
-              ButtonSegment(value: 30, label: Text('30 dias')),
-              ButtonSegment(value: 60, label: Text('60 dias')),
-              ButtonSegment(value: 90, label: Text('90 dias')),
+              M3ESegment(value: 30, label: '30 dias'),
+              M3ESegment(value: 60, label: '60 dias'),
+              M3ESegment(value: 90, label: '90 dias'),
             ],
             selected: {timeRangeDays},
             onSelectionChanged: (Set<int> selected) {

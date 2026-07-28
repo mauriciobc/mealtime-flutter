@@ -9,6 +9,7 @@ import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/features/cats/presentation/widgets/cat_form.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 class CreateCatPage extends StatefulWidget {
   const CreateCatPage({super.key});
@@ -23,8 +24,9 @@ class _CreateCatPageState extends State<CreateCatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.cats_addCat),
+      appBar: M3EAppBar.top(
+        titleText: context.l10n.cats_addCat,
+        automaticallyImplyLeading: true,
         actions: [
           if (_isLoading)
             const Padding(

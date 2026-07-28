@@ -10,9 +10,10 @@ import 'package:mealtime_app/features/profile/domain/entities/profile.dart';
 import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
 import 'package:mealtime_app/features/profile/presentation/widgets/profile_avatar_widget.dart';
 import 'package:mealtime_app/features/profile/presentation/widgets/profile_edit_bottom_sheet.dart';
-import 'package:mealtime_app/features/profile/presentation/widgets/profile_tabs_widget.dart';
+import 'package:mealtime_app/features/profile/presentation/widgets/profile_dashboard_widget.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
-import 'package:m3e_collection/m3e_collection.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/shared/widgets/expressive_dialogs.dart';
 
@@ -25,7 +26,10 @@ class ProfilePage extends ConsumerWidget {
     
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(context.l10n.profile_title)),
+        appBar: M3EAppBar.top(
+          titleText: context.l10n.profile_title,
+          automaticallyImplyLeading: true,
+        ),
         body: Center(
           child: Text(context.l10n.auth_userNotAuthenticated),
         ),
@@ -35,43 +39,37 @@ class ProfilePage extends ConsumerWidget {
     final profileAsync = ref.watch(profileProvider(user.id));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.profile_title),
-        actions: [
-          IconButtonM3E(
-            onPressed: () => _showEditBottomSheet(context, ref, user.id, profileAsync),
-            icon: const Icon(Icons.edit),
-            tooltip: context.l10n.profile_editProfile,
-          ),
-          IconButtonM3E(
-            onPressed: () => _handleLogout(context, ref),
-            icon: const Icon(Icons.logout),
-            tooltip: context.l10n.auth_logout,
-          ),
-        ],
-      ),
       body: profileAsync.when(
         data: (profile) {
           if (profile == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(context.l10n.profile_profileNotFound),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      final provider = profileProvider(user.id);
-                      ref.read(provider.notifier).refresh();
-                    },
-                    child: Text(context.l10n.profile_reload),
-                  ),
-                ],
+            return Scaffold(
+              appBar: M3EAppBar.top(
+                titleText: context.l10n.profile_title,
+                automaticallyImplyLeading: true,
+              ),
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(context.l10n.profile_profileNotFound),
+                    const SizedBox(height: 16),
+                    M3EButton(
+                      style: M3EButtonStyle.filled,
+                      size: M3EButtonSize.md,
+                      shape: M3EButtonShape.round,
+                      onPressed: () {
+                        final provider = profileProvider(user.id);
+                        ref.read(provider.notifier).refresh();
+                      },
+                      child: Text(context.l10n.profile_reload),
+                    ),
+                  ],
+                ),
               ),
             );
           }
 
-          return RefreshIndicator(
+          return M3ERefreshIndicator(
             onRefresh: () async {
               HapticsService.mediumImpact();
               final provider = profileProvider(user.id);
@@ -79,29 +77,59 @@ class ProfilePage extends ConsumerWidget {
             },
             child: CustomScrollView(
               slivers: [
+                SliverAppBar.large(
+                  pinned: true,
+                  floating: true,
+                  stretch: true,
+                  title: Text(context.l10n.profile_title),
+                  actions: [
+                    M3EIconButton(
+                      onPressed: () => _showEditBottomSheet(context, ref, user.id, profileAsync),
+                      icon: const Icon(Icons.edit),
+                      tooltip: context.l10n.profile_editProfile,
+                    ),
+                    M3EIconButton(
+                      onPressed: () => _handleLogout(context, ref),
+                      icon: const Icon(Icons.logout),
+                      tooltip: context.l10n.auth_logout,
+                    ),
+                  ],
+                ),
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                       ProfileAvatarWidget(
                         imageUrl: profile.avatarUrl,
                         userId: user.id,
-                        size: 120,
+                        size: 100,
                       ),
                       const SizedBox(height: 16),
                       Text(
                         profile.fullName ??
                             profile.email?.split('@').first ??
                             context.l10n.profile_user,
-                        style: Theme.of(context).textTheme.headlineSmall,
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                        ),
                       ),
+                      if (profile.username != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          '@${profile.username}',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 24),
                     ],
                   ),
                 ),
-                SliverFillRemaining(
-                  hasScrollBody: true,
-                  child: ProfileTabsWidget(profile: profile),
+                SliverToBoxAdapter(
+                  child: ProfileDashboardWidget(profile: profile),
                 ),
               ],
             ),
@@ -112,32 +140,41 @@ class ProfilePage extends ConsumerWidget {
             child: Material3LoadingIndicator(),
           ),
         ),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SelectableText.rich(
-                TextSpan(
-                  text: '${context.l10n.error_loading}: ',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: error.toString(),
+        error: (error, stack) => Scaffold(
+          appBar: M3EAppBar.top(
+            titleText: context.l10n.profile_title,
+            automaticallyImplyLeading: true,
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SelectableText.rich(
+                  TextSpan(
+                    text: '${context.l10n.error_loading}: ',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
                     ),
-                  ],
+                    children: [
+                      TextSpan(
+                        text: error.toString(),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  final provider = profileProvider(user.id);
-                  ref.read(provider.notifier).refresh();
-                },
-                child: Text(context.l10n.common_retry),
-              ),
-            ],
+                const SizedBox(height: 16),
+                M3EButton(
+                  style: M3EButtonStyle.filled,
+                  size: M3EButtonSize.md,
+                  shape: M3EButtonShape.round,
+                  onPressed: () {
+                    final provider = profileProvider(user.id);
+                    ref.read(provider.notifier).refresh();
+                  },
+                  child: Text(context.l10n.common_retry),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -154,13 +191,10 @@ class ProfilePage extends ConsumerWidget {
     final profile = profileAsync.value;
     if (profile == null) return;
 
-    showModalBottomSheet<Profile>(
+    ExpressiveBottomSheet.show<Profile>(
       context: context,
+      child: ProfileEditBottomSheet(profile: profile),
       isScrollControlled: true,
-      showDragHandle: true,
-      builder: (dialogContext) => ProfileEditBottomSheet(
-        profile: profile,
-      ),
     ).then((updatedProfile) async {
       if (updatedProfile != null) {
         final provider = profileProvider(userId);

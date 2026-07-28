@@ -108,10 +108,34 @@ class CatCard extends StatelessWidget {
     );
   }
 
+  Widget _buildInfoRow(BuildContext context, IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: Theme.of(context).colorScheme.outline,
+        ),
+        SizedBox(width: M3SpacingToken.space4.value),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildCatInfo(BuildContext context) {
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           cat.name,
@@ -119,54 +143,53 @@ class CatCard extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: theme.colorScheme.onSurface,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         SizedBox(height: M3SpacingToken.space4.value),
         if (cat.breed != null) ...[
           Text(
             cat.breed!,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           SizedBox(height: M3SpacingToken.space4.value),
         ],
-        Row(
-          children: [
-            Icon(
-              Icons.cake,
-              size: 16,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-            SizedBox(width: M3SpacingToken.space4.value),
-            Text(
-              cat.birthDate == null
-                  ? context.l10n.cats_birthDateNotInformed
-                  : cat.ageDescription,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-            if (cat.gender != null) ...[
-              SizedBox(width: M3SpacingToken.space16.value),
+        _buildInfoRow(
+          context,
+          Icons.cake,
+          cat.birthDate == null
+              ? context.l10n.cats_birthDateNotInformed
+              : '${cat.birthDate!.day}/${cat.birthDate!.month.toString().padLeft(2, '0')}/${cat.birthDate!.year}',
+        ),
+        SizedBox(height: M3SpacingToken.space4.value),
+        _buildInfoRow(
+          context,
+          Icons.calendar_today,
+          cat.birthDate == null ? '—' : cat.ageDescription,
+        ),
+        if (cat.gender != null) ...[
+          SizedBox(height: M3SpacingToken.space4.value),
+          Row(
+            children: [
               Icon(
                 cat.gender == 'male' ? Icons.male : Icons.female,
                 size: 16,
-                color: cat.gender == 'male'
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.tertiary,
+                color: Theme.of(context).colorScheme.outline,
               ),
               SizedBox(width: M3SpacingToken.space4.value),
               Text(
                 cat.gender == 'male' ? 'Macho' : 'Fêmea',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
-          ],
-        ),
+          ),
+        ],
         if (cat.currentWeight != null) ...[
           SizedBox(height: M3SpacingToken.space4.value),
           Row(
@@ -174,15 +197,19 @@ class CatCard extends StatelessWidget {
               Icon(
                 Icons.monitor_weight,
                 size: 16,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(context).colorScheme.outline,
               ),
               SizedBox(width: M3SpacingToken.space4.value),
-              Text(
-                '${cat.currentWeight!.toStringAsFixed(1)} kg',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.6),
+              Expanded(
+                child: Text(
+                  '${cat.currentWeight!.toStringAsFixed(1)} kg',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -228,7 +255,7 @@ class CatCard extends StatelessWidget {
       ],
       child: Icon(
         Icons.more_vert,
-        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+        color: Theme.of(context).colorScheme.outline,
       ),
     );
   }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mealtime_app/core/theme/m3e.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
-import 'package:mealtime_app/core/theme/m3_shapes.dart';
 
 class ExpressiveNavigationBar extends StatefulWidget {
   const ExpressiveNavigationBar({super.key});
@@ -45,87 +45,58 @@ class _ExpressiveNavigationBarState extends State<ExpressiveNavigationBar> {
     final colorScheme = Theme.of(context).colorScheme;
     final selectedIndex = _getSelectedIndex(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            colorScheme.surfaceContainerLow,
-            colorScheme.surfaceContainer,
-          ],
+    return M3ENavigationBar(
+      selectedIndex: selectedIndex,
+      indicatorStyle: M3ENavBarIndicatorStyle.pill,
+      size: M3ENavBarSize.medium,
+      shapeFamily: M3ENavBarShapeFamily.round,
+      destinations: [
+        M3ENavigationBarDestination(
+          icon: Icon(Icons.home_outlined, color: colorScheme.outline),
+          selectedIcon: Icon(Icons.home, color: colorScheme.primary),
+          label: context.l10n.navigation_home,
         ),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(M3Shapes.shapeLarge.topLeft.x),
-          topRight: Radius.circular(M3Shapes.shapeLarge.topRight.x),
+        M3ENavigationBarDestination(
+          icon: SvgPicture.asset(
+            'assets/images/cat-outline.svg',
+            width: 24,
+            height: 24,
+            colorFilter: ColorFilter.mode(
+              selectedIndex == 1 ? colorScheme.primary : colorScheme.outline,
+              BlendMode.srcIn,
+            ),
+          ),
+          selectedIcon: SvgPicture.asset(
+            'assets/images/cat-bold.svg',
+            width: 24,
+            height: 24,
+            colorFilter: ColorFilter.mode(
+              colorScheme.primary,
+              BlendMode.srcIn,
+            ),
+          ),
+          label: context.l10n.navigation_cats,
         ),
-        border: Border(
-          top: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+        M3ENavigationBarDestination(
+          icon: Icon(
+            Icons.monitor_weight_outlined,
+            color: colorScheme.outline,
           ),
+          selectedIcon: Icon(
+            Icons.monitor_weight,
+            color: colorScheme.primary,
+          ),
+          label: context.l10n.navigation_weight,
         ),
-      ),
-      child: NavigationBar(
-        selectedIndex: selectedIndex,
-        indicatorColor: colorScheme.primaryContainer.withValues(alpha: 0.6),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        destinations: [
-          NavigationDestination(
-            icon: Icon(
-              Icons.home_outlined,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            selectedIcon: Icon(Icons.home, color: colorScheme.primary),
-            label: context.l10n.navigation_home,
-          ),
-          NavigationDestination(
-            icon: SvgPicture.asset(
-              'assets/images/cat-outline.svg',
-              width: 24,
-              height: 24,
-              colorFilter: ColorFilter.mode(
-                selectedIndex == 1
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-                BlendMode.srcIn,
-              ),
-            ),
-            selectedIcon: SvgPicture.asset(
-              'assets/images/cat-bold.svg',
-              width: 24,
-              height: 24,
-              colorFilter: ColorFilter.mode(
-                colorScheme.primary,
-                BlendMode.srcIn,
-              ),
-            ),
-            label: context.l10n.navigation_cats,
-          ),
-          NavigationDestination(
-            icon: Icon(
-              Icons.monitor_weight_outlined,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            selectedIcon: Icon(
-              Icons.monitor_weight,
-              color: colorScheme.primary,
-            ),
-            label: context.l10n.navigation_weight,
-          ),
-          NavigationDestination(
-            icon: Icon(
-              Icons.bar_chart_outlined,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            selectedIcon: Icon(Icons.bar_chart, color: colorScheme.primary),
-            label: context.l10n.navigation_statistics,
-          ),
-        ],
-        onDestinationSelected: (index) {
-          _navigateToDestination(index, context);
-        },
-      ),
+        M3ENavigationBarDestination(
+          icon: Icon(Icons.bar_chart_outlined, color: colorScheme.outline),
+          selectedIcon: Icon(Icons.bar_chart, color: colorScheme.primary),
+          label: context.l10n.navigation_statistics,
+        ),
+      ],
+      onDestinationSelected: (index) {
+        _navigateToDestination(index, context);
+      },
     );
   }
 

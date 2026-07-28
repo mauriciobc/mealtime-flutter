@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_design/material_design.dart';
-import 'package:m3e_collection/m3e_collection.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
@@ -18,38 +18,48 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    // Verificar autenticação após um pequeno delay
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.read<SimpleAuthBloc>().add(const SimpleAuthCheckRequested());
+    // Dispara a checagem de auth imediatamente. Só redireciona no primeiro
+    // frame se o estado já for Success (ex.: deep link OAuth); não manda
+    // para login só porque o estado é Initial — assim usuário logado não
+    // vê a tela de login antes do redirecionamento.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (context.read<SimpleAuthBloc>().state is SimpleAuthSuccess) {
+        _redirectIfStateFinal(context);
       }
+      context.read<SimpleAuthBloc>().add(const SimpleAuthCheckRequested());
     });
-    
     // Fallback: Se após 10 segundos ainda não tiver navegado, ir para login
     Future.delayed(const Duration(seconds: 10), () {
       if (mounted) {
         final state = context.read<SimpleAuthBloc>().state;
-        if (state is SimpleAuthLoading || 
-            (state is! SimpleAuthSuccess && state is! SimpleAuthInitial && state is! SimpleAuthFailure)) {
-          // Se ainda está em loading ou em algum estado indefinido, ir para login
+        if (state is SimpleAuthLoading ||
+            (state is! SimpleAuthSuccess &&
+                state is! SimpleAuthInitial &&
+                state is! SimpleAuthFailure)) {
           context.go('/login');
         }
       }
     });
   }
 
+  void _redirectIfStateFinal(BuildContext context) {
+    final state = context.read<SimpleAuthBloc>().state;
+    if (state is SimpleAuthSuccess) {
+      if (state.hasHousehold) {
+        context.go('/home');
+      } else {
+        context.go('/onboarding');
+      }
+    } else if (state is SimpleAuthInitial || state is SimpleAuthFailure) {
+      context.go('/login');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<SimpleAuthBloc, SimpleAuthState>(
-      listener: (context, state) {
-        if (state is SimpleAuthSuccess) {
-          // Usuário autenticado, ir para home
-          context.go('/home');
-        } else if (state is SimpleAuthInitial || state is SimpleAuthFailure) {
-          // Usuário não autenticado ou erro na autenticação, ir para login
-          context.go('/login');
-        }
-      },
+      listener: (context, state) => _redirectIfStateFinal(context),
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.primary,
         body: Center(
@@ -79,12 +89,12 @@ class _SplashPageState extends State<SplashPage> {
                 'Gerencie a alimentação dos seus gatos',
                 style: TextStyle(
                   fontSize: 18,
-                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
               SizedBox(height: M3SpacingToken.space48.value),
               Material3LoadingIndicator(
-                variant: LoadingIndicatorM3EVariant.contained,
+                variant: M3ELoadingIndicatorVariant.contained,
               ),
             ],
           ),

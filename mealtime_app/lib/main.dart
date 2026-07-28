@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -19,8 +20,10 @@ import 'package:mealtime_app/features/statistics/presentation/bloc/statistics_bl
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart';
 import 'package:mealtime_app/l10n/app_localizations.dart';
 import 'package:material_design/material_design.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:mealtime_app/core/theme/m3_expressive_theme.dart';
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
+import 'package:mealtime_app/core/theme/typography_scale.dart';
 
 // Helper function to create a custom text theme with Outfit for headings and Atkinson Hyperlegible for body
 // Inclui estilos enfatizados para M3 Expressive
@@ -121,6 +124,19 @@ Color _adjustColorLightnessAndDesaturate(
 /// Analisa e ajusta todas as cores do tema para garantir contraste adequado
 /// 
 /// Garante diferenças mínimas entre:
+/// Garante contraste WCAG AA mínimo entre surface roles.
+/// 
+/// Esta função valida e ajusta as cores semânticas do ColorScheme para:
+/// - Atender conformidade WCAG 2.1 AA (4.5:1 para texto normal, 3:1 para UI components)
+/// - Manter hierarquia visual entre surface, containers e variantes
+/// - Funcionando tanto em light theme quanto dark theme
+/// 
+/// Referências:
+/// - [WCAG 2.1 Contrast](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
+/// - [Material 3 Color System](https://m3.material.io/styles/color/overview)
+/// - [ContrastUtils] para cálculos de contraste programáticos
+///
+/// Pares validados:
 /// - surface (background) e surfaceContainerHighest
 /// - surface e surfaceContainer (usado em cards)
 /// - surfaceContainer e suas variantes (High, Highest)
@@ -236,30 +252,27 @@ void main() async {
 
   // Tratamento global de erros de renderização
   FlutterError.onError = (FlutterErrorDetails details) {
-    // Log limitado para evitar spam no console
-    // AssertionError são comuns durante desenvolvimento e podem causar loops
     final exception = details.exception;
     final stack = details.stack;
-    
-    // Limitar logs de AssertionError relacionados a parentDataDirty e acessibilidade
-    // pois esses são os que causam loops infinitos
-    if (exception is AssertionError) {
+
+    // Em debug: suprimir só ruído conhecido de testes de UI / a11y que causa loop.
+    if (kDebugMode && exception is AssertionError) {
       final message = exception.toString();
-      if (message.contains('parentDataDirty') || 
+      if (message.contains('parentDataDirty') ||
           message.contains('semantics') ||
           message.contains('fl_view_accessible') ||
           message.contains('child != nullptr')) {
-        // Não logar repetidamente o mesmo erro
-        // Apenas registrar uma vez para evitar spam
         return;
       }
     }
-    
-    // Para outros erros, logar normalmente mas sem presentError
-    // para evitar múltiplas janelas de erro
+
+    FlutterError.presentError(details);
     debugPrint('[FlutterError] ${details.exception}');
     if (stack != null) {
-      debugPrint('[FlutterError] Stack: ${stack.toString().split('\n').take(5).join('\n')}');
+      debugPrint(
+        '[FlutterError] Stack: '
+        '${stack.toString().split('\n').take(5).join('\n')}',
+      );
     }
   };
 
@@ -345,6 +358,11 @@ class MyApp extends StatelessWidget {
           TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
           TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
         },
+      ),
+      // M3 Expressive: elevação por overlay tonal, não sombra
+      appBarTheme: AppBarTheme(
+        elevation: 0,
+        scrolledUnderElevation: 0,
       ),
       // Configura Cards para usarem surfaceContainer (com contraste)
       // em vez de surface (mesma cor do background)
@@ -436,6 +454,36 @@ class MyApp extends StatelessWidget {
               darkTheme: _buildTheme(adjustedDarkScheme),
               themeMode: ThemeMode.system,
               routerConfig: AppRouter.router,
+              builder: (context, child) {
+                final mediaQuery = MediaQuery.of(context);
+                final width = mediaQuery.size.width;
+                final scaleFactor = getScaleFactorForWidth(width);
+                final theme = Theme.of(context);
+                final scaledTextTheme =
+                    scaleTextTheme(theme.textTheme, scaleFactor);
+                final clampedTextScaler = mediaQuery.textScaler.clamp(
+                  minScaleFactor: 1.0,
+                  maxScaleFactor: 1.2,
+                );
+                final themedChild = MediaQuery(
+                  data: mediaQuery.copyWith(textScaler: clampedTextScaler),
+                  child: Theme(
+                    data: theme.copyWith(textTheme: scaledTextTheme),
+                    child: child ?? const SizedBox.shrink(),
+                  ),
+                );
+                final m3eData = M3EThemeData.fromMaterial(
+                  theme.copyWith(textTheme: scaledTextTheme),
+                ).copyWith(
+                  colorScheme: M3EColorScheme.fromColorScheme(
+                    theme.colorScheme,
+                  ).harmonized(),
+                );
+                return M3ETheme(
+                  data: m3eData,
+                  child: themedChild,
+                );
+              },
               localizationsDelegates: const [
                 AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
@@ -457,22 +505,11 @@ class MyApp extends StatelessWidget {
 }
 
 extension ContextExtension on BuildContext {
+  /// Thin façade over [M3ESnackbar.show].
+  ///
+  /// [isError] is kept for call-site compatibility. M3ESnackbar has no
+  /// error/color variant, so the flag is currently unused.
   void showSnackBar(String message, {bool isError = false}) {
-    final theme = Theme.of(this);
-    ScaffoldMessenger.of(this).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: TextStyle(
-            color: isError
-                ? theme.colorScheme.onError
-                : theme.snackBarTheme.contentTextStyle?.color,
-          ),
-        ),
-        backgroundColor: isError
-            ? theme.colorScheme.error
-            : theme.snackBarTheme.backgroundColor,
-      ),
-    );
+    M3ESnackbar.show(this, message: message);
   }
 }

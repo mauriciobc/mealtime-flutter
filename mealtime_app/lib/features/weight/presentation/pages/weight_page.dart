@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:material_design/material_design.dart';
-import 'package:mealtime_app/features/cats/domain/entities/cat.dart' as cat_entity;
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:mealtime_app/features/cats/domain/entities/cat.dart'
+    as cat_entity;
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
 import 'package:mealtime_app/core/utils/haptics_service.dart';
 import 'package:mealtime_app/features/cats/presentation/bloc/cats_bloc.dart';
@@ -17,10 +19,10 @@ import 'package:mealtime_app/features/weight/presentation/widgets/add_weight_bot
 import 'package:mealtime_app/features/weight/presentation/widgets/create_goal_bottom_sheet.dart';
 import 'package:mealtime_app/features/weight/presentation/widgets/weight_trend_chart.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
-import 'package:m3e_collection/m3e_collection.dart';
 import 'package:mealtime_app/core/theme/m3_motion_helpers.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart' as shared;
 import 'package:mealtime_app/shared/widgets/cat_selection_filter.dart';
+import 'package:mealtime_app/shared/widgets/expressive_dialogs.dart';
 import 'package:mealtime_app/shared/widgets/expressive_widgets.dart';
 
 class WeightPage extends StatefulWidget {
@@ -46,49 +48,61 @@ class _WeightPageState extends State<WeightPage> {
     if (!mounted) return;
 
     debugPrint('[WeightPage] 🚀 Carregando gatos...');
-    context.read<CatsBloc>().add(const LoadCats());
+    final catsBloc = context.read<CatsBloc>();
+    catsBloc.add(const LoadCats());
+    // BlocListener only runs when state *changes*. If CatsBloc already had
+    // CatsLoaded (e.g. from Home), the same emission after LoadCats() may be
+    // equal and the listener won't fire. So we also init Weight from current
+    // state when we already have cats.
+    _tryInitializeWeightFromCatsState(catsBloc.state);
+  }
+
+  void _tryInitializeWeightFromCatsState(CatsState catsState) {
+    List<cat_entity.Cat>? cats;
+    if (catsState is CatsLoaded) {
+      cats = catsState.cats;
+    } else if (catsState is CatOperationSuccess) {
+      cats = catsState.cats;
+    }
+    if (cats == null || cats.isEmpty) return;
+    if (!mounted) return;
+    final weightState = context.read<WeightBloc>().state;
+    if (weightState is WeightInitial ||
+        (weightState is WeightLoaded && weightState.cats.isEmpty)) {
+      debugPrint(
+        '[WeightPage] 🎯 Inicializando WeightBloc com ${cats.length} gatos',
+      );
+      context.read<WeightBloc>().add(
+        InitializeWeight(
+          cats: cats,
+          catId: cats.isNotEmpty ? cats.first.id : null,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<CatsBloc, CatsState>(
       listener: (context, catsState) {
-        debugPrint('[WeightPage] 📢 CatsBloc emitido: ${catsState.runtimeType}');
-        List<cat_entity.Cat>? cats;
-        if (catsState is CatsLoaded) {
-          cats = catsState.cats;
-          debugPrint('[WeightPage] ✅ CatsLoaded com ${cats.length} gatos');
-        } else if (catsState is CatOperationSuccess) {
-          cats = catsState.cats;
-          debugPrint('[WeightPage] ✅ CatOperationSuccess com ${cats.length} gatos');
-        }
-        if (cats != null) {
-          final weightState = context.read<WeightBloc>().state;
-          debugPrint('[WeightPage] 📊 WeightBloc estado atual: ${weightState.runtimeType}');
-          if (weightState is WeightInitial ||
-              (weightState is WeightLoaded && weightState.cats.isEmpty)) {
-            debugPrint('[WeightPage] 🎯 Inicializando WeightBloc com ${cats.length} gatos');
-            context.read<WeightBloc>().add(
-                  InitializeWeight(
-                    cats: cats,
-                    catId: cats.isNotEmpty ? cats.first.id : null,
-                  ),
-                );
-          }
-        }
+        debugPrint(
+          '[WeightPage] 📢 CatsBloc emitido: ${catsState.runtimeType}',
+        );
+        _tryInitializeWeightFromCatsState(catsState);
       },
       child: BlocBuilder<WeightBloc, WeightState>(
         builder: (context, weightState) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Painel de Peso'),
+            appBar: M3EAppBar.top(
+              titleText: 'Painel de Peso',
+              automaticallyImplyLeading: true,
               actions: [
                 if (weightState is WeightLoaded)
                   _buildNewGoalButton(weightState, weightState.cats),
               ],
             ),
             body: _buildBody(context, weightState),
-            floatingActionButton: FabM3E(
+            floatingActionButton: M3EFab(
               onPressed: () {
                 HapticsService.mediumImpact();
                 final weightState = context.read<WeightBloc>().state;
@@ -101,26 +115,22 @@ class _WeightPageState extends State<WeightPage> {
                         shape: RoundedRectangleBorder(
                           borderRadius: M3Shapes.shapeMedium,
                         ),
-                        action: SnackBarAction(
-                          label: 'OK',
-                          onPressed: () {},
-                        ),
+                        action: SnackBarAction(label: 'OK', onPressed: () {}),
                       ),
                     );
                     return;
                   }
-                  showModalBottomSheet(
+                  ExpressiveBottomSheet.show(
                     context: context,
-                    isScrollControlled: true,
-                    showDragHandle: true,
-                    builder: (context) => AddWeightBottomSheet(
+                    child: AddWeightBottomSheet(
                       selectedCat: weightState.selectedCat,
                     ),
+                    isScrollControlled: true,
                   );
                 }
               },
-              icon: const Icon(Icons.add),
               tooltip: 'Registrar Peso',
+              icon: const Icon(Icons.add),
             ),
           );
         },
@@ -130,9 +140,7 @@ class _WeightPageState extends State<WeightPage> {
 
   Widget _buildBody(BuildContext context, WeightState weightState) {
     if (weightState is WeightLoading) {
-      return const LoadingWidget(
-        message: 'Carregando dados de peso...',
-      );
+      return const LoadingWidget(message: 'Carregando dados de peso...');
     }
     if (weightState is WeightError) {
       HapticsService.error();
@@ -146,13 +154,11 @@ class _WeightPageState extends State<WeightPage> {
     if (weightState is WeightLoaded) {
       return _buildContent(weightState, weightState.cats);
     }
-    return const LoadingWidget(
-      message: 'Carregando dados...',
-    );
+    return const LoadingWidget(message: 'Carregando dados...');
   }
 
   Widget _buildContent(WeightLoaded weightState, List<cat_entity.Cat> cats) {
-    return RefreshIndicator(
+    return M3ERefreshIndicator(
       onRefresh: () async {
         HapticsService.mediumImpact();
         context.read<WeightBloc>().add(const RefreshWeightData());
@@ -170,87 +176,91 @@ class _WeightPageState extends State<WeightPage> {
           M3SpacingToken.space16,
         ),
         children: <Widget>[
-            // Header
-            StaggeredEntranceBuilder(index: 0, child: _buildHeader()),
+          // Header
+          StaggeredEntranceBuilder(index: 0, child: _buildHeader()),
+          SizedBox(height: M3SpacingToken.space24.value),
+
+          // Estado vazio quando não há gatos
+          if (cats.isEmpty) ...[
+            StaggeredEntranceBuilder(index: 1, child: _buildEmptyState()),
+          ],
+
+          // Seletor de Gatos (se houver mais de um)
+          if (cats.length > 1) ...[
+            StaggeredEntranceBuilder(
+              index: 1,
+              child: _buildCatSelector(weightState, cats),
+            ),
             SizedBox(height: M3SpacingToken.space24.value),
-            
-            // Estado vazio quando não há gatos
-            if (cats.isEmpty) ...[
-              StaggeredEntranceBuilder(index: 1, child: _buildEmptyState()),
-            ],
-            
-            // Seletor de Gatos (se houver mais de um)
-            if (cats.length > 1) ...[
-              StaggeredEntranceBuilder(index: 1, child: _buildCatSelector(weightState, cats)),
-              SizedBox(height: M3SpacingToken.space24.value),
-            ],
+          ],
 
-            // Mostrar seletor quando há apenas 1 gato não selecionado
-            if (cats.length == 1 && weightState.selectedCat == null) ...[
-              StaggeredEntranceBuilder(index: 1, child: _buildSingleCatSelector(weightState, cats.first)),
-              SizedBox(height: M3SpacingToken.space24.value),
-            ],
+          // Mostrar seletor quando há apenas 1 gato não selecionado
+          if (cats.length == 1 && weightState.selectedCat == null) ...[
+            StaggeredEntranceBuilder(
+              index: 1,
+              child: _buildSingleCatSelector(weightState, cats.first),
+            ),
+            SizedBox(height: M3SpacingToken.space24.value),
+          ],
 
-            // Indicadores de Peso
-            if (weightState.selectedCat != null) ...[
-              StaggeredEntranceBuilder(
-                index: 2,
-                child: RepaintBoundary(
-                  child: _buildWeightIndicators(weightState),
+          // Indicadores de Peso
+          if (weightState.selectedCat != null) ...[
+            StaggeredEntranceBuilder(
+              index: 2,
+              child: RepaintBoundary(
+                child: _buildWeightIndicators(weightState),
+              ),
+            ),
+            SizedBox(height: M3SpacingToken.space24.value),
+          ],
+
+          // Progresso da Meta
+          if (weightState.activeGoal != null) ...[
+            StaggeredEntranceBuilder(
+              index: 3,
+              child: RepaintBoundary(
+                child: AnimatedSwitcher(
+                  duration: M3Motion.standard.duration,
+                  switchInCurve: M3Motion.standard.curve,
+                  switchOutCurve: M3Motion.standard.curve,
+                  child: _buildProgressCard(weightState),
                 ),
               ),
-              SizedBox(height: M3SpacingToken.space24.value),
-            ],
+            ),
+            SizedBox(height: M3SpacingToken.space24.value),
+          ],
 
-            // Progresso da Meta
-            if (weightState.activeGoal != null) ...[
-              StaggeredEntranceBuilder(
-                index: 3,
-                child: RepaintBoundary(
-                  child: AnimatedSwitcher(
-                    duration: M3Motion.standard.duration,
-                    switchInCurve: M3Motion.standard.curve,
-                    switchOutCurve: M3Motion.standard.curve,
-                    child: _buildProgressCard(weightState),
+          // Gráfico de Tendência
+          if (cats.isNotEmpty) ...[
+            StaggeredEntranceBuilder(
+              index: 4,
+              child: RepaintBoundary(
+                child: WeightTrendChart(
+                  key: ValueKey(
+                    'trend-chart-${weightState.selectedCat?.id}-'
+                    '${weightState.filteredWeightLogs.length}-'
+                    '${weightState.timeRangeDays}',
                   ),
+                  weightLogs: weightState.filteredWeightLogs,
+                  goal: weightState.activeGoal,
+                  timeRangeDays: weightState.timeRangeDays,
+                  onTimeRangeChanged: (days) {
+                    HapticsService.selectionClick();
+                    context.read<WeightBloc>().add(ChangeTimeRange(days));
+                  },
                 ),
               ),
-              SizedBox(height: M3SpacingToken.space24.value),
-            ],
+            ),
+            SizedBox(height: M3SpacingToken.space24.value),
+          ],
 
-            // Gráfico de Tendência
-            if (cats.isNotEmpty) ...[
-              StaggeredEntranceBuilder(
-                index: 4,
-                child: RepaintBoundary(
-                  child: WeightTrendChart(
-                    key: ValueKey(
-                      'trend-chart-${weightState.selectedCat?.id}-'
-                      '${weightState.filteredWeightLogs.length}-'
-                      '${weightState.timeRangeDays}',
-                    ),
-                    weightLogs: weightState.filteredWeightLogs,
-                    goal: weightState.activeGoal,
-                    timeRangeDays: weightState.timeRangeDays,
-                    onTimeRangeChanged: (days) {
-                      HapticsService.selectionClick();
-                      context.read<WeightBloc>().add(ChangeTimeRange(days));
-                    },
-                  ),
-                ),
-              ),
-              SizedBox(height: M3SpacingToken.space24.value),
-            ],
-
-            // Histórico Recente
-            if (cats.isNotEmpty) ...[
-              StaggeredEntranceBuilder(
-                index: 5,
-                child: RepaintBoundary(
-                  child: _buildHistoryList(weightState),
-                ),
-              ),
-            ],
+          // Histórico Recente
+          if (cats.isNotEmpty) ...[
+            StaggeredEntranceBuilder(
+              index: 5,
+              child: RepaintBoundary(child: _buildHistoryList(weightState)),
+            ),
+          ],
         ],
       ),
     );
@@ -282,11 +292,12 @@ class _WeightPageState extends State<WeightPage> {
     WeightLoaded weightState,
     List<cat_entity.Cat> cats,
   ) {
-    final isDisabled = cats.isEmpty ||
+    final isDisabled =
+        cats.isEmpty ||
         weightState.selectedCat == null ||
         weightState.activeGoal != null;
 
-    return IconButton(
+    return M3EIconButton(
       key: const ValueKey('new-goal-button'),
       onPressed: isDisabled
           ? null
@@ -300,22 +311,18 @@ class _WeightPageState extends State<WeightPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: M3Shapes.shapeMedium,
                     ),
-                    action: SnackBarAction(
-                      label: 'OK',
-                      onPressed: () {},
-                    ),
+                    action: SnackBarAction(label: 'OK', onPressed: () {}),
                   ),
                 );
                 return;
               }
-              showModalBottomSheet(
+              ExpressiveBottomSheet.show(
                 context: context,
-                isScrollControlled: true,
-                showDragHandle: true,
-                builder: (context) => CreateGoalBottomSheet(
+                child: CreateGoalBottomSheet(
                   selectedCat: weightState.selectedCat!,
                   weightLogs: weightState.weightLogs,
                 ),
+                isScrollControlled: true,
               );
             },
       icon: const Icon(Icons.flag),
@@ -323,7 +330,10 @@ class _WeightPageState extends State<WeightPage> {
     );
   }
 
-  Widget _buildCatSelector(WeightLoaded weightState, List<cat_entity.Cat> cats) {
+  Widget _buildCatSelector(
+    WeightLoaded weightState,
+    List<cat_entity.Cat> cats,
+  ) {
     return CatSelectionFilter(
       cats: cats,
       initialSelectedId: weightState.selectedCat?.id,
@@ -375,7 +385,9 @@ class _WeightPageState extends State<WeightPage> {
               ),
               borderRadius: M3Shapes.shapeLarge,
               border: Border.all(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.2),
               ),
             ),
             child: Row(
@@ -389,25 +401,23 @@ class _WeightPageState extends State<WeightPage> {
                       Text(
                         cat.name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                       SizedBox(height: M3SpacingToken.space4.value),
                       Text(
                         'Toque para ver os registros de peso',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withValues(
-                                    alpha: 0.6,
-                                  ),
-                            ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Icon(
                   Icons.chevron_right,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.outline,
                 ),
               ],
             ),
@@ -428,10 +438,7 @@ class _WeightPageState extends State<WeightPage> {
             parent: animation,
             curve: M3Motion.standard.curve,
           ),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
+          child: FadeTransition(opacity: animation, child: child),
         );
       },
       child: Row(
@@ -473,7 +480,7 @@ class _WeightPageState extends State<WeightPage> {
   Widget _buildProgressCard(WeightLoaded weightState) {
     final progress = weightState.progressPercentage ?? 0.0;
     final safeProgress = progress.isFinite ? progress : 0.0;
-    
+
     return TweenAnimationBuilder<double>(
       duration: M3Motion.emphasized.duration,
       tween: Tween(begin: 0.0, end: safeProgress / 100),
@@ -481,7 +488,9 @@ class _WeightPageState extends State<WeightPage> {
       builder: (context, animatedProgress, child) {
         final theme = Theme.of(context);
         return Container(
-          key: ValueKey('progress-card-${weightState.activeGoal?.id ?? 'none'}'),
+          key: ValueKey(
+            'progress-card-${weightState.activeGoal?.id ?? 'none'}',
+          ),
           padding: const M3EdgeInsets.all(M3SpacingToken.space20),
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -545,10 +554,9 @@ class _WeightPageState extends State<WeightPage> {
               SizedBox(height: M3SpacingToken.space20.value),
               ClipRRect(
                 borderRadius: M3Shapes.shapeSmall,
-                child: LinearProgressIndicatorM3E(
+                child: M3EProgressIndicator.linear(
                   value: animatedProgress,
-                  size: LinearProgressM3ESize.m,
-                  activeColor: theme.colorScheme.primary,
+                  color: theme.colorScheme.primary,
                   trackColor: theme.colorScheme.surfaceContainerHighest,
                 ),
               ),
@@ -565,7 +573,6 @@ class _WeightPageState extends State<WeightPage> {
       },
     );
   }
-
 
   Widget _buildHistoryList(WeightLoaded weightState) {
     if (weightState.weightLogs.isEmpty) {
@@ -606,26 +613,26 @@ class _WeightPageState extends State<WeightPage> {
               }
 
               final theme = Theme.of(context);
-              
+
               return ListTile(
                 key: ValueKey('weight-log-${log.id}'),
                 leading: CircleAvatar(
                   backgroundColor: variation != null && variation > 0
                       ? theme.colorScheme.tertiary.withValues(alpha: 0.2)
                       : variation != null && variation < 0
-                          ? theme.colorScheme.error.withValues(alpha: 0.2)
-                          : theme.colorScheme.outline.withValues(alpha: 0.2),
+                      ? theme.colorScheme.error.withValues(alpha: 0.2)
+                      : theme.colorScheme.outline.withValues(alpha: 0.2),
                   child: Icon(
                     variation != null && variation > 0
                         ? Icons.trending_up
                         : variation != null && variation < 0
-                            ? Icons.trending_down
-                            : Icons.remove,
+                        ? Icons.trending_down
+                        : Icons.remove,
                     color: variation != null && variation > 0
                         ? theme.colorScheme.onTertiaryContainer
                         : variation != null && variation < 0
-                            ? theme.colorScheme.onErrorContainer
-                            : theme.colorScheme.onSurfaceVariant,
+                        ? theme.colorScheme.onErrorContainer
+                        : theme.colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
                 ),
@@ -641,10 +648,14 @@ class _WeightPageState extends State<WeightPage> {
                         ),
                         decoration: BoxDecoration(
                           color: variation > 0
-                              ? theme.colorScheme.tertiary.withValues(alpha: 0.1)
+                              ? theme.colorScheme.tertiary.withValues(
+                                  alpha: 0.1,
+                                )
                               : variation < 0
-                                  ? theme.colorScheme.error.withValues(alpha: 0.1)
-                                  : theme.colorScheme.outline.withValues(alpha: 0.1),
+                              ? theme.colorScheme.error.withValues(alpha: 0.1)
+                              : theme.colorScheme.outline.withValues(
+                                  alpha: 0.1,
+                                ),
                           borderRadius: M3Shapes.shapeMedium,
                         ),
                         child: Text(
@@ -653,8 +664,8 @@ class _WeightPageState extends State<WeightPage> {
                             color: variation > 0
                                 ? theme.colorScheme.onTertiaryContainer
                                 : variation < 0
-                                    ? theme.colorScheme.onErrorContainer
-                                    : theme.colorScheme.onSurfaceVariant,
+                                ? theme.colorScheme.onErrorContainer
+                                : theme.colorScheme.onSurfaceVariant,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -670,7 +681,8 @@ class _WeightPageState extends State<WeightPage> {
 
   Widget _buildCatAvatar(BuildContext context, cat_entity.Cat cat) {
     final imageUrl = cat.imageUrl;
-    final hasValidImageUrl = imageUrl != null &&
+    final hasValidImageUrl =
+        imageUrl != null &&
         imageUrl.isNotEmpty &&
         imageUrl.trim().isNotEmpty &&
         (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
@@ -691,7 +703,9 @@ class _WeightPageState extends State<WeightPage> {
                 height: 64,
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: const Center(
-                  child: CircularProgressIndicatorM3E(size: CircularProgressM3ESize.s),
+                  child: M3EProgressIndicator.circular(
+                    size: 16,
+                  ),
                 ),
               ),
               errorWidget: (context, url, error) => Container(
@@ -713,13 +727,15 @@ class _WeightPageState extends State<WeightPage> {
     return CircleAvatar(
       key: ValueKey('cat-avatar-fallback-${cat.id}'),
       radius: 32,
-      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.primary.withValues(alpha: 0.1),
       child: Text(
         cat.name[0].toUpperCase(),
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
     );
   }

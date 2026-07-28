@@ -253,7 +253,7 @@ class _ExpressiveCatCardState extends State<ExpressiveCatCard>
               Text(
                 widget.cat.breed!,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
+                  color: colorScheme.onSurfaceVariant,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -296,8 +296,7 @@ class _ExpressiveCatCardState extends State<ExpressiveCatCard>
                 Icon(
                   Icons.cake,
                   size: 14,
-                  color: colorScheme.onSurfaceVariant
-                      .withValues(alpha: 0.7),
+                  color: colorScheme.outline,
                 ),
                 SizedBox(width: M3SpacingToken.space4.value),
                 Flexible(
@@ -322,7 +321,7 @@ class _ExpressiveCatCardState extends State<ExpressiveCatCard>
                   Icon(
                     Icons.monitor_weight,
                     size: 16,
-                    color: colorScheme.primary,
+                    color: colorScheme.outline,
                   ),
                   SizedBox(width: M3SpacingToken.space4.value),
                   Flexible(
@@ -400,7 +399,7 @@ class _ExpressiveCatCardState extends State<ExpressiveCatCard>
             onTap: null,
             child: Padding(
               padding: const M3EdgeInsets.all(M3SpacingToken.space8),
-              child: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
+              child: Icon(Icons.more_vert, color: colorScheme.outline),
             ),
           ),
         ),

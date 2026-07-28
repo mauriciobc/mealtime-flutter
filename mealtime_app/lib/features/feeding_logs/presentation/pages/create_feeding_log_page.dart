@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/bloc/feeding_logs_bloc.dart';
@@ -68,8 +70,9 @@ class _CreateFeedingLogPageState extends State<CreateFeedingLogPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nova Refeição'),
+      appBar: M3EAppBar.top(
+        titleText: 'Nova Refeição',
+        automaticallyImplyLeading: true,
         actions: [
           TextButton(onPressed: _saveFeedingLog, child: const Text('Salvar')),
         ],
@@ -117,7 +120,10 @@ class _CreateFeedingLogPageState extends State<CreateFeedingLogPage> {
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
+                  child: M3EButton.icon(
+                    style: M3EButtonStyle.filled,
+                    size: M3EButtonSize.md,
+                    shape: M3EButtonShape.round,
                     onPressed: _saveFeedingLog,
                     icon: const Icon(Icons.save),
                     label: const Text('Criar Refeição'),

@@ -5,7 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:m3e_collection/m3e_collection.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 class ProfileAvatarWidget extends ConsumerStatefulWidget {
   final String? imageUrl;
@@ -59,7 +59,7 @@ class _ProfileAvatarWidgetState extends ConsumerState<ProfileAvatarWidget> {
                     width: 2,
                   ),
                 ),
-                child: IconButtonM3E(
+                child: M3EIconButton(
                   icon: _isLoading
                       ? Material3LoadingIndicator(size: 16.0)
                       : Icon(

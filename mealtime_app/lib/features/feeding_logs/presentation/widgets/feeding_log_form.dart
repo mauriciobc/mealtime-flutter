@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
 
 class FeedingLogForm extends StatelessWidget {
@@ -41,22 +42,24 @@ class FeedingLogForm extends StatelessWidget {
         // Tipo de refeição
         Text(
           'Tipo de Refeição',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           children: MealType.values.map((type) {
             final isSelected = selectedType == type;
-            return FilterChip(
-              label: Text(_getTypeDisplayName(type)),
+            return M3EChip(
+              label: _getTypeDisplayName(type),
+              type: M3EChipType.filter,
               selected: isSelected,
-              onSelected: (selected) {
-                if (selected) onTypeChanged(type);
+              onPressed: () {
+                if (!isSelected) onTypeChanged(type);
               },
-              avatar: Icon(_getTypeIcon(type)),
+              leading: Icon(_getTypeIcon(type)),
             );
           }).toList(),
         ),
@@ -103,9 +106,10 @@ class FeedingLogForm extends StatelessWidget {
         // Data e hora
         Text(
           'Data e Hora',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
         const SizedBox(height: 8),
         Row(

@@ -9,6 +9,7 @@ import 'package:mealtime_app/features/cats/presentation/bloc/cats_state.dart';
 import 'package:mealtime_app/features/cats/presentation/widgets/cat_form.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/shared/widgets/error_widget.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 class EditCatPage extends StatefulWidget {
   final String catId;
@@ -31,8 +32,9 @@ class _EditCatPageState extends State<EditCatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar Gato'),
+      appBar: M3EAppBar.top(
+        titleText: 'Editar Gato',
+        automaticallyImplyLeading: true,
         actions: [
           if (_isLoading)
             const Padding(

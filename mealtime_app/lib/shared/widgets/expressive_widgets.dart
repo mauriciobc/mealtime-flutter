@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
+import 'package:mealtime_app/core/theme/m3e.dart';
 import 'package:mealtime_app/core/theme/text_theme_extensions.dart';
 
 class ExpressiveSummaryCard extends StatelessWidget {
@@ -138,6 +139,9 @@ class ExpressiveSectionHeader extends StatelessWidget {
                       color: colorScheme.onSurface,
                       letterSpacing: -0.2,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textScaler: TextScaler.noScaling,
                   ),
                   if (subtitle != null) ...[
                     SizedBox(height: M3SpacingToken.space4.value),
@@ -146,12 +150,15 @@ class ExpressiveSectionHeader extends StatelessWidget {
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textScaler: TextScaler.noScaling,
                     ),
                   ],
                 ],
               ),
             ),
-            if (action != null) action!,
+            ?action,
           ],
         ),
       ],
@@ -224,17 +231,13 @@ class ExpressiveFeedingCard extends StatelessWidget {
                       Icon(
                         Icons.access_time,
                         size: 14,
-                        color: colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.7,
-                        ),
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       SizedBox(width: M3SpacingToken.space4.value),
                       Text(
                         timeAgo,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.7,
-                          ),
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -364,13 +367,13 @@ class ExpressiveChartContainer extends StatelessWidget {
           Icon(
             Icons.bar_chart_outlined,
             size: 48,
-            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+            color: colorScheme.onSurfaceVariant,
           ),
           SizedBox(height: M3SpacingToken.space8.value),
           Text(
             'No data',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -454,14 +457,17 @@ class ExpressiveEmptyState extends StatelessWidget {
           ],
           if (actionLabel != null && onAction != null) ...[
             SizedBox(height: M3SpacingToken.space20.value),
-            FilledButton.tonal(
-              onPressed: onAction,
-              style: FilledButton.styleFrom(
+            M3EButton(
+              style: M3EButtonStyle.tonal,
+              size: M3EButtonSize.md,
+              shape: M3EButtonShape.round,
+              decoration: M3EButtonDecoration.styleFrom(
                 padding: const M3EdgeInsets.symmetric(
                   horizontal: M3SpacingToken.space24,
                   vertical: M3SpacingToken.space12,
                 ),
               ),
+              onPressed: onAction,
               child: Text(actionLabel!),
             ),
           ],

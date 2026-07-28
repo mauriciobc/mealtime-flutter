@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_design/material_design.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
@@ -238,11 +240,21 @@ class _CatFormState extends State<CatForm> {
   }
 
   Widget _buildSubmitButton() {
-    return ElevatedButton(
-      onPressed: widget.isLoading ? null : _submitForm,
-      child: widget.isLoading
-          ? const Material3LoadingIndicator(size: 20.0)
-          : Text(widget.initialCat != null ? context.l10n.cats_saveCat : context.l10n.cats_createCat),
+    return SizedBox(
+      width: double.infinity,
+      child: M3EButton(
+        style: M3EButtonStyle.filled,
+        size: M3EButtonSize.md,
+        shape: M3EButtonShape.round,
+        onPressed: widget.isLoading ? null : _submitForm,
+        child: widget.isLoading
+            ? const Material3LoadingIndicator(size: 20.0)
+            : Text(
+                widget.initialCat != null
+                    ? context.l10n.cats_saveCat
+                    : context.l10n.cats_createCat,
+              ),
+      ),
     );
   }
 
