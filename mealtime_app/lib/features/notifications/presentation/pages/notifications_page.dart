@@ -5,7 +5,8 @@ import 'package:mealtime_app/core/supabase/supabase_config.dart';
 import 'package:mealtime_app/features/notifications/domain/entities/notification.dart'
     as notification_entity;
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
-import 'package:m3e_collection/m3e_collection.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 
 class NotificationsPage extends StatefulWidget {
   /// Callback opcional chamado quando o contador de notificações não lidas muda
@@ -273,10 +274,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.notifications_title),
+      appBar: M3EAppBar.top(
+        titleText: context.l10n.notifications_title,
+        automaticallyImplyLeading: true,
         actions: [
-          IconButtonM3E(
+          M3EIconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadNotifications,
             tooltip: context.l10n.notifications_refresh,
@@ -308,11 +310,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
             const SizedBox(height: 16),
             Text(
               message,
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
+            M3EButton.icon(
+              style: M3EButtonStyle.filled,
+              size: M3EButtonSize.md,
+              shape: M3EButtonShape.round,
               onPressed: _loadNotifications,
               icon: const Icon(Icons.refresh),
               label: Text(context.l10n.notifications_tryAgain),
@@ -330,24 +337,20 @@ class _NotificationsPageState extends State<NotificationsPage> {
             Icon(
               Icons.notifications_none,
               size: 80,
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.5),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: 16),
             Text(
               context.l10n.notifications_empty,
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               context.l10n.notifications_emptySubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
             ),
           ],
@@ -368,18 +371,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
               vertical: 8,
             ),
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: ElevatedButton.icon(
+            child: M3EButton.icon(
+              style: M3EButtonStyle.filled,
+              size: M3EButtonSize.md,
+              shape: M3EButtonShape.round,
               onPressed: _markAllAsRead,
               icon: const Icon(Icons.done_all, size: 18),
               label: Text(context.l10n.notifications_markAllAsRead),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
             ),
           ),
         // Lista de notificações
         Expanded(
-          child: RefreshIndicator(
+          child: M3ERefreshIndicator(
             onRefresh: _loadNotifications,
             child: ListView.separated(
               padding: const EdgeInsets.all(8),
@@ -509,10 +512,7 @@ class _NotificationItem extends StatelessWidget {
             Text(
               _formatDate(date),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
             ),
           ],
@@ -532,7 +532,7 @@ class _NotificationItem extends StatelessWidget {
                 ),
               ),
             // Botão de deletar
-            IconButtonM3E(
+            M3EIconButton(
               icon: Icon(
                 Icons.delete_outline,
                 color: Theme.of(context).colorScheme.error,

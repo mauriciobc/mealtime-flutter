@@ -26,26 +26,29 @@ class CatSelectionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(12);
+    final scheme = Theme.of(context).colorScheme;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       decoration: BoxDecoration(
         border: Border.all(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+          color: isSelected ? scheme.primary : scheme.outline,
           width: isSelected ? 2 : 1,
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadius,
         color: isSelected
-            ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1)
-            : Theme.of(context).colorScheme.surface,
+            ? scheme.primaryContainer.withValues(alpha: 0.3)
+            : scheme.surface,
       ),
-      child: Column(
+      child: Material(
+        type: MaterialType.transparency,
+        borderRadius: borderRadius,
+        child: Column(
         children: [
           InkWell(
             onTap: () => onSelectionChanged(!isSelected),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: borderRadius,
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
@@ -97,6 +100,7 @@ class CatSelectionItem extends StatelessWidget {
                 : const SizedBox.shrink(),
           ),
         ],
+        ),
       ),
     );
   }

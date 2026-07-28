@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_design/material_design.dart';
 import 'package:material_charts/material_charts.dart';
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
@@ -55,7 +56,9 @@ class WeightTrendChart extends StatelessWidget {
       title: 'Tendência de Peso',
       subtitle: 'Evolução do peso ao longo do tempo',
       hasData: true,
+      minChartHeight: 280,
       chart: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -65,11 +68,11 @@ class WeightTrendChart extends StatelessWidget {
             ),
           ),
           SizedBox(height: M3SpacingToken.space8.value),
-          SegmentedButton<int>(
+          M3ESegmentedButton<int>(
             segments: const [
-              ButtonSegment(value: 30, label: Text('30 dias')),
-              ButtonSegment(value: 60, label: Text('60 dias')),
-              ButtonSegment(value: 90, label: Text('90 dias')),
+              M3ESegment(value: 30, label: '30 dias'),
+              M3ESegment(value: 60, label: '60 dias'),
+              M3ESegment(value: 90, label: '90 dias'),
             ],
             selected: {timeRangeDays},
             onSelectionChanged: (Set<int> selected) {
@@ -88,7 +91,8 @@ class WeightTrendChart extends StatelessWidget {
               } else {
                 chartWidth = 400.0;
               }
-              final chartHeight = 250.0;
+              // Plot height only — period controls live above this box.
+              const chartHeight = 220.0;
 
               final validData = chartData.where((data) {
                 return data.value.isFinite &&

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_design/material_design.dart';
-import 'package:m3e_collection/m3e_collection.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:mealtime_app/features/homes/domain/entities/home.dart';
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
 
@@ -25,7 +25,7 @@ class HomeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
+      elevation: 0,
       child: InkWell(
         onTap: onTap,
         borderRadius: M3Shapes.shapeMedium,
@@ -58,7 +58,12 @@ class HomeCard extends StatelessWidget {
                         Text(
                           home.name,
                           style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface,
+                              ),
                         ),
                         if (home.address != null) ...[
                           SizedBox(height: M3SpacingToken.space4.value),
@@ -66,9 +71,9 @@ class HomeCard extends StatelessWidget {
                             home.address!,
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface.withValues(alpha: 0.7),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                 ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -101,7 +106,9 @@ class HomeCard extends StatelessWidget {
                 SizedBox(height: M3SpacingToken.space12.value),
                 Text(
                   home.description!,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -114,17 +121,13 @@ class HomeCard extends StatelessWidget {
                     Icon(
                       Icons.people,
                       size: 16,
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(context).colorScheme.outline,
                     ),
                     SizedBox(width: M3SpacingToken.space4.value),
                     Text(
                       '$membersCount Membro${membersCount != 1 ? 's' : ''}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -135,26 +138,24 @@ class HomeCard extends StatelessWidget {
                   Text(
                     'Criada em ${_formatDate(home.createdAt)}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const Spacer(),
                   if (onEdit != null)
-                    IconButtonM3E(
+                    M3EIconButton(
                       onPressed: onEdit,
                       icon: const Icon(Icons.edit, size: 20),
                       tooltip: 'Editar',
                     ),
                   if (onSetActive != null && !home.isActive)
-                    IconButtonM3E(
+                    M3EIconButton(
                       onPressed: onSetActive,
                       icon: const Icon(Icons.home, size: 20),
                       tooltip: 'Definir como Ativa',
                     ),
                   if (onDelete != null)
-                    IconButtonM3E(
+                    M3EIconButton(
                       onPressed: onDelete,
                       icon: Icon(
                         Icons.delete,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
@@ -75,7 +77,7 @@ class _LoginFormState extends State<LoginForm> {
               decoration: InputDecoration(
                 labelText: 'Senha',
                 prefixIcon: const Icon(Icons.lock),
-                suffixIcon: IconButton(
+                suffixIcon: M3EIconButton(
                   icon: Icon(
                     _obscurePassword ? Icons.visibility : Icons.visibility_off,
                   ),
@@ -105,9 +107,12 @@ class _LoginFormState extends State<LoginForm> {
                 final theme = Theme.of(context);
                 return SizedBox(
                   width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: state is AuthLoading ? null : _handleLogin,
+                  child: M3EButton(
+                    style: M3EButtonStyle.filled,
+                    size: M3EButtonSize.md,
+                    shape: M3EButtonShape.round,
+                    onPressed:
+                        state is AuthLoading ? null : _handleLogin,
                     child: state is AuthLoading
                         ? const Material3LoadingIndicator(size: 20.0)
                         : Text(

@@ -3,7 +3,8 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:m3e_collection/m3e_collection.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
@@ -106,14 +107,20 @@ class _AccountPageState extends ConsumerState<AccountPage> {
         body: Center(child: Material3LoadingIndicator()),
       ),
       error: (e, _) => Scaffold(
-        appBar: AppBar(title: Text(context.l10n.profile_title)),
+        appBar: M3EAppBar.top(
+          titleText: context.l10n.profile_title,
+          automaticallyImplyLeading: true,
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('${context.l10n.error_loading}: $e'),
               const SizedBox(height: 16),
-              ElevatedButton(
+              M3EButton(
+                style: M3EButtonStyle.filled,
+                size: M3EButtonSize.md,
+                shape: M3EButtonShape.round,
                 onPressed: () {
                   ref.invalidate(profileProvider(user.id));
                 },
@@ -133,10 +140,11 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     bool isLoading,
   ) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.profile_title),
+      appBar: M3EAppBar.top(
+        titleText: context.l10n.profile_title,
+        automaticallyImplyLeading: true,
         actions: [
-          IconButtonM3E(
+          M3EIconButton(
             onPressed: _signOut,
             icon: const Icon(Icons.logout),
             tooltip: context.l10n.auth_logout,
@@ -193,9 +201,13 @@ class _AccountPageState extends ConsumerState<AccountPage> {
           SizedBox(height: M3SpacingToken.space24.value),
           SizedBox(
             width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: isLoading ? null : () => _updateProfile(context, user.id),
+            child: M3EButton(
+              style: M3EButtonStyle.filled,
+              size: M3EButtonSize.md,
+              shape: M3EButtonShape.round,
+              onPressed: isLoading
+                  ? null
+                  : () => _updateProfile(context, user.id),
               child: isLoading
                   ? const Material3LoadingIndicator(size: 20.0)
                   : Text(context.l10n.profile_updateProfile),
@@ -209,59 +221,54 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   Widget _buildAccountInfoCard(BuildContext context, User user) {
-    return Card(
-      child: Padding(
-        padding: const M3EdgeInsets.all(M3SpacingToken.space16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.profile_accountInfo,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            SizedBox(height: M3SpacingToken.space16.value),
-            ListTile(
-              leading: const Icon(Icons.badge),
-              title: Text(context.l10n.profile_userId),
-              subtitle: Text(user.id, style: const TextStyle(fontSize: 12)),
-            ),
-            ListTile(
-              leading: const Icon(Icons.email),
-              title: Text(context.l10n.common_email),
-              subtitle: Text(user.email ?? 'N/A'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.verified),
-              title: Text(context.l10n.profile_accountStatus),
-              subtitle: Text(
-                user.emailConfirmedAt != null
-                    ? context.l10n.profile_verified
-                    : context.l10n.profile_notVerified,
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: Text(context.l10n.profile_accountCreated),
-              subtitle: Text(
-                user.createdAt.isNotEmpty
-                    ? _formatDate(DateTime.parse(user.createdAt))
-                    : 'N/A',
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.login),
-              title: Text(context.l10n.profile_lastAccess),
-              subtitle: Text(
-                (user.lastSignInAt ?? '').isNotEmpty
-                    ? _formatDate(DateTime.parse(user.lastSignInAt!))
-                    : 'N/A',
-              ),
-            ),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const M3EdgeInsets.only(bottom: M3SpacingToken.space8),
+          child: Text(
+            context.l10n.profile_accountInfo,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
         ),
-      ),
+        M3EListItem(
+          headline: context.l10n.profile_userId,
+          supportingText: user.id,
+          leading: const Icon(Icons.badge),
+        ),
+        SizedBox(height: M3SpacingToken.space8.value),
+        M3EListItem(
+          headline: context.l10n.common_email,
+          supportingText: user.email ?? 'N/A',
+          leading: const Icon(Icons.email),
+        ),
+        SizedBox(height: M3SpacingToken.space8.value),
+        M3EListItem(
+          headline: context.l10n.profile_accountStatus,
+          supportingText: user.emailConfirmedAt != null
+              ? context.l10n.profile_verified
+              : context.l10n.profile_notVerified,
+          leading: const Icon(Icons.verified),
+        ),
+        SizedBox(height: M3SpacingToken.space8.value),
+        M3EListItem(
+          headline: context.l10n.profile_accountCreated,
+          supportingText: user.createdAt.isNotEmpty
+              ? _formatDate(DateTime.parse(user.createdAt))
+              : 'N/A',
+          leading: const Icon(Icons.calendar_today),
+        ),
+        SizedBox(height: M3SpacingToken.space8.value),
+        M3EListItem(
+          headline: context.l10n.profile_lastAccess,
+          supportingText: (user.lastSignInAt ?? '').isNotEmpty
+              ? _formatDate(DateTime.parse(user.lastSignInAt!))
+              : 'N/A',
+          leading: const Icon(Icons.login),
+        ),
+      ],
     );
   }
 

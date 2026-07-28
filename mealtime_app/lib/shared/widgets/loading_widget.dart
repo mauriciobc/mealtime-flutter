@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:m3e_collection/m3e_collection.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 class LoadingWidget extends StatelessWidget {
   final String? message;
@@ -15,7 +15,12 @@ class LoadingWidget extends StatelessWidget {
           const Material3LoadingIndicator(),
           if (message != null) ...[
             const SizedBox(height: 16),
-            Text(message!, style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              message!,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
           ],
         ],
       ),
@@ -47,7 +52,9 @@ class FullScreenLoadingWidget extends StatelessWidget {
                 const SizedBox(height: 24),
                 Text(
                   message!,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -59,9 +66,7 @@ class FullScreenLoadingWidget extends StatelessWidget {
   }
 }
 
-/// Indicador de loading Material 3 Expressive
-/// Usa polígonos que se transformam (morphing polygons) seguindo as especificações
-/// Material 3 Expressive do Flutter
+/// Façade estável sobre [M3ELoadingIndicator] (material_3_expressive).
 class Material3LoadingIndicator extends StatelessWidget {
   const Material3LoadingIndicator({
     super.key,
@@ -70,27 +75,20 @@ class Material3LoadingIndicator extends StatelessWidget {
   });
 
   /// Variante do indicador: default ou contained
-  final LoadingIndicatorM3EVariant? variant;
-  
+  final M3ELoadingIndicatorVariant? variant;
+
   /// Tamanho do indicador (48dp é o padrão Material 3)
   final double size;
 
   @override
   Widget build(BuildContext context) {
-    // LoadingIndicatorM3E usa automaticamente as cores do ColorScheme
-    // - Default: container usa secondaryContainer, indicador usa primary
-    // - Contained: container usa primaryContainer, indicador usa onPrimaryContainer
     return ExcludeSemantics(
       child: SizedBox(
         width: size,
         height: size,
-        child: variant != null
-            ? LoadingIndicatorM3E(
-                variant: variant!,
-                // Opcionalmente pode personalizar a cor do indicador
-                // Se não especificado, usa as cores do tema automaticamente
-              )
-            : const LoadingIndicatorM3E(),
+        child: M3ELoadingIndicator(
+          variant: variant ?? M3ELoadingIndicatorVariant.defaultStyle,
+        ),
       ),
     );
   }

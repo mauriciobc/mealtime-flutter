@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:m3e_collection/m3e_collection.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 class AvatarWidget extends StatefulWidget {
   final String? imageUrl;
@@ -52,7 +52,7 @@ class _AvatarWidgetState extends State<AvatarWidget> {
                     width: 2,
                   ),
                 ),
-                child: IconButtonM3E(
+                child: M3EIconButton(
                   icon: Icon(
                     Icons.camera_alt,
                     size: 16,
@@ -85,7 +85,7 @@ class _AvatarWidgetState extends State<AvatarWidget> {
       child: Icon(
         Icons.person,
         size: widget.size * 0.5,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        color: Theme.of(context).colorScheme.outline,
       ),
     );
   }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:material_design/material_design.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
+import 'package:material_3_expressive/components/buttons/styles/m3e_button_decoration.dart';
 
 class SoulfulEmptyState extends StatelessWidget {
   final String message;
@@ -31,7 +34,7 @@ class SoulfulEmptyState extends StatelessWidget {
             Container(
               padding: const M3EdgeInsets.all(M3SpacingToken.space32),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -61,18 +64,17 @@ class SoulfulEmptyState extends StatelessWidget {
             ],
             if (onAction != null && actionLabel != null) ...[
               SizedBox(height: M3SpacingToken.space32.value),
-              FilledButton.tonalIcon(
+              M3EButton.icon(
+                style: M3EButtonStyle.tonal,
+                size: M3EButtonSize.md,
+                shape: M3EButtonShape.round,
+                decoration: M3EButtonDecoration.styleFrom(
+                  backgroundColor: colorScheme.primaryContainer,
+                  foregroundColor: colorScheme.onPrimaryContainer,
+                ),
                 onPressed: onAction,
                 icon: const Icon(Icons.add),
                 label: Text(actionLabel!),
-                style: FilledButton.styleFrom(
-                  backgroundColor: colorScheme.primaryContainer,
-                  foregroundColor: colorScheme.onPrimaryContainer,
-                  padding: const M3EdgeInsets.symmetric(
-                    horizontal: M3SpacingToken.space24,
-                    vertical: M3SpacingToken.space16,
-                  ),
-                ),
               ),
             ],
           ],

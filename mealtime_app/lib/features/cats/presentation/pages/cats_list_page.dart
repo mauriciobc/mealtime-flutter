@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_design/material_design.dart';
@@ -35,8 +36,9 @@ class _CatsListPageState extends State<CatsListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.cats_title),
+      appBar: M3EAppBar.top(
+        titleText: context.l10n.cats_title,
+        automaticallyImplyLeading: true,
       ),
       body: BlocConsumer<CatsBloc, CatsState>(
         listener: (context, state) {
@@ -122,12 +124,12 @@ class _CatsListPageState extends State<CatsListPage> {
           return const LoadingWidget();
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: M3EFab(
         onPressed: () {
           HapticsService.mediumImpact();
           context.push(AppRouter.createCat);
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
       ),
     );
   }
@@ -146,7 +148,7 @@ class _CatsListPageState extends State<CatsListPage> {
   }
 
   Widget _buildCatsList(List<Cat> cats) {
-    return RefreshIndicator(
+    return M3ERefreshIndicator(
       onRefresh: () async {
         HapticsService.mediumImpact();
         context.read<CatsBloc>().add(const RefreshCats());

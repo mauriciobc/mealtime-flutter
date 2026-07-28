@@ -27,9 +27,10 @@ import 'package:mealtime_app/features/home/presentation/widgets/recent_records_s
 import 'package:mealtime_app/features/home/presentation/widgets/summary_cards_section.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/profile/presentation/providers/profile_providers.dart';
+import 'package:mealtime_app/services/realtime/realtime_feeding_logs_service.dart';
 import 'package:mealtime_app/shared/widgets/expressive_dialogs.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
-import 'package:m3e_collection/m3e_collection.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -42,17 +43,21 @@ class _HomePageState extends ConsumerState<HomePage>
     with WidgetsBindingObserver {
   String? _currentHouseholdId;
   bool _notificationsInitialized = false;
-  int _unreadNotificationsCount = 0; // Inicializar com 0, será carregado do banco
+  int _unreadNotificationsCount =
+      0; // Inicializar com 0, será carregado do banco
   Timer? _periodicSyncHandle; // Handle para cancelar periodic sync
   /// Guardado em campo para usar em dispose() sem acessar ref (unsafe após unmount).
   RealtimeNotificationService? _realtimeNotificationService;
+
+  /// Serviço de realtime para feeding logs - atualiza UI quando dados mudam
+  RealtimeFeedingLogsService? _realtimeFeedingLogsService;
 
   @override
   void initState() {
     super.initState();
     // Registrar observer para detectar quando app volta ao foreground
     WidgetsBinding.instance.addObserver(this);
-    
+
     // Carregar dados iniciais
     context.read<CatsBloc>().add(LoadCats());
     // Homes loading is optional - don't block UI if it fails
@@ -61,33 +66,61 @@ class _HomePageState extends ConsumerState<HomePage>
     } catch (e) {
       debugPrint('[HomePage] Failed to load homes (non-critical): $e');
     }
+    // Se o cache retornar antes do primeiro build, BlocListener não dispara.
+    // Garantir que feeding logs sejam carregados após o primeiro frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final catsState = context.read<CatsBloc>().state;
+      if (catsState is CatsLoaded && catsState.cats.isNotEmpty) {
+        _loadFeedingLogs();
+      }
+    });
     // Inicializar notificações REALTIME
     _initializeNotifications();
-    
+
     // Iniciar periodic sync para alimentações
     _startPeriodicSync();
+
+    // Inicializar realtime service para feeding logs
+    _initializeRealtimeFeedingLogs();
   }
-  
+
+  /// Inicializa o serviço de realtime para feeding logs
+  void _initializeRealtimeFeedingLogs() {
+    _realtimeFeedingLogsService = RealtimeFeedingLogsService(
+      onDataChanged: () {
+        if (!mounted) return;
+        debugPrint(
+          '[HomePage] Realtime update detectado, recarregando feeding logs...',
+        );
+        // Trigger reload when realtime data changes
+        context.read<FeedingLogsBloc>().add(const FeedingLogsRealtimeUpdate());
+      },
+    );
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Recarregar dados quando app volta ao foreground
     if (state == AppLifecycleState.resumed) {
-      debugPrint('[HomePage] App retornou ao foreground, recarregando dados...');
+      debugPrint(
+        '[HomePage] App retornou ao foreground, recarregando dados...',
+      );
       _loadFeedingLogs();
     }
   }
-  
+
   /// Inicia sincronização periódica de feeding logs a cada 30 segundos
   void _startPeriodicSync() {
     // Limpar handle anterior se existir
     _periodicSyncHandle?.cancel();
-    
+
     // Criar periodic timer
     _periodicSyncHandle = _createPeriodicTimer();
-    
+
     debugPrint('[HomePage] Periodic sync iniciado (a cada 2 minutos)');
   }
-  
+
   /// Cria um timer periódico que sincroniza feeding logs
   Timer _createPeriodicTimer() {
     return Timer.periodic(const Duration(minutes: 2), (timer) {
@@ -102,7 +135,7 @@ class _HomePageState extends ConsumerState<HomePage>
 
   Future<void> _initializeNotifications() async {
     if (_notificationsInitialized) return;
-    
+
     try {
       // Inicializar NotificationService primeiro
       final notificationService = ref.read(notificationServiceProvider);
@@ -114,12 +147,12 @@ class _HomePageState extends ConsumerState<HomePage>
 
       // Configurar callback para incrementar badge quando notificação for recebida
       realtimeService.onNotificationReceived = _incrementNotificationCount;
-      
+
       await realtimeService.initialize();
-      
+
       // Buscar notificações não lidas do banco de dados
       await _loadUnreadNotificationsCount();
-      
+
       _notificationsInitialized = true;
       debugPrint('[HomePage] Notificações REALTIME inicializadas');
     } catch (e) {
@@ -136,15 +169,16 @@ class _HomePageState extends ConsumerState<HomePage>
     }
   }
 
-
   /// Carrega a contagem de notificações não lidas do banco de dados
   Future<void> _loadUnreadNotificationsCount() async {
     try {
       final supabase = SupabaseConfig.client;
       final user = supabase.auth.currentUser;
-      
+
       if (user == null) {
-        debugPrint('[HomePage] Usuário não autenticado, não é possível carregar notificações');
+        debugPrint(
+          '[HomePage] Usuário não autenticado, não é possível carregar notificações',
+        );
         if (mounted) {
           setState(() {
             _unreadNotificationsCount = 0;
@@ -161,13 +195,15 @@ class _HomePageState extends ConsumerState<HomePage>
             .select('id')
             .eq('user_id', user.id)
             .eq('is_read', false);
-        
+
         if (mounted) {
           final count = response.length;
           setState(() {
             _unreadNotificationsCount = count;
           });
-          debugPrint('[HomePage] Notificações não lidas carregadas: $_unreadNotificationsCount');
+          debugPrint(
+            '[HomePage] Notificações não lidas carregadas: $_unreadNotificationsCount',
+          );
         }
       } catch (_) {
         // Se is_read não existir, usar read_at (timestamp)
@@ -175,16 +211,18 @@ class _HomePageState extends ConsumerState<HomePage>
             .from('notifications')
             .select('id, read_at')
             .eq('user_id', user.id);
-        
+
         final unreadCount = (response as List)
             .where((n) => (n as Map<String, dynamic>)['read_at'] == null)
             .length;
-        
+
         if (mounted) {
           setState(() {
             _unreadNotificationsCount = unreadCount;
           });
-          debugPrint('[HomePage] Notificações não lidas carregadas: $_unreadNotificationsCount');
+          debugPrint(
+            '[HomePage] Notificações não lidas carregadas: $_unreadNotificationsCount',
+          );
         }
       }
     } catch (e) {
@@ -206,6 +244,13 @@ class _HomePageState extends ConsumerState<HomePage>
     // Cancelar periodic sync
     _periodicSyncHandle?.cancel();
 
+    // Desconectar realtime feeding logs service
+    try {
+      _realtimeFeedingLogsService?.disconnect();
+    } catch (e) {
+      debugPrint('[HomePage] Erro ao desconectar realtime feeding logs: $e');
+    }
+
     // Desconectar notificações usando referência guardada (ref/context são unsafe em dispose)
     try {
       _realtimeNotificationService?.disconnect();
@@ -226,24 +271,33 @@ class _HomePageState extends ConsumerState<HomePage>
     if (!mounted) return;
     final catsState = context.read<CatsBloc>().state;
     final feedingLogsState = context.read<FeedingLogsBloc>().state;
-    
+
     // Prevent duplicate calls - don't load if already loading
     if (feedingLogsState is FeedingLogsLoading) {
       debugPrint('[HomePage] Skipping _loadFeedingLogs: already loading');
       return;
     }
-    
+
     if (catsState is CatsLoaded && catsState.cats.isNotEmpty) {
       final householdId = catsState.cats.first.homeId;
-      
+
       if (_currentHouseholdId != householdId) {
         _currentHouseholdId = householdId;
-        debugPrint('[HomePage] Loading feeding logs for household: $householdId');
-        context.read<FeedingLogsBloc>().add(
-          LoadTodayFeedingLogs(householdId: householdId, forceRemote: forceRemote),
+        debugPrint(
+          '[HomePage] Loading feeding logs for household: $householdId',
         );
+        context.read<FeedingLogsBloc>().add(
+          LoadTodayFeedingLogs(
+            householdId: householdId,
+            forceRemote: forceRemote,
+          ),
+        );
+        // Atualizar realtime service com o novo household
+        _realtimeFeedingLogsService?.updateHouseholdId(householdId);
       } else {
-        debugPrint('[HomePage] Household ID unchanged, checking if reload needed');
+        debugPrint(
+          '[HomePage] Household ID unchanged, checking if reload needed',
+        );
         // If household unchanged but no data, reload anyway
         final hasData = _getFeedingLogsFromState(feedingLogsState).isNotEmpty;
         if (!hasData || forceRemote) {
@@ -251,12 +305,17 @@ class _HomePageState extends ConsumerState<HomePage>
             '[HomePage] Reloading feeding logs (no data or not loaded or forceRemote=$forceRemote)',
           );
           context.read<FeedingLogsBloc>().add(
-            LoadTodayFeedingLogs(householdId: householdId, forceRemote: forceRemote),
+            LoadTodayFeedingLogs(
+              householdId: householdId,
+              forceRemote: forceRemote,
+            ),
           );
         }
       }
     } else {
-      debugPrint('[HomePage] Cannot load feeding logs: cats not loaded or empty');
+      debugPrint(
+        '[HomePage] Cannot load feeding logs: cats not loaded or empty',
+      );
     }
   }
 
@@ -271,7 +330,6 @@ class _HomePageState extends ConsumerState<HomePage>
     }
     return [];
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -323,69 +381,99 @@ class _HomePageState extends ConsumerState<HomePage>
       child: BlocBuilder<CatsBloc, CatsState>(
         builder: (context, catsState) {
           // Mostrar loader apenas quando está carregando pela primeira vez
-          final bool isLoading = catsState is CatsLoading || 
-                               (catsState is CatsInitial);
+          final bool isLoading =
+              catsState is CatsLoading || (catsState is CatsInitial);
 
           return Stack(
             children: [
               Scaffold(
                 backgroundColor: Theme.of(context).colorScheme.surface,
                 body: SafeArea(
-                  child: CustomScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    slivers: [
-                      // 1. Header
-                      SliverToBoxAdapter(child: _buildHeader(context)),
+                  child: M3ERefreshIndicator(
+                    onRefresh: () async {
+                      // Force reload from remote when user pulls to refresh
+                      final catsState = context.read<CatsBloc>().state;
+                      if (catsState is CatsLoaded &&
+                          catsState.cats.isNotEmpty) {
+                        final householdId = catsState.cats.first.homeId;
+                        debugPrint(
+                          '[HomePage] Pull-to-refresh: recarregando feeding logs...',
+                        );
+                        context.read<FeedingLogsBloc>().add(
+                          LoadTodayFeedingLogs(
+                            householdId: householdId,
+                            forceRemote: true,
+                          ),
+                        );
+                      }
+                      // Wait briefly for the reload to start
+                      await Future.delayed(const Duration(milliseconds: 300));
+                    },
+                    child: CustomScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      slivers: [
+                        // 1. Header
+                        SliverToBoxAdapter(child: _buildHeader(context)),
 
-                      // 2. Summary Cards
-                      const SliverPadding(
-                        padding: EdgeInsets.only(top: 24),
-                        sliver: SliverToBoxAdapter(child: SummaryCardsSection()),
-                      ),
+                        // 2. Summary Cards
+                        const SliverPadding(
+                          padding: EdgeInsets.only(top: 24),
+                          sliver: SliverToBoxAdapter(
+                            child: SummaryCardsSection(),
+                          ),
+                        ),
 
-                      // 3. Last Feeding
-                      const SliverPadding(
-                        padding: EdgeInsets.only(top: 24),
-                        sliver: SliverToBoxAdapter(child: LastFeedingSection()),
-                      ),
+                        // 3. Last Feeding
+                        const SliverPadding(
+                          padding: EdgeInsets.only(top: 24),
+                          sliver: SliverToBoxAdapter(
+                            child: LastFeedingSection(),
+                          ),
+                        ),
 
-                      // 4. Chart Section
-                      const SliverPadding(
-                        padding: EdgeInsets.only(top: 24),
-                        sliver: SliverToBoxAdapter(child: FeedingsChartSection()),
-                      ),
+                        // 4. Chart Section
+                        const SliverPadding(
+                          padding: EdgeInsets.only(top: 24),
+                          sliver: SliverToBoxAdapter(
+                            child: FeedingsChartSection(),
+                          ),
+                        ),
 
-                      // 5. Recent Records
-                      const SliverPadding(
-                        padding: EdgeInsets.only(top: 24),
-                        sliver: SliverToBoxAdapter(child: RecentRecordsSection()),
-                      ),
+                        // 5. Recent Records
+                        const SliverPadding(
+                          padding: EdgeInsets.only(top: 24),
+                          sliver: SliverToBoxAdapter(
+                            child: RecentRecordsSection(),
+                          ),
+                        ),
 
-                      // 6. My Cats
-                      const SliverPadding(
-                        padding: EdgeInsets.only(top: 24),
-                        sliver: SliverToBoxAdapter(child: MyCatsSection()),
-                      ),
+                        // 6. My Cats
+                        const SliverPadding(
+                          padding: EdgeInsets.only(top: 24),
+                          sliver: SliverToBoxAdapter(child: MyCatsSection()),
+                        ),
 
-                      // Bottom Spacing for FAB
-                      const SliverToBoxAdapter(child: SizedBox(height: 100)),
-                    ],
+                        // Bottom Spacing for FAB
+                        const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                      ],
+                    ),
                   ),
                 ),
-                floatingActionButton: FabM3E(
-                  icon: const Icon(Icons.add),
+                floatingActionButton: M3EFab(
                   onPressed: _showFeedingBottomSheet,
                   tooltip: context.l10n.home_register_feeding,
+                  icon: const Icon(Icons.add),
                 ),
-                floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.endFloat,
               ),
               // Overlay de loader Material 3 que não bloqueia listeners
               if (isLoading)
                 Material(
-                  color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
-                  child: const Center(
-                    child: Material3LoadingIndicator(),
-                  ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surface.withValues(alpha: 0.9),
+                  child: const Center(child: Material3LoadingIndicator()),
                 ),
             ],
           );
@@ -416,7 +504,7 @@ class _HomePageState extends ConsumerState<HomePage>
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  IconButtonM3E(
+                  M3EIconButton(
                     icon: Icon(
                       Icons.notifications_outlined,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -430,7 +518,7 @@ class _HomePageState extends ConsumerState<HomePage>
                           'onUnreadCountChanged': _loadUnreadNotificationsCount,
                         },
                       );
-                      
+
                       // Recarregar contagem ao voltar da página (backup)
                       if (mounted) {
                         await _loadUnreadNotificationsCount();
@@ -477,16 +565,13 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
-
   void _showFeedingBottomSheet() {
     final catsBloc = context.read<CatsBloc>();
     final catsState = catsBloc.state;
 
     if (catsState is! CatsLoaded || catsState.cats.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.home_no_cats_register_first),
-        ),
+        SnackBar(content: Text(context.l10n.home_no_cats_register_first)),
       );
       return;
     }
@@ -526,8 +611,29 @@ class _UserAvatarButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = SupabaseConfig.client.auth.currentUser;
-    
+
     if (user == null) {
+      return Semantics(
+        label: context.l10n.navigation_profile,
+        button: true,
+        child: GestureDetector(
+          onTap: () {
+            context.push(AppRouter.profile);
+          },
+          child: CircleAvatar(
+            radius: 20,
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            child: Icon(
+              Icons.person,
+              color: Theme.of(context).colorScheme.onSecondary,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final profileAsync = ref.watch(currentUserProfileProvider);
+
     return Semantics(
       label: context.l10n.navigation_profile,
       button: true,
@@ -535,115 +641,99 @@ class _UserAvatarButton extends ConsumerWidget {
         onTap: () {
           context.push(AppRouter.profile);
         },
-        child: CircleAvatar(
-          radius: 20,
-          backgroundColor: Theme.of(context).colorScheme.secondary,
-          child: Icon(
-            Icons.person,
-            color: Theme.of(context).colorScheme.onSecondary,
-          ),
-        ),
-      ),
-    );
-  }
+        child: profileAsync.when(
+          data: (profile) {
+            final avatarUrl = profile?.avatarUrl;
+            final initial =
+                (profile?.fullName?.isNotEmpty == true
+                    ? profile!.fullName!.substring(0, 1).toUpperCase()
+                    : null) ??
+                (user.email?.isNotEmpty == true
+                    ? user.email!.substring(0, 1).toUpperCase()
+                    : null) ??
+                'U';
 
-  final profileAsync = ref.watch(currentUserProfileProvider);
-
-  return Semantics(
-    label: context.l10n.navigation_profile,
-    button: true,
-    child: GestureDetector(
-      onTap: () {
-        context.push(AppRouter.profile);
-      },
-      child: profileAsync.when(
-        data: (profile) {
-          final avatarUrl = profile?.avatarUrl;
-          final initial = (profile?.fullName?.isNotEmpty == true
-                  ? profile!.fullName!.substring(0, 1).toUpperCase()
-                  : null) ??
-              (user.email?.isNotEmpty == true
-                  ? user.email!.substring(0, 1).toUpperCase()
-                  : null) ??
-              'U';
-
-          if (avatarUrl != null && avatarUrl.isNotEmpty) {
-            return Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).colorScheme.secondary,
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                  width: 1,
+            if (avatarUrl != null && avatarUrl.isNotEmpty) {
+              return Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).colorScheme.secondary,
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
                 ),
-              ),
-              child: ClipOval(
-                child: CachedNetworkImage(
-                  imageUrl: avatarUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Center(
-                    child: SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicatorM3E(
-                        size: CircularProgressM3ESize.s,
-                        activeColor: Theme.of(context).colorScheme.onSecondary,
+                child: ClipOval(
+                  child: CachedNetworkImage(
+                    imageUrl: avatarUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Center(
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: M3EProgressIndicator.circular(
+                          size: 16,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSecondary,
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => CircleAvatar(
+                      radius: 20,
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      child: Text(
+                        initial,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSecondary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ),
-                  errorWidget: (context, url, error) => CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                    child: Text(
-                      initial,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSecondary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
+                ),
+              );
+            }
+
+            return CircleAvatar(
+              radius: 20,
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              child: Text(
+                initial,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSecondary,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             );
-          }
-
-          return CircleAvatar(
+          },
+          loading: () => CircleAvatar(
             radius: 20,
             backgroundColor: Theme.of(context).colorScheme.secondary,
-            child: Text(
-              initial,
-              style: TextStyle(
+            child: SizedBox(
+              width: 16,
+              height: 16,
+              child: M3EProgressIndicator.circular(
+                size: 16,
                 color: Theme.of(context).colorScheme.onSecondary,
-                fontWeight: FontWeight.bold,
               ),
             ),
-          );
-        },
-        loading: () => CircleAvatar(
-          radius: 20,
-          backgroundColor: Theme.of(context).colorScheme.secondary,
-          child: SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicatorM3E(
-              size: CircularProgressM3ESize.s,
-              activeColor: Theme.of(context).colorScheme.onSecondary,
-            ),
           ),
-        ),
-        error: (_, _) => CircleAvatar(
-          radius: 20,
-          backgroundColor: Theme.of(context).colorScheme.secondary,
-          child: Icon(
-            Icons.person,
-            color: Theme.of(context).colorScheme.onSecondary,
+          error: (_, _) => CircleAvatar(
+            radius: 20,
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            child: Icon(
+              Icons.person,
+              color: Theme.of(context).colorScheme.onSecondary,
+            ),
           ),
         ),
       ),
-    ),
     );
   }
 }

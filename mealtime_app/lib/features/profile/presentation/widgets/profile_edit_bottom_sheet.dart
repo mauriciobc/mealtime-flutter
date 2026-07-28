@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
+import 'package:mealtime_app/core/theme/m3e.dart';
 import 'package:mealtime_app/core/utils/haptics_service.dart';
 import 'package:mealtime_app/features/profile/domain/entities/profile.dart';
 import 'package:mealtime_app/features/profile/utils/timezone_helper.dart';
@@ -149,14 +150,20 @@ class _ProfileEditBottomSheetState extends State<ProfileEditBottomSheet> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Expanded(
-                  child: OutlinedButton(
+                  child: M3EButton(
+                    style: M3EButtonStyle.outlined,
+                    size: M3EButtonSize.md,
+                    shape: M3EButtonShape.round,
                     onPressed: () => Navigator.of(context).pop(),
                     child: const Text('Cancelar'),
                   ),
                 ),
                 SizedBox(width: M3SpacingToken.space16.value),
                 Expanded(
-                  child: FilledButton(
+                  child: M3EButton(
+                    style: M3EButtonStyle.filled,
+                    size: M3EButtonSize.md,
+                    shape: M3EButtonShape.round,
                     onPressed: _save,
                     child: const Text('Salvar'),
                   ),

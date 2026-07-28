@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_design/material_design.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/homes/presentation/widgets/home_form.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
@@ -28,8 +30,9 @@ class _CreateHomePageState extends State<CreateHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.homes_create),
+      appBar: M3EAppBar.top(
+        titleText: context.l10n.homes_create,
+        automaticallyImplyLeading: true,
         actions: [
           TextButton(onPressed: _saveHome, child: Text(context.l10n.common_save)),
         ],
@@ -60,7 +63,9 @@ class _CreateHomePageState extends State<CreateHomePage> {
               children: [
                 Text(
                   context.l10n.homes_info,
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
                 SizedBox(height: M3SpacingToken.space24.value),
                 HomeForm(
@@ -68,9 +73,15 @@ class _CreateHomePageState extends State<CreateHomePage> {
                   descriptionController: _descriptionController,
                 ),
                 SizedBox(height: M3SpacingToken.space32.value),
-                ElevatedButton(
-                  onPressed: _saveHome,
-                  child: Text(context.l10n.homes_createHome),
+                SizedBox(
+                  width: double.infinity,
+                  child: M3EButton(
+                    style: M3EButtonStyle.filled,
+                    size: M3EButtonSize.md,
+                    shape: M3EButtonShape.round,
+                    onPressed: _saveHome,
+                    child: Text(context.l10n.homes_createHome),
+                  ),
                 ),
               ],
             ),

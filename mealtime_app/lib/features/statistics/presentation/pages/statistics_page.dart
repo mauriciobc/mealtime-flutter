@@ -17,6 +17,8 @@ import 'package:mealtime_app/features/statistics/presentation/widgets/statistics
 import 'package:mealtime_app/features/statistics/presentation/widgets/statistics_summary_cards.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -49,8 +51,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.statistics_title),
+      appBar: M3EAppBar.top(
+        titleText: context.l10n.statistics_title,
+        automaticallyImplyLeading: true,
       ),
       body: BlocBuilder<StatisticsBloc, StatisticsState>(
         builder: (context, state) {
@@ -187,7 +190,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
             Icon(
               Icons.bar_chart_outlined,
               size: 64,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+              color: colorScheme.outline,
             ),
             SizedBox(height: M3SpacingToken.space16.value),
             Text(
@@ -241,7 +244,10 @@ class _StatisticsPageState extends State<StatisticsPage> {
               ),
             ),
             SizedBox(height: M3SpacingToken.space24.value),
-            FilledButton.icon(
+            M3EButton.icon(
+              style: M3EButtonStyle.filled,
+              size: M3EButtonSize.md,
+              shape: M3EButtonShape.round,
               onPressed: () {
                 context.read<StatisticsBloc>().add(
                       const LoadStatistics(

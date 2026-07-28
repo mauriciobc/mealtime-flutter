@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mealtime_app/core/router/router_auth_redirect.dart';
+import 'package:mealtime_app/core/theme/m3e.dart';
 import 'package:mealtime_app/core/widgets/scaffold_with_nav.dart';
 import 'package:mealtime_app/features/auth/presentation/pages/splash_page.dart';
 import 'package:mealtime_app/features/auth/presentation/pages/expressive_login_page.dart';
@@ -11,7 +13,7 @@ import 'package:mealtime_app/features/cats/presentation/pages/cats_list_page.dar
 import 'package:mealtime_app/features/cats/presentation/pages/create_cat_page.dart';
 import 'package:mealtime_app/features/cats/presentation/pages/edit_cat_page.dart';
 import 'package:mealtime_app/features/cats/presentation/pages/cat_detail_page.dart';
-// import 'package:mealtime_app/features/feeding_logs/presentation/pages/feeding_logs_list_page.dart';
+import 'package:mealtime_app/features/feeding_logs/presentation/pages/feeding_logs_list_page.dart';
 import 'package:mealtime_app/features/feeding_logs/presentation/pages/create_feeding_log_page.dart';
 // import 'package:mealtime_app/features/feeding_logs/presentation/pages/feeding_log_detail_page.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
@@ -22,26 +24,14 @@ import 'package:mealtime_app/features/statistics/presentation/pages/statistics_p
 import 'package:mealtime_app/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:mealtime_app/features/weight/presentation/pages/weight_page.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
+import 'package:mealtime_app/features/onboarding/presentation/pages/onboarding_page.dart';
 
 class AppRouter {
   // Router configurado com todas as rotas incluindo /notifications
   static final GoRouter _router = GoRouter(
     initialLocation: '/splash',
-    redirect: (context, state) {
-      final path = state.uri.path;
-      // Path raiz (ex.: após logout na web ou link para mealtime.app.br/)
-      // não tem rota → redirecionar para splash (checa auth e vai para login ou home).
-      if (path.isEmpty || path == '/') {
-        return '/splash';
-      }
-      // Deep link OAuth callback: io.mealtime.app://login-callback/... → path é
-      // /login-callback ou /login-callback/. Supabase já processou a sessão;
-      // redirecionar para home para evitar "Page not found".
-      if (path == '/login-callback' || path == '/login-callback/') {
-        return home;
-      }
-      return null;
-    },
+    redirect: (context, state) =>
+        resolveAuthRedirect(path: state.uri.path),
     routes: [
       // Rotas públicas (sem bottomNav)
       GoRoute(
@@ -55,6 +45,10 @@ class AppRouter {
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingPage(),
       ),
       // Rotas autenticadas (com bottomNav persistente)
       ShellRoute(
@@ -92,15 +86,10 @@ class AppRouter {
             builder: (context, state) =>
                 CatDetailPage(catId: state.pathParameters['catId']!),
           ),
-          // TODO: Reativar quando FeedingLogsListPage for corrigida
-          // GoRoute(
-          //   path: '/feeding-logs',
-          //   builder: (context, state) {
-          //     return const Scaffold(
-          //       body: Center(child: Text('Feeding Logs - Em desenvolvimento')),
-          //     );
-          //   },
-          // ),
+          GoRoute(
+            path: '/feeding-logs',
+            builder: (context, state) => const FeedingLogsListPage(),
+          ),
           GoRoute(
             path: '/create-feeding-log',
             builder: (context, state) {
@@ -143,13 +132,14 @@ class AppRouter {
               return BlocBuilder<HomesBloc, HomesState>(
                 builder: (context, state) {
                   if (state is HomesLoaded) {
-                    final home = state.homes.firstWhere(
-                      (h) => h.id == homeId,
-                      orElse: () => throw Exception(
-                        'Residência não encontrada',
-                      ),
+                    for (final h in state.homes) {
+                      if (h.id == homeId) {
+                        return HomeDetailPage(home: h);
+                      }
+                    }
+                    return _HomeMissingInListScaffold(
+                      onGoToList: () => context.go(AppRouter.homes),
                     );
-                    return HomeDetailPage(home: home);
                   }
                   
                   // Se ainda não carregou, mostrar loading e carregar
@@ -208,15 +198,54 @@ class AppRouter {
   static const String createMeal = '/create-meal';
   static const String editMeal = '/edit-meal';
   static const String mealDetail = '/meal-detail';
+  static const String feedingLogs = '/feeding-logs';
   static const String homes = '/homes';
   static const String createHome = '/homes/create';
   static const String editHome = '/homes';
   static const String homeDetail = '/homes';
   static const String statistics = '/statistics';
   static const String weight = '/weight';
+  static const String onboarding = '/onboarding';
   static const String notifications = '/notifications';
   static const String profile = '/profile';
   static const String account = '/account';
 
   static GoRouter get router => _router;
+}
+
+/// Residência não está na lista em memória (deep link, cache antigo, etc.).
+class _HomeMissingInListScaffold extends StatelessWidget {
+  const _HomeMissingInListScaffold({required this.onGoToList});
+
+  final VoidCallback onGoToList;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Residência não encontrada ou ainda não carregada.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 24),
+              M3EButton(
+                style: M3EButtonStyle.filled,
+                size: M3EButtonSize.md,
+                shape: M3EButtonShape.round,
+                onPressed: onGoToList,
+                child: const Text('Ver residências'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -57,7 +57,7 @@ class CatAvatar extends StatelessWidget {
       child: Icon(
         Icons.pets,
         size: size * 0.5,
-        color: theme.colorScheme.onSurfaceVariant,
+        color: theme.colorScheme.outline,
       ),
     );
   }

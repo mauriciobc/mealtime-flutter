@@ -3,24 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design/material_design.dart';
+import 'package:mealtime_app/core/theme/m3e.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/domain/entities/weight_entry.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_event.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_state.dart';
 import 'package:uuid/uuid.dart';
-import 'package:m3e_collection/m3e_collection.dart';
 import 'package:mealtime_app/core/utils/haptics_service.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 class AddWeightBottomSheet extends StatefulWidget {
   final Cat? selectedCat;
   final WeightEntry? weightEntry; // Para edição
 
-  const AddWeightBottomSheet({
-    super.key,
-    this.selectedCat,
-    this.weightEntry,
-  });
+  const AddWeightBottomSheet({super.key, this.selectedCat, this.weightEntry});
 
   @override
   State<AddWeightBottomSheet> createState() => _AddWeightBottomSheetState();
@@ -130,7 +127,9 @@ class _AddWeightBottomSheetState extends State<AddWeightBottomSheet> {
                     widget.weightEntry != null
                         ? 'Editar Registro de Peso'
                         : 'Registrar Peso',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   if (widget.selectedCat != null) ...[
@@ -183,13 +182,16 @@ class _AddWeightBottomSheetState extends State<AddWeightBottomSheet> {
                 Text(
                   cat.name,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
                 if (cat.currentWeight != null)
                   Text(
                     'Peso atual: ${cat.currentWeight!.toStringAsFixed(1)} kg',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
               ],
             ),
@@ -254,7 +256,9 @@ class _AddWeightBottomSheetState extends State<AddWeightBottomSheet> {
               ),
               child: Text(
                 DateFormat('dd/MM/yyyy').format(_selectedDate),
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
           ),
@@ -271,7 +275,9 @@ class _AddWeightBottomSheetState extends State<AddWeightBottomSheet> {
               ),
               child: Text(
                 _selectedTime.format(context),
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
           ),
@@ -299,21 +305,23 @@ class _AddWeightBottomSheetState extends State<AddWeightBottomSheet> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Expanded(
-          child: OutlinedButton(
+          child: M3EButton(
+            style: M3EButtonStyle.outlined,
+            size: M3EButtonSize.md,
+            shape: M3EButtonShape.round,
             onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
             child: const Text('Cancelar'),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: FilledButton(
+          child: M3EButton(
+            style: M3EButtonStyle.filled,
+            size: M3EButtonSize.md,
+            shape: M3EButtonShape.round,
             onPressed: _isSubmitting ? null : _submitForm,
             child: _isSubmitting
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicatorM3E(size: CircularProgressM3ESize.s),
-                  )
+                ? const Material3LoadingIndicator(size: 20.0)
                 : Text(widget.weightEntry != null ? 'Atualizar' : 'Registrar'),
           ),
         ),
@@ -335,7 +343,9 @@ class _AddWeightBottomSheetState extends State<AddWeightBottomSheet> {
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 'Selecione a Data',
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
             Expanded(
@@ -373,7 +383,9 @@ class _AddWeightBottomSheetState extends State<AddWeightBottomSheet> {
                 children: [
                   Text(
                     'Selecione a Hora',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
@@ -386,7 +398,11 @@ class _AddWeightBottomSheetState extends State<AddWeightBottomSheet> {
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.time,
                 initialDateTime: DateTime(
-                  2024, 1, 1, _selectedTime.hour, _selectedTime.minute,
+                  2024,
+                  1,
+                  1,
+                  _selectedTime.hour,
+                  _selectedTime.minute,
                 ),
                 use24hFormat: MediaQuery.of(context).alwaysUse24HourFormat,
                 onDateTimeChanged: (DateTime newTime) {
@@ -419,7 +435,7 @@ class _AddWeightBottomSheetState extends State<AddWeightBottomSheet> {
       );
       return;
     }
-    
+
     if (widget.selectedCat == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -457,26 +473,42 @@ class _AddWeightBottomSheetState extends State<AddWeightBottomSheet> {
 
     setState(() => _isSubmitting = true);
 
-    final normalizedWeight = _weightController.text.replaceAll(',', '.').trim();
-    final weight = double.parse(normalizedWeight);
+    try {
+      final normalizedWeight = _weightController.text
+          .replaceAll(',', '.')
+          .trim();
+      final weight = double.parse(normalizedWeight);
 
-    final weightEntry = WeightEntry(
-      id: widget.weightEntry?.id ?? const Uuid().v4(),
-      catId: widget.selectedCat!.id,
-      weight: weight,
-      measuredAt: measuredAt,
-      notes: _notesController.text.trim().isEmpty
-          ? null
-          : _notesController.text.trim(),
-      createdAt: widget.weightEntry?.createdAt ?? DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+      final weightEntry = WeightEntry(
+        id: widget.weightEntry?.id ?? const Uuid().v4(),
+        catId: widget.selectedCat!.id,
+        weight: weight,
+        measuredAt: measuredAt,
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+        createdAt: widget.weightEntry?.createdAt ?? DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
 
-    if (widget.weightEntry != null) {
-      context.read<WeightBloc>().add(UpdateWeightLog(weightEntry));
-    } else {
-      context.read<WeightBloc>().add(CreateWeightLog(weightEntry));
+      if (widget.weightEntry != null) {
+        context.read<WeightBloc>().add(UpdateWeightLog(weightEntry));
+      } else {
+        context.read<WeightBloc>().add(CreateWeightLog(weightEntry));
+      }
+    } catch (e) {
+      setState(() => _isSubmitting = false);
+      HapticsService.error();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao processar peso: ${e.toString()}'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
     }
   }
 }
-

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/feeding_logs/domain/entities/feeding_log.dart';
@@ -215,14 +217,8 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
   Widget _buildConfirmButton() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    // Fixar primary/onPrimary em todos os estados (pressed, hover, focus) para
-    // evitar tema/overlay aplicando "dark blue on blue" no estado ativo.
-    final foregroundAllStates = MaterialStateProperty.resolveWith<Color>(
-      (Set<MaterialState> states) => colorScheme.onPrimary,
-    );
-    final backgroundAllStates = MaterialStateProperty.resolveWith<Color>(
-      (Set<MaterialState> states) => colorScheme.primary,
-    );
+    // Deixar Material 3 gerenciar estados automaticamente via styleFrom
+    // Removing explicit state overrides permite que disabled state seja visualmente claro
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -230,18 +226,13 @@ class _FeedingBottomSheetState extends State<FeedingBottomSheet> {
       ),
       child: SizedBox(
         width: double.infinity,
-        child: FilledButton(
+        child: M3EButton(
+          style: M3EButtonStyle.filled,
+          size: M3EButtonSize.md,
+          shape: M3EButtonShape.round,
           onPressed: _selectedCatIds.isEmpty || _isSubmitting
               ? null
               : _submitFeedings,
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
-          ).copyWith(
-            foregroundColor: foregroundAllStates,
-            backgroundColor: backgroundAllStates,
-          ),
           child: _isSubmitting
               ? const Material3LoadingIndicator(size: 20.0)
               : Row(

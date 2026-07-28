@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_design/material_design.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:mealtime_app/features/homes/domain/entities/home.dart';
 import 'package:mealtime_app/features/homes/presentation/bloc/homes_bloc.dart';
 import 'package:mealtime_app/features/homes/presentation/widgets/home_form.dart';
@@ -39,8 +41,9 @@ class _EditHomePageState extends State<EditHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar Residência'),
+      appBar: M3EAppBar.top(
+        titleText: 'Editar Residência',
+        automaticallyImplyLeading: true,
         actions: [
           TextButton(onPressed: _saveHome, child: const Text('Salvar')),
         ],
@@ -73,7 +76,9 @@ class _EditHomePageState extends State<EditHomePage> {
               children: [
                 Text(
                   'Editar Residência',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
                 SizedBox(height: M3SpacingToken.space24.value),
                 HomeForm(
@@ -81,9 +86,15 @@ class _EditHomePageState extends State<EditHomePage> {
                   descriptionController: _descriptionController,
                 ),
                 SizedBox(height: M3SpacingToken.space32.value),
-                ElevatedButton(
-                  onPressed: _saveHome,
-                  child: const Text('Salvar Alterações'),
+                SizedBox(
+                  width: double.infinity,
+                  child: M3EButton(
+                    style: M3EButtonStyle.filled,
+                    size: M3EButtonSize.md,
+                    shape: M3EButtonShape.round,
+                    onPressed: _saveHome,
+                    child: const Text('Salvar Alterações'),
+                  ),
                 ),
               ],
             ),

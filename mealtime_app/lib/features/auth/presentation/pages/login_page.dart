@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
+import 'package:mealtime_app/core/localization/auth_error_message_resolver.dart';
+import 'package:mealtime_app/core/router/app_router.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/main.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
@@ -19,6 +23,8 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   bool _isSignUp = false;
+  /// Erro de validação do formulário (campos vazios); exibido inline.
+  String? _validationError;
 
   @override
   void dispose() {
@@ -33,24 +39,20 @@ class _LoginPageState extends State<LoginPage> {
     return BlocListener<SimpleAuthBloc, SimpleAuthState>(
       listener: (context, state) {
         if (state is SimpleAuthSuccess) {
-          // Navegar para a tela principal
-          context.go('/home');
-        } else if (state is SimpleAuthFailure) {
-          // Mostrar erro
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message), 
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
+          if (state.hasHousehold) {
+            context.go(AppRouter.home);
+          } else {
+            context.go(AppRouter.onboarding);
+          }
         }
       },
       child: Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _isSignUp ? context.l10n.auth_register : context.l10n.auth_signIn,
-        ),
+      appBar: M3EAppBar.top(
+        titleText: _isSignUp
+            ? context.l10n.auth_register
+            : context.l10n.auth_signIn,
         centerTitle: true,
+        automaticallyImplyLeading: true,
       ),
       body: Padding(
         padding: const M3EdgeInsets.all(M3SpacingToken.space16),
@@ -128,9 +130,13 @@ class _LoginPageState extends State<LoginPage> {
               builder: (context, state) {
                 return SizedBox(
                   width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: state is SimpleAuthLoading ? null : _handleAuth,
+                  child: M3EButton(
+                    style: M3EButtonStyle.filled,
+                    size: M3EButtonSize.md,
+                    shape: M3EButtonShape.round,
+                    onPressed: state is SimpleAuthLoading
+                        ? null
+                        : _handleAuth,
                     child: state is SimpleAuthLoading
                         ? const Material3LoadingIndicator(size: 20.0)
                         : Text(
@@ -142,6 +148,8 @@ class _LoginPageState extends State<LoginPage> {
                 );
               },
             ),
+            SizedBox(height: M3SpacingToken.space16.value),
+            _buildErrorMessage(context),
             SizedBox(height: M3SpacingToken.space16.value),
 
             // Toggle entre login e cadastro
@@ -174,27 +182,46 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// Exibe erros de validação e falhas do bloc inline (SelectableText.rich).
+  Widget _buildErrorMessage(BuildContext context) {
+    return BlocBuilder<SimpleAuthBloc, SimpleAuthState>(
+      builder: (context, state) {
+        final failureMessage =
+            state is SimpleAuthFailure ? state.message : null;
+        final message = _validationError ?? failureMessage;
+        if (message == null || message.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        final displayText = context.l10n.authErrorMessage(message);
+        return Padding(
+          padding: const M3EdgeInsets.only(top: M3SpacingToken.space8),
+          child: SelectableText.rich(
+            TextSpan(
+              text: displayText,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _handleAuth() async {
+    setState(() => _validationError = null);
+
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.auth_pleaseEnterEmail),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      setState(() => _validationError = context.l10n.auth_pleaseEnterEmail);
       return;
     }
 
     if (password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.auth_pleaseEnterPassword),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      setState(() => _validationError = context.l10n.auth_pleaseEnterPassword);
       return;
     }
 
@@ -202,12 +229,8 @@ class _LoginPageState extends State<LoginPage> {
       final name = _nameController.text.trim();
 
       if (name.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.auth_pleaseEnterFullName),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        setState(
+            () => _validationError = context.l10n.auth_pleaseEnterFullName);
         return;
       }
 
@@ -225,7 +248,6 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // Login usando SimpleAuthBloc
     context.read<SimpleAuthBloc>().add(
       SimpleAuthLoginRequested(
         email: email,

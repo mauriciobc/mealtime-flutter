@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:material_design/material_design.dart';
 import 'package:mealtime_app/features/auth/presentation/bloc/simple_auth_bloc.dart';
 import 'package:mealtime_app/core/router/app_router.dart';
@@ -10,6 +12,7 @@ import 'package:mealtime_app/main.dart';
 import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 import 'package:mealtime_app/core/constants/m3_animation.dart';
 import 'package:mealtime_app/core/localization/app_localizations_extension.dart';
+import 'package:mealtime_app/core/localization/auth_error_message_resolver.dart';
 import 'package:mealtime_app/core/theme/m3_shapes.dart';
 import 'package:mealtime_app/core/theme/text_theme_extensions.dart';
 import 'package:mealtime_app/shared/widgets/themed_svg.dart';
@@ -27,6 +30,8 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   bool _isSignUp = false;
+  /// Erro de validação do formulário; exibido inline com SelectableText.rich.
+  String? _validationError;
 
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
@@ -81,7 +86,11 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
     return BlocListener<SimpleAuthBloc, SimpleAuthState>(
       listener: (context, state) {
         if (state is SimpleAuthSuccess) {
-          context.go(AppRouter.home);
+          if (state.hasHousehold) {
+            context.go(AppRouter.home);
+          } else {
+            context.go(AppRouter.onboarding);
+          }
         }
       },
       child: Scaffold(
@@ -109,29 +118,7 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
                   _buildHeader(context),
                   SizedBox(height: M3SpacingToken.space32.value),
                   _buildForm(context),
-                  BlocBuilder<SimpleAuthBloc, SimpleAuthState>(
-                    buildWhen: (prev, curr) =>
-                        curr is SimpleAuthFailure || prev is SimpleAuthFailure,
-                    builder: (context, state) {
-                      if (state is SimpleAuthFailure) {
-                        return Padding(
-                          padding: const M3EdgeInsets.only(
-                            top: M3SpacingToken.space16,
-                          ),
-                          child: SelectableText.rich(
-                            TextSpan(
-                              text: state.message,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.error,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
+                  _buildInlineError(context),
                   SizedBox(height: M3SpacingToken.space24.value),
                   _buildGoogleSignInButton(context),
                   SizedBox(height: M3SpacingToken.space24.value),
@@ -159,13 +146,6 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
           decoration: BoxDecoration(
             color: colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
           ),
           child: ThemedSvg(
             assetPath: 'assets/images/mealtime-symbol.svg',
@@ -303,14 +283,11 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
 
         return SizedBox(
           width: double.infinity,
-          height: 56,
-          child: FilledButton(
+          child: M3EButton(
+            style: M3EButtonStyle.filled,
+            size: M3EButtonSize.md,
+            shape: M3EButtonShape.round,
             onPressed: isLoading ? null : _handleAuth,
-            style: FilledButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: M3Shapes.shapeXLarge,
-              ),
-            ),
             child: isLoading
                 ? const SizedBox(
                     width: 24,
@@ -318,8 +295,11 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
                     child: Material3LoadingIndicator(size: 20),
                   )
                 : Text(
-                    _isSignUp ? context.l10n.auth_register : context.l10n.auth_signIn,
-                    style: theme.textTheme.titleMediumEmphasized?.copyWith(
+                    _isSignUp
+                        ? context.l10n.auth_register
+                        : context.l10n.auth_signIn,
+                    style: theme.textTheme.titleMediumEmphasized
+                        ?.copyWith(
                       color: theme.colorScheme.onPrimary,
                     ),
                   ),
@@ -331,19 +311,14 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
 
   Widget _buildGoogleSignInButton(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    // Google branding guidelines: Light fill #FFFFFF stroke #747775 text #1F1F1F;
-    // Dark fill #131314 stroke #8E918F text #E3E3E3. Roboto Medium 14px.
-    const Color lightFill = Color(0xFFFFFFFF);
-    const Color lightStroke = Color(0xFF747775);
-    const Color lightText = Color(0xFF1F1F1F);
-    const Color darkFill = Color(0xFF131314);
-    const Color darkStroke = Color(0xFF8E918F);
-    const Color darkText = Color(0xFFE3E3E3);
-
-    final fillColor = isDark ? darkFill : lightFill;
-    final borderColor = isDark ? darkStroke : lightStroke;
-    final textColor = isDark ? darkText : lightText;
+    // Adaptar button Google ao tema da aplicação (policy: adaptar ao tema quando possível)
+    // Mantém logo Google para reconhecimento de marca
+    final fillColor =
+        isDark ? colorScheme.surfaceContainerHigh : colorScheme.surface;
+    final borderColor = colorScheme.outline;
+    final textColor = colorScheme.onSurface;
 
     return BlocBuilder<SimpleAuthBloc, SimpleAuthState>(
       buildWhen: (prev, curr) =>
@@ -455,17 +430,74 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
     );
   }
 
+  /// Erros de auth (bloc) e validação exibidos inline com SelectableText.rich.
+  Widget _buildInlineError(BuildContext context) {
+    return BlocBuilder<SimpleAuthBloc, SimpleAuthState>(
+      builder: (context, state) {
+        if (_validationError != null) {
+          final displayText =
+              context.l10n.authErrorMessage(_validationError!);
+          return Padding(
+            padding: const M3EdgeInsets.only(top: M3SpacingToken.space16),
+            child: SelectableText.rich(
+              TextSpan(
+                text: displayText,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          );
+        }
+        if (state is SimpleAuthFailure) {
+          final displayText =
+              context.l10n.authErrorMessage(state.message);
+          return Padding(
+            padding: const M3EdgeInsets.only(top: M3SpacingToken.space16),
+            child: SelectableText.rich(
+              TextSpan(
+                text: displayText,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          );
+        }
+        if (state is SimpleAuthNeedsEmailConfirmation) {
+          return Padding(
+            padding: const M3EdgeInsets.only(top: M3SpacingToken.space16),
+            child: SelectableText.rich(
+              TextSpan(
+                text: state.message,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
   Future<void> _handleAuth() async {
+    setState(() => _validationError = null);
+
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty) {
-      _showErrorSnackBar(context.l10n.auth_emailRequired, context);
+      setState(() => _validationError = context.l10n.auth_emailRequired);
       return;
     }
 
     if (password.isEmpty) {
-      _showErrorSnackBar(context.l10n.auth_passwordRequired, context);
+      setState(() => _validationError = context.l10n.auth_passwordRequired);
       return;
     }
 
@@ -473,21 +505,15 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
       final name = _nameController.text.trim();
 
       if (name.isEmpty) {
-        _showErrorSnackBar(context.l10n.auth_nameRequired, context);
+        setState(() => _validationError = context.l10n.auth_nameRequired);
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.l10n.auth_registerInDevelopment,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: M3Shapes.shapeMedium),
+      context.read<SimpleAuthBloc>().add(
+        SimpleAuthRegisterRequested(
+          email: email,
+          password: password,
+          name: name,
         ),
       );
       return;
@@ -495,17 +521,6 @@ class _ExpressiveLoginPageState extends State<ExpressiveLoginPage>
 
     context.read<SimpleAuthBloc>().add(
       SimpleAuthLoginRequested(email: email, password: password),
-    );
-  }
-
-  void _showErrorSnackBar(String message, BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.error,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: M3Shapes.shapeMedium),
-      ),
     );
   }
 }

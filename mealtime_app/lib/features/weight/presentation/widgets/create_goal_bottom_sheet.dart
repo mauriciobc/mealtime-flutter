@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design/material_design.dart';
+import 'package:mealtime_app/core/theme/m3e.dart';
 import 'package:mealtime_app/features/cats/domain/entities/cat.dart';
 import 'package:mealtime_app/features/cats/domain/entities/weight_entry.dart';
 import 'package:mealtime_app/features/weight/domain/entities/weight_goal.dart';
@@ -9,8 +10,8 @@ import 'package:mealtime_app/features/weight/presentation/bloc/weight_bloc.dart'
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_event.dart';
 import 'package:mealtime_app/features/weight/presentation/bloc/weight_state.dart';
 import 'package:uuid/uuid.dart';
-import 'package:m3e_collection/m3e_collection.dart';
 import 'package:mealtime_app/core/utils/haptics_service.dart';
+import 'package:mealtime_app/shared/widgets/loading_widget.dart';
 
 class CreateGoalBottomSheet extends StatefulWidget {
   final Cat selectedCat;
@@ -48,8 +49,8 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
 
     // Se houver meta existente, preencher campos
     if (widget.existingGoal != null) {
-      _targetWeightController.text =
-          widget.existingGoal!.targetWeight.toStringAsFixed(1);
+      _targetWeightController.text = widget.existingGoal!.targetWeight
+          .toStringAsFixed(1);
       _notesController.text = widget.existingGoal!.notes ?? '';
       _selectedDate = widget.existingGoal!.targetDate;
     } else {
@@ -148,7 +149,9 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
                 children: [
                   Text(
                     'Nova Meta de Peso',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   _buildCatInfo(startWeight),
@@ -202,12 +205,15 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
                 Text(
                   widget.selectedCat.name,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
                 Text(
                   'Peso inicial: ${startWeight.toStringAsFixed(1)} kg',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -221,9 +227,9 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer.withValues(
-              alpha: 0.3,
-            ),
+        color: Theme.of(
+          context,
+        ).colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -231,14 +237,16 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
         children: [
           Text(
             'Peso Inicial',
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           Text(
             '${startWeight.toStringAsFixed(1)} kg',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
         ],
       ),
@@ -307,7 +315,9 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
         ),
         child: Text(
           DateFormat('dd/MM/yyyy').format(_selectedDate),
-          style: Theme.of(context).textTheme.bodyLarge,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
       ),
     );
@@ -331,9 +341,9 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer.withValues(
-              alpha: 0.3,
-            ),
+        color: Theme.of(
+          context,
+        ).colorScheme.errorContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -349,8 +359,8 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
             child: Text(
               'Este plano é um guia. Sempre siga orientação do veterinário.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onErrorContainer,
-                  ),
+                color: Theme.of(context).colorScheme.onErrorContainer,
+              ),
             ),
           ),
         ],
@@ -363,21 +373,23 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Expanded(
-          child: OutlinedButton(
+          child: M3EButton(
+            style: M3EButtonStyle.outlined,
+            size: M3EButtonSize.md,
+            shape: M3EButtonShape.round,
             onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
             child: const Text('Cancelar'),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: FilledButton(
+          child: M3EButton(
+            style: M3EButtonStyle.filled,
+            size: M3EButtonSize.md,
+            shape: M3EButtonShape.round,
             onPressed: _isSubmitting ? null : _submitForm,
             child: _isSubmitting
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicatorM3E(size: CircularProgressM3ESize.s),
-                  )
+                ? const Material3LoadingIndicator(size: 20.0)
                 : const Text('Criar Meta'),
           ),
         ),
@@ -399,7 +411,9 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 'Selecione a Data Alvo',
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
             Expanded(
@@ -440,7 +454,9 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
     if (_selectedDate.isBefore(DateTime.now().add(const Duration(days: 1)))) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('A data alvo deve ser no futuro (mínimo: amanhã)'),
+          content: const Text(
+            'A data alvo deve ser no futuro (mínimo: amanhã)',
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -455,7 +471,9 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
     if (_selectedDate.isAfter(maxDate)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('A data alvo não pode ser mais de 1 ano no futuro'),
+          content: const Text(
+            'A data alvo não pode ser mais de 1 ano no futuro',
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -468,34 +486,50 @@ class _CreateGoalBottomSheetState extends State<CreateGoalBottomSheet> {
 
     setState(() => _isSubmitting = true);
 
-    double startWeight = widget.selectedCat.currentWeight ?? 5.0;
-    DateTime startDate = DateTime.now();
+    try {
+      double startWeight = widget.selectedCat.currentWeight ?? 5.0;
+      DateTime startDate = DateTime.now();
 
-    if (widget.weightLogs.isNotEmpty) {
-      final sortedLogs = List<WeightEntry>.from(widget.weightLogs)
-        ..sort((a, b) => a.measuredAt.compareTo(b.measuredAt));
-      startWeight = sortedLogs.first.weight;
-      startDate = sortedLogs.first.measuredAt;
+      if (widget.weightLogs.isNotEmpty) {
+        final sortedLogs = List<WeightEntry>.from(widget.weightLogs)
+          ..sort((a, b) => a.measuredAt.compareTo(b.measuredAt));
+        startWeight = sortedLogs.first.weight;
+        startDate = sortedLogs.first.measuredAt;
+      }
+
+      final normalizedWeight = _targetWeightController.text
+          .replaceAll(',', '.')
+          .trim();
+      final targetWeight = double.parse(normalizedWeight);
+
+      final goal = WeightGoal(
+        id: widget.existingGoal?.id ?? const Uuid().v4(),
+        catId: widget.selectedCat.id,
+        targetWeight: targetWeight,
+        startWeight: startWeight,
+        startDate: startDate,
+        targetDate: _selectedDate,
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+        createdAt: widget.existingGoal?.createdAt ?? DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      context.read<WeightBloc>().add(CreateGoal(goal));
+    } catch (e) {
+      setState(() => _isSubmitting = false);
+      HapticsService.error();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao processar peso: ${e.toString()}'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
     }
-
-    final normalizedWeight = _targetWeightController.text.replaceAll(',', '.').trim();
-    final targetWeight = double.parse(normalizedWeight);
-
-    final goal = WeightGoal(
-      id: widget.existingGoal?.id ?? const Uuid().v4(),
-      catId: widget.selectedCat.id,
-      targetWeight: targetWeight,
-      startWeight: startWeight,
-      startDate: startDate,
-      targetDate: _selectedDate,
-      notes: _notesController.text.trim().isEmpty
-          ? null
-          : _notesController.text.trim(),
-      createdAt: widget.existingGoal?.createdAt ?? DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    context.read<WeightBloc>().add(CreateGoal(goal));
   }
 }
-
